@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BE.Models.Auth;
+namespace BE.DTOs.Auth;
 
-public class RegisterModel
+public class RegisterTeacherDto
 {
     [Required]
     [EmailAddress]
@@ -10,4 +10,6 @@ public class RegisterModel
     [Required]
     [DataType(DataType.Password)]
     public string Password { get; set; }
+    [Required]
+    public string Secret { get; set; }
 }

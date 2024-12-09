@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using BE.DTOs.JWT;
 using BE.Models.Auth;
 using BE.Repositories;
 using Microsoft.AspNetCore.Identity;
@@ -20,19 +21,19 @@ public class JwtService : IJwtService
         _userManager = userManager;
     }
 
-    public async Task<TokenModel> GenerateAccessTokenFromRefreshToken(TokenModel model)
+    public async Task<TokenDto> GenerateAccessTokenFromRefreshToken(TokenDto dto)
     {
         var handler = new JwtSecurityTokenHandler();
-        var token = handler.ReadJwtToken(model.AccessToken);
+        var token = handler.ReadJwtToken(dto.AccessToken);
         var userName = token.Claims.FirstOrDefault(claim => claim.Type == "unique_name")?.Value;
         var user = await _userManager.FindByNameAsync(userName);
-        if (user == null || user.RefreshToken != model.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+        if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             throw new Exception();
         }
 
         var newAccessToken = await GenerateJwtToken(user);
-        var newTokenModel = new TokenModel { AccessToken = newAccessToken, RefreshToken = user.RefreshToken };
+        var newTokenModel = new TokenDto { AccessToken = newAccessToken, RefreshToken = user.RefreshToken };
         return newTokenModel;
     }
 

@@ -1,8 +1,12 @@
-using BE.Models.Auth;
+using BE.DTOs.Auth;
+using BE.DTOs.Judge;
+using BE.DTOs.JWT;
 using BE.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 // TODO: Add tests
+// TODO: Add endpoints documentation
 namespace BE.Controllers
 {
     [ApiController]
@@ -19,9 +23,9 @@ namespace BE.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginDto dto)
         {
-            var loginToken = await _authService.LoginUser(model);
+            var loginToken = await _authService.LoginUser(dto);
             if (loginToken == null)
             {
                 return Problem(detail: "The requested user could not be found.",
@@ -32,28 +36,30 @@ namespace BE.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterModel model)
+        public async Task<IActionResult> Register(RegisterDto dto)
         {
-            var result = await _authService.RegisterUser(model);
+            var result = await _authService.RegisterUser(dto);
             if (result == false)
             {
-                return Problem(detail : "User registration not successful.", statusCode: StatusCodes.Status400BadRequest, title: "User not registered.");
+                return Problem(detail: "User registration not successful.", statusCode: StatusCodes.Status400BadRequest,
+                    title: "User not registered.");
             }
+
             return StatusCode(StatusCodes.Status201Created, "User registered successfully.");
         }
 
         [HttpPost("registerTeacher")]
-        public async Task<IActionResult> RegisterTeacher(RegisterTeacherModel model)
+        public async Task<IActionResult> RegisterTeacher(RegisterTeacherDto dto)
         {
-            await _authService.RegisterTeacher(model);
+            await _authService.RegisterTeacher(dto);
             return StatusCode(StatusCodes.Status201Created, "User registered successfully.");
         }
 
         //https://www.c-sharpcorner.com/article/jwt-authentication-with-refresh-tokens-in-net-6-0/
         [HttpPost("refreshToken")]
-        public async Task<IActionResult> RefreshToken(TokenModel model)
+        public async Task<IActionResult> RefreshToken(TokenDto dto)
         {
-            var newToken = await _jwtService.GenerateAccessTokenFromRefreshToken(model);
+            var newToken = await _jwtService.GenerateAccessTokenFromRefreshToken(dto);
             return Ok(newToken);
         }
 

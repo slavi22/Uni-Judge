@@ -4,30 +4,31 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <UserSecretsId>b10d5716-e994-44ea-9952-006bef6207ba</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" /> <!-- UPGRADE IN THE FUTURE BECAUSE AS OF NOW MIGRATIONS DONT WORK BECAUSE OF THE POSTGRE'S VERSION (upgrade that first) -->
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11"> <!-- UPGRADE IN THE FUTURE BECAUSE AS OF NOW MIGRATIONS DONT WORK BECAUSE OF THE POSTGRE'S VERSION (upgrade that first) -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11"> <!-- UPGRADE IN THE FUTURE BECAUSE AS OF NOW MIGRATIONS DONT WORK BECAUSE OF THE POSTGRE'S VERSION (upgrade that first) -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
-        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" /> <!-- UPGRADE IN THE FUTURE BECAUSE AS OF NOW MIGRATIONS DONT WORK BECAUSE OF THE POSTGRE'S VERSION (upgrade that first) -->
-        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.0.0" />
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="7.1.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.1.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.1.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.1.0" />
     </ItemGroup>
 
     <ItemGroup>
       <Folder Include="Controllers\" />
+      <Folder Include="Migrations\" />
     </ItemGroup>
 
 </Project>

@@ -71,8 +71,13 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnectionString")));
 
+        builder.Services.AddHttpClient("Judge", client =>
+        {
+            client.BaseAddress = new Uri(builder.Configuration.GetSection("JudgeServerAddress").Value);
+        });
+
         // Add services to the container.
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddNewtonsoftJson();
 
         builder.Services.AddExceptionHandler<IncorrectTeacherSecretExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -81,11 +86,13 @@ public class Program
 
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<IJudgeService, JudgeService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         // builder.Services.AddOpenApi();
 
         builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGenNewtonsoftSupport();
         builder.Services.AddSwaggerGen(setup =>
         {
             setup.SwaggerDoc("v1",

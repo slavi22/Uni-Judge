@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BE.Models.Auth;
+namespace BE.DTOs.Auth;
 
-public class LoginModel
+public class LoginDto
 {
     [Required]
     [EmailAddress]
