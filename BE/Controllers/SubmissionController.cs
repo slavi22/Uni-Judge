@@ -1,4 +1,6 @@
-using BE.DTOs.Judge;
+using System.ComponentModel.DataAnnotations;
+using System.Text;
+using BE.DTOs.Judge.Requests;
 using BE.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,11 +20,13 @@ namespace BE.Controllers
         }
 
         [HttpPost("createSubmissionBatch")]
+        [Consumes("application/json")]
+        // use [Produces] attribute to specify the response type
         public async Task<IActionResult> CreateSubmissionBatch(SubmissionBatchDto submissions)
         {
-            // TODO: Make a custom httpclient that will send requests to the judge BE
-            await _judgeService.AddBatchSubmissions(submissions);
-            return Ok();
+            // TODO: fetch the expected output from the database based on the problem id, then iterate over the list items and set the correct expected output
+            var result = await _judgeService.AddBatchSubmissions(submissions);
+            return Ok(result);
         }
     }
 }

@@ -16,6 +16,7 @@ namespace BE;
 
 public class Program
 {
+    //TODO: DOCUMENT EVERYTHING BEFORE CONTINUING
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);

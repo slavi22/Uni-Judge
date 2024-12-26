@@ -12,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace BE.Services;
 
-// TODO: UPGRADE SOME NUGET PACKAGES IN 'BE.csproj' IN THE FUTURE BECAUSE AS OF NOW MIGRATIONS DONT WORK BECAUSE OF THE POSTGRE'S VERSION (upgrade that first)
 public class AuthService : IAuthService
 {
     private readonly IConfiguration _configuration;
