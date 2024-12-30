@@ -21,4 +21,15 @@ public abstract class BaseTemplateCreator
 
         return array;
     }
+
+    protected static string SetTypeOfInput(string input)
+    {
+        // TODO: figure out how to do it for complex objects like lists, arrays, etc., since they are plain words and should have double quotes around them
+        if (!double.TryParse(input, out _))
+        {
+            return $"\"{input}\"";
+        }
+
+        return input;
+    }
 }

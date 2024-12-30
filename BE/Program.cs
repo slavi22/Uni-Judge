@@ -1,7 +1,6 @@
 using System.Text;
 using BE.Data;
 using BE.ExceptionHandlers;
-using BE.Exceptions;
 using BE.Models.Auth;
 using BE.Repositories;
 using BE.Services;
@@ -9,8 +8,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace BE;
 
@@ -70,7 +71,11 @@ public class Program
         });
 
         builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnectionString")));
+        {
+            //https://github.com/dotnet/efcore/issues/35110#issuecomment-2517298432
+            options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)); //used to remove warning about pending migrations
+            options.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnectionString"));
+        });
 
         builder.Services.AddHttpClient("Judge", client =>
         {
@@ -78,7 +83,11 @@ public class Program
         });
 
         // Add services to the container.
-        builder.Services.AddControllers().AddNewtonsoftJson();
+        //builder.Services.AddControllers().AddNewtonsoftJson();
+        builder.Services.AddControllers().AddNewtonsoftJson(options =>
+        {
+            options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+        });
 
         builder.Services.AddExceptionHandler<IncorrectTeacherSecretExceptionHandler>();
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -88,6 +97,7 @@ public class Program
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IJudgeService, JudgeService>();
+        builder.Services.AddScoped<IProblemService, ProblemService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         // builder.Services.AddOpenApi();
