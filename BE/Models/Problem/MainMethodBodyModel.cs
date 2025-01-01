@@ -2,11 +2,12 @@
 
 namespace BE.Models.Problem;
 
-public class MainMethodBody
+public class MainMethodBodyModel
 {
     public int Id { get; set; }
     public LanguagesEnum Language { get; set; }
+    public string SolutionTemplate { get; set; }
     public string MainMethodBodyContent { get; set; }
-    public Problem Problem { get; set; }
     public int ProblemId { get; set; }
+    public ProblemModel Problem { get; set; }
 }

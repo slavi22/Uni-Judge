@@ -26,18 +26,13 @@ public class CSharpTemplate : BaseTemplateCreator
         return body;
     }
 
-    public string ConstructOtherPlaceholders(string mainMethodBody, string methodName, string methodParameters, string expectedOutput)
+    public static string ConstructExpectedOutput(string mainMethodBody, string expectedOutput)
     {
         /*var body = mainMethodBody.Replace("{methodName}", methodName)
             .Replace("{methodParameters}", methodParameters).Replace("{expectedOutput}", SetTypeOfInput(expectedOutput));
         return EncodeBodyToBase64(body);*/
-        return "";
-    }
-
-    private static string EncodeBodyToBase64(string body)
-    {
-        //var inputTestCases = body.Split(",").Select(int.Parse).ToList();
-        return Convert.ToBase64String(Encoding.UTF8.GetBytes(body));
+        var body = mainMethodBody.Replace("{expectedOutput}", expectedOutput);
+        return body;
     }
 
 }

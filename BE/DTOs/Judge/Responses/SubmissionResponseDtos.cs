@@ -9,9 +9,15 @@ public class SubmissionResponseTokenDto
 
 public class SubmissionBatchResultResponse
 {
+    public bool IsCorrect { get; set; }
+
     [JsonProperty("token")] public string Token { get; set; }
 
-    [JsonProperty("status")] public string Status { get; set; }
+    [JsonProperty("stdout")] public string Stdout { get; set; }
+
+    [JsonProperty("status")] public StatusDto Status { get; set; }
+
+    [JsonProperty("compile_output")] public string? CompileOutput { get; set; }
 
     [JsonProperty("stderr")] public string? Stderr { get; set; }
 

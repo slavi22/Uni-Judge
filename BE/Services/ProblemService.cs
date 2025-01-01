@@ -19,29 +19,52 @@ public class ProblemService : IProblemService
     // First we have to map the MainMethodBodyDto to the MainMethodBody entity so we iterate over the list of MainMethodBodyDto and create a new MainMethodBody entity for each one
     // Then we create a new Problem entity and set its properties to the values from the CreateProblemDto
     // Then we iterate over the list of languages and create a new ProblemLanguage entity for each language and add it to the Problem entity
-    public async Task<Problem> CreateProblem(CreateProblemDto dto)
+    public async Task<ProblemModel> CreateProblem(CreateProblemDto dto)
     {
-        List<MainMethodBody> mainMethodBodies = new List<MainMethodBody>();
+        List<MainMethodBodyModel> mainMethodBodies = new List<MainMethodBodyModel>();
         foreach (var bodyDto in dto.MainMethodBodiesList)
         {
-            mainMethodBodies.Add(new MainMethodBody
+            mainMethodBodies.Add(new MainMethodBodyModel
             {
                 Language = bodyDto.Language,
-                MainMethodBodyContent = bodyDto.MainMethodBodyContent
+                MainMethodBodyContent = bodyDto.MainMethodBodyContent,
+                SolutionTemplate = bodyDto.SolutionTemplate,
             });
         }
 
-        var problemEntity = new Problem
+        var problemEntity = new ProblemModel
         {
             Name = dto.Name,
             Description = dto.Description,
-            ExpectedOutputList = dto.ExpectedOutputList,
-            StdInList = dto.StdInList,
+            /*ExpectedOutputList = dto.ExpectedOutputList,
+            StdInList = dto.StdInList,*/
             MainMethodBodiesList = mainMethodBodies
         };
+
+        foreach (var testCase in dto.ExpectedOutputList)
+        {
+            var expectedOutputList = new ExpectedOutputListModel
+            {
+                ProblemId = problemEntity.Id,
+                ExpectedOutput = testCase
+            };
+            problemEntity.ExpectedOutputList.Add(expectedOutputList);
+        }
+
+        foreach (var input in dto.StdInList)
+        {
+            var stdInList = new StdInListModel
+            {
+                ProblemId = problemEntity.Id,
+                StdIn = input
+            };
+            problemEntity.StdInList.Add(stdInList);
+        }
+
+        
         foreach (var languageId in dto.LanguagesList)
         {
-            var problemLanguage = new ProblemLanguage
+            var problemLanguage = new ProblemLanguageModel
             {
                 ProblemId = problemEntity.Id,
                 LanguageId = (int)languageId

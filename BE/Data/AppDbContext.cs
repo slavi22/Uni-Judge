@@ -8,9 +8,11 @@ namespace BE.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
-    public DbSet<Problem> Problems { get; set; }
-    public DbSet<Language> Languages { get; set; }
-    public DbSet<MainMethodBody> MainMethodBodies { get; set; }
+    public DbSet<ProblemModel> Problems { get; set; }
+    public DbSet<LanguageModel> Languages { get; set; }
+    public DbSet<MainMethodBodyModel> MainMethodBodies { get; set; }
+    public DbSet<ExpectedOutputListModel> ExpectedOutputs { get; set; }
+    public DbSet<StdInListModel> StdIns { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -18,15 +20,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         SeedRoles(builder);
         SeedLanguages(builder);
         // https://www.learnentityframeworkcore.com/configuration/many-to-many-relationship-configuration#:~:text=The%20join%20table%20will,to%20map%20it%20successfully%3A
-        builder.Entity<ProblemLanguage>()
+        builder.Entity<ProblemLanguageModel>()
             .HasKey(pl => new { pl.ProblemId, pl.LanguageId });
 
-        builder.Entity<ProblemLanguage>()
+        builder.Entity<ProblemLanguageModel>()
             .HasOne(pl => pl.Problem)
             .WithMany(p => p.ProblemLanguages)
             .HasForeignKey(pl => pl.ProblemId);
 
-        builder.Entity<ProblemLanguage>()
+        builder.Entity<ProblemLanguageModel>()
             .HasOne(pl => pl.Language)
             .WithMany(l => l.ProblemLanguages)
             .HasForeignKey(pl => pl.LanguageId);
@@ -57,7 +59,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
     private static void SeedLanguages(ModelBuilder builder)
     {
-        builder.Entity<Language>().HasData(new Language
+        builder.Entity<LanguageModel>().HasData(new LanguageModel
             {
                 Id = 51,
                 Name = "C#"

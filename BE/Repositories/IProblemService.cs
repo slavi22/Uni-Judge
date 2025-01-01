@@ -5,5 +5,5 @@ namespace BE.Repositories;
 
 public interface IProblemService
 {
-    public Task<Problem> CreateProblem(CreateProblemDto dtos);
+    public Task<ProblemModel> CreateProblem(CreateProblemDto dto);
 }

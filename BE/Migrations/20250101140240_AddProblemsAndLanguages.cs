@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -31,13 +30,31 @@ namespace BE.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    ExpectedOutputList = table.Column<List<string>>(type: "text[]", nullable: false),
-                    StdInList = table.Column<List<string>>(type: "text[]", nullable: true)
+                    Description = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Problems", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ExpectedOutputs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ExpectedOutput = table.Column<string>(type: "text", nullable: false),
+                    ProblemId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ExpectedOutputs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ExpectedOutputs_Problems_ProblemId",
+                        column: x => x.ProblemId,
+                        principalTable: "Problems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -47,6 +64,7 @@ namespace BE.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Language = table.Column<int>(type: "integer", nullable: false),
+                    SolutionTemplate = table.Column<string>(type: "text", nullable: false),
                     MainMethodBodyContent = table.Column<string>(type: "text", nullable: false),
                     ProblemId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -85,10 +103,35 @@ namespace BE.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "StdIns",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    StdIn = table.Column<string>(type: "text", nullable: false),
+                    ProblemId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StdIns", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StdIns_Problems_ProblemId",
+                        column: x => x.ProblemId,
+                        principalTable: "Problems",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Languages",
                 columns: new[] { "Id", "Name" },
                 values: new object[] { 51, "C#" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ExpectedOutputs_ProblemId",
+                table: "ExpectedOutputs",
+                column: "ProblemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MainMethodBodies_ProblemId",
@@ -99,16 +142,27 @@ namespace BE.Migrations
                 name: "IX_ProblemLanguage_LanguageId",
                 table: "ProblemLanguage",
                 column: "LanguageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StdIns_ProblemId",
+                table: "StdIns",
+                column: "ProblemId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "ExpectedOutputs");
+
+            migrationBuilder.DropTable(
                 name: "MainMethodBodies");
 
             migrationBuilder.DropTable(
                 name: "ProblemLanguage");
+
+            migrationBuilder.DropTable(
+                name: "StdIns");
 
             migrationBuilder.DropTable(
                 name: "Languages");

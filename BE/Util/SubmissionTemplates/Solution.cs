@@ -24,8 +24,9 @@ public class Program
         Console.WriteLine(result);
     }
 
-    //{solutionClass}
 }
+
+//{solutionClass}
 
 
 
@@ -38,6 +39,7 @@ public class Solution
 
     public int SolutionMethodWithListInput(List<int> input)
     {
+        Console.WriteLine("Test message");
         return input[0];
     }
 }

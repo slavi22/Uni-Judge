@@ -2,10 +2,10 @@
 
 namespace BE.Models.Problem;
 
-public class Language
+public class LanguageModel
 {
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public int Id { get; set; }
     public string Name { get; set; }
-    public ICollection<ProblemLanguage> ProblemLanguages { get; } = new List<ProblemLanguage>();
+    public ICollection<ProblemLanguageModel> ProblemLanguages { get; } = new List<ProblemLanguageModel>();
 }
