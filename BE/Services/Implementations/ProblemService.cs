@@ -1,14 +1,15 @@
 ﻿using BE.DTOs.Problem;
 using BE.Models.Problem;
 using BE.Repositories.Implementations;
+using BE.Repositories.Interfaces;
 using BE.Services.Interfaces;
 
 namespace BE.Services.Implementations;
 
 public class ProblemService : IProblemService
 {
-    private readonly ProblemRepository _problemRepository;
-    public ProblemService(ProblemRepository problemRepository)
+    private readonly IProblemRepository _problemRepository;
+    public ProblemService(IProblemRepository problemRepository)
     {
         _problemRepository = problemRepository;
     }
