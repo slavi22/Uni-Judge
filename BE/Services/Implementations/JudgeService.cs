@@ -1,31 +1,33 @@
 ﻿using System.Text;
-using BE.Data;
 using BE.DTOs.Judge.Requests;
 using BE.DTOs.Judge.Responses;
-using BE.Repositories;
+using BE.Repositories.Interfaces;
+using BE.Services.Interfaces;
 using BE.Util.SubmissionTemplates;
-using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
-namespace BE.Services;
+namespace BE.Services.Implementations;
 
 public class JudgeService : IJudgeService
 {
-    private readonly AppDbContext _dbContext;
+    //private readonly AppDbContext _dbContext;
+    private readonly IMainMethodBodiesRepository _mainMethodBodiesRepository;
+    private readonly IProblemRepository _problemRepository;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public JudgeService(IHttpClientFactory httpClientFactory, AppDbContext dbContext)
+    public JudgeService(IMainMethodBodiesRepository mainMethodBodiesRepository, IProblemRepository problemRepository, IHttpClientFactory httpClientFactory)
     {
+        _mainMethodBodiesRepository = mainMethodBodiesRepository;
+        _problemRepository = problemRepository;
         _httpClientFactory = httpClientFactory;
-        _dbContext = dbContext;
     }
 
     // this method is used to send a batch of submissions to the judge BE and return the status of each submission (used as test cases foreach test in the problem)
-    public async Task<List<SubmissionBatchResultResponse>> AddBatchSubmissions(BatchSubmissionDto batchSubmissions)
+    public async Task<List<SubmissionBatchResultResponseDto>> AddBatchSubmissions(ClientSubmissionDto clientSubmissionDto)
     {
         // Prepare the submissions, send them to the judge backend, poll for their status, and return the results
 
-        var preparedSubmissionsWithResult = await PrepareSubmissionBatchDtoWithResult(batchSubmissions);
+        var preparedSubmissionsWithResult = await PrepareSubmissionBatchDtoWithResult(clientSubmissionDto);
         var preparedSubmissionsWithoutResult = PrepareSubmissionBatchDtoWithoutResult(preparedSubmissionsWithResult);
 
         var httpClient = _httpClientFactory.CreateClient("Judge");
@@ -37,14 +39,14 @@ public class JudgeService : IJudgeService
         var response =
             JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(await request.Content.ReadAsStringAsync());
         var submissionStatuses = await PollSubmissionStatus(response);
-        var result = new List<SubmissionBatchResultResponse>();
+        var result = new List<SubmissionBatchResultResponseDto>();
         // TODO: FINISH THIS
         for (int i = 0; i < response.Count; i++)
         {
             var answer = submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").Last();
             if (submissionStatuses.Submissions[i].Status.Id == 3 && answer == preparedSubmissionsWithResult.Submissions[i].ExpectedOutput)
             {
-                result.Add(new SubmissionBatchResultResponse
+                result.Add(new SubmissionBatchResultResponseDto
                 {
                     IsCorrect = true,
                     Token = response[i].Token,
@@ -56,7 +58,7 @@ public class JudgeService : IJudgeService
 
             else
             {
-                result.Add(new SubmissionBatchResultResponse
+                result.Add(new SubmissionBatchResultResponseDto
                 {
                     IsCorrect = false,
                     Token = response[i].Token,
@@ -73,40 +75,36 @@ public class JudgeService : IJudgeService
 
     // this method is used to prepare the submissions by constructing the solution class body
     private async Task<BatchSubmissionRequestDto> PrepareSubmissionBatchDtoWithResult(
-        BatchSubmissionDto batchSubmissions)
+        ClientSubmissionDto clientSubmissionDto)
     {
         // Prepare the submissions by constructing the solution class body and return the prepared submissions
 
         var preparedSubmissions = new BatchSubmissionRequestDto();
-        foreach (var submission in batchSubmissions.Submissions)
+
+        var mainMethodBodyEntity = await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(clientSubmissionDto.ProblemId);
+        var problemEntity = await _problemRepository.GetProblemByIdAsync(clientSubmissionDto.ProblemId);
+        switch (clientSubmissionDto.LanguageId)
         {
-            var mainMethodBodyEntity =
-                await _dbContext.MainMethodBodies.FirstOrDefaultAsync(x => x.ProblemId == submission.ProblemId);
-            var problemEntity = await _dbContext.Problems.Include(problemModel => problemModel.StdInList)
-                .Include(problemModel => problemModel.ExpectedOutputList).FirstOrDefaultAsync(x => x.Id == submission.ProblemId);
-            switch (submission.LanguageId)
+            case "51":
             {
-                case "51":
-                {
-                    submission.SourceCode = CSharpTemplate.ConstructSolutionBase(
-                        mainMethodBodyEntity.MainMethodBodyContent,
-                        submission.SourceCode);
-                    break;
-                }
+                clientSubmissionDto.SourceCode = CSharpTemplate.ConstructSolutionBase(
+                    mainMethodBodyEntity.MainMethodBodyContent,
+                    clientSubmissionDto.SourceCode);
+                break;
             }
+        }
 
-            for (int i = 0; i < problemEntity.ExpectedOutputList.Count; i++)
+        for (int i = 0; i < problemEntity.ExpectedOutputList.Count; i++)
+        {
+            var submissionForRequest = new SubmissionRequestDto
             {
-                var submissionForRequest = new SingleSubmissionRequestDto
-                {
-                    LanguageId = submission.LanguageId,
-                    SourceCode = submission.SourceCode,
-                    StdIn = problemEntity.StdInList[i].StdIn,
-                    ExpectedOutput = problemEntity.ExpectedOutputList[i].ExpectedOutput
-                };
+                LanguageId = clientSubmissionDto.LanguageId,
+                SourceCode = clientSubmissionDto.SourceCode,
+                StdIn = problemEntity.StdInList[i].StdIn,
+                ExpectedOutput = problemEntity.ExpectedOutputList[i].ExpectedOutput
+            };
 
-                preparedSubmissions.Submissions.Add(submissionForRequest);
-            }
+            preparedSubmissions.Submissions.Add(submissionForRequest);
         }
 
         return preparedSubmissions;
@@ -120,7 +118,7 @@ public class JudgeService : IJudgeService
         var batchSubmissionWithoutExpectedOutput = new BatchSubmissionRequestDto();
         foreach (var submission in batchSubmissions.Submissions)
         {
-            var editedSubmission = new SingleSubmissionRequestDto
+            var editedSubmission = new SubmissionRequestDto
             {
                 LanguageId = submission.LanguageId,
                 SourceCode = submission.SourceCode,
@@ -143,7 +141,6 @@ public class JudgeService : IJudgeService
         do
         {
             var newSubmissions = await httpClient.GetAsync(
-                //TODO: add the message attribute to check if it returns the error output
                 $"submissions/batch?tokens={string.Join(",", response.Select(x => x.Token))}&base64_encoded=true&fields=status,stdout,stderr,compile_output,expected_output");
             submissionList =
                 JsonConvert.DeserializeObject<SubmissionResultDto>(await newSubmissions.Content.ReadAsStringAsync());

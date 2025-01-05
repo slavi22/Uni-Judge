@@ -4,21 +4,21 @@ using System.Security.Cryptography;
 using System.Text;
 using BE.DTOs.JWT;
 using BE.Models.Auth;
-using BE.Repositories;
-using Microsoft.AspNetCore.Identity;
+using BE.Repositories.Interfaces;
+using BE.Services.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 
-namespace BE.Services;
+namespace BE.Services.Implementations;
 
 public class JwtService : IJwtService
 {
+    private readonly IUserRepository _userRepository;
     private readonly IConfiguration _configuration;
-    private readonly UserManager<AppUser> _userManager;
 
-    public JwtService(IConfiguration configuration, UserManager<AppUser> userManager)
+    public JwtService(IUserRepository userRepository, IConfiguration configuration)
     {
+        _userRepository = userRepository;
         _configuration = configuration;
-        _userManager = userManager;
     }
 
     public async Task<TokenDto> GenerateAccessTokenFromRefreshToken(TokenDto dto)
@@ -26,7 +26,7 @@ public class JwtService : IJwtService
         var handler = new JwtSecurityTokenHandler();
         var token = handler.ReadJwtToken(dto.AccessToken);
         var userName = token.Claims.FirstOrDefault(claim => claim.Type == "unique_name")?.Value;
-        var user = await _userManager.FindByNameAsync(userName);
+        var user = await _userRepository.FindByNameAsync(userName);
         if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             throw new Exception();
@@ -39,7 +39,7 @@ public class JwtService : IJwtService
 
     public async Task<bool> RevokeRefreshToken(string userName)
     {
-        var user = await _userManager.FindByNameAsync(userName);
+        var user = await _userRepository.FindByNameAsync(userName);
         if (user == null)
         {
             return false;
@@ -47,7 +47,7 @@ public class JwtService : IJwtService
 
         user.RefreshToken = null;
         user.RefreshTokenExpiryTime = null;
-        await _userManager.UpdateAsync(user);
+        await _userRepository.UpdateAsync(user);
         return true;
     }
 
@@ -84,7 +84,7 @@ public class JwtService : IJwtService
     {
         var claims = new ClaimsIdentity();
         claims.AddClaim(new Claim(ClaimTypes.Name, user.UserName));
-        var roles = await _userManager.GetRolesAsync(user);
+        var roles = await _userRepository.GetRolesAsync(user);
         foreach (var role in roles)
         {
             claims.AddClaim(new Claim(ClaimTypes.Role, role));

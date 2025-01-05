@@ -1,9 +1,7 @@
 using BE.DTOs.Auth;
-using BE.DTOs.Judge;
 using BE.DTOs.JWT;
-using BE.Repositories;
+using BE.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 // TODO: Add tests
 // TODO: Add endpoints documentation

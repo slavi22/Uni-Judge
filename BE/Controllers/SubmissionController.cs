@@ -1,5 +1,5 @@
 using BE.DTOs.Judge.Requests;
-using BE.Repositories;
+using BE.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 // TODO: Add tests
@@ -17,13 +17,13 @@ namespace BE.Controllers
             _judgeService = judgeService;
         }
 
-        [HttpPost("createSubmissionBatch")]
+        [HttpPost("createSubmission")]
         [Consumes("application/json")]
         // use [Produces] attribute to specify the response type
-        public async Task<IActionResult> CreateSubmissionBatch(BatchSubmissionDto batchSubmissions)
+        public async Task<IActionResult> CreateSubmissionBatch(ClientSubmissionDto clientSubmissionDto)
         {
             // TODO: fetch the expected output from the database based on the problem id, then iterate over the list items and set the correct expected output
-            var result = await _judgeService.AddBatchSubmissions(batchSubmissions);
+            var result = await _judgeService.AddBatchSubmissions(clientSubmissionDto);
             return Ok(result);
         }
     }

@@ -1,17 +1,16 @@
-﻿using BE.Data;
-using BE.DTOs.Problem;
+﻿using BE.DTOs.Problem;
 using BE.Models.Problem;
-using BE.Repositories;
+using BE.Repositories.Implementations;
+using BE.Services.Interfaces;
 
-namespace BE.Services;
+namespace BE.Services.Implementations;
 
 public class ProblemService : IProblemService
 {
-    private readonly AppDbContext _dbContext;
-
-    public ProblemService(AppDbContext dbContext)
+    private readonly ProblemRepository _problemRepository;
+    public ProblemService(ProblemRepository problemRepository)
     {
-        _dbContext = dbContext;
+        _problemRepository = problemRepository;
     }
 
 
@@ -36,8 +35,6 @@ public class ProblemService : IProblemService
         {
             Name = dto.Name,
             Description = dto.Description,
-            /*ExpectedOutputList = dto.ExpectedOutputList,
-            StdInList = dto.StdInList,*/
             MainMethodBodiesList = mainMethodBodies
         };
 
@@ -72,8 +69,7 @@ public class ProblemService : IProblemService
             problemEntity.ProblemLanguages.Add(problemLanguage);
         }
 
-        await _dbContext.Problems.AddAsync(problemEntity);
-        await _dbContext.SaveChangesAsync();
+        await _problemRepository.AddProblemAsync(problemEntity);
         return problemEntity;
     }
 }

@@ -2,8 +2,10 @@ using System.Text;
 using BE.Data;
 using BE.ExceptionHandlers;
 using BE.Models.Auth;
-using BE.Repositories;
-using BE.Services;
+using BE.Repositories.Implementations;
+using BE.Repositories.Interfaces;
+using BE.Services.Implementations;
+using BE.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -94,6 +96,12 @@ public class Program
 
         builder.Services.AddProblemDetails();
 
+        //Repositories
+        builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IMainMethodBodiesRepository, MainMethodBodiesRepository>();
+        builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
+
+        // Services
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IJudgeService, JudgeService>();

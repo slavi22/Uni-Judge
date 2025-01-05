@@ -1,7 +1,7 @@
 ﻿using BE.DTOs.JWT;
 using BE.Models.Auth;
 
-namespace BE.Repositories;
+namespace BE.Services.Interfaces;
 
 public interface IJwtService
 {

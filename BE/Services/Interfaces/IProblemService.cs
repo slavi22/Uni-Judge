@@ -1,7 +1,7 @@
 ﻿using BE.DTOs.Problem;
 using BE.Models.Problem;
 
-namespace BE.Repositories;
+namespace BE.Services.Interfaces;
 
 public interface IProblemService
 {

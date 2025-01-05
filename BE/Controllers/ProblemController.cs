@@ -1,5 +1,5 @@
 using BE.DTOs.Problem;
-using BE.Repositories;
+using BE.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BE.Controllers
