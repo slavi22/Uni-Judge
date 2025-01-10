@@ -36,6 +36,8 @@ public class ProblemService : IProblemService
         {
             Name = dto.Name,
             Description = dto.Description,
+            RequiredPercentageToPass = dto.RequiredPercentageToPass,
+            CourseId = dto.CourseId,
             MainMethodBodiesList = mainMethodBodies
         };
 
@@ -44,7 +46,8 @@ public class ProblemService : IProblemService
             var expectedOutputList = new ExpectedOutputListModel
             {
                 ProblemId = problemEntity.Id,
-                ExpectedOutput = testCase
+                IsSample = testCase.IsSample,
+                ExpectedOutput = testCase.ExpectedOutput
             };
             problemEntity.ExpectedOutputList.Add(expectedOutputList);
         }

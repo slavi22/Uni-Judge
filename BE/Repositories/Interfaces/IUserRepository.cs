@@ -4,6 +4,7 @@ namespace BE.Repositories.Interfaces;
 
 public interface IUserRepository
 {
+    Task<AppUser> GetCurrentUserAsync();
     Task<AppUser> FindByNameAsync(string email);
     Task<int> GetUserCountAsync();
     Task<bool> CreateAsync(AppUser user, string password);

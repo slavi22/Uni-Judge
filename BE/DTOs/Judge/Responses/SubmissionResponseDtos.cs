@@ -7,19 +7,21 @@ public class SubmissionResponseTokenDto
     [JsonProperty("token")] public string Token { get; set; }
 }
 
-public class SubmissionBatchResultResponse
+public class SubmissionBatchResultResponseDto
 {
     public bool IsCorrect { get; set; }
 
-    [JsonProperty("token")] public string Token { get; set; }
+    public string? HiddenExpectedOutput { get; set; }
 
-    [JsonProperty("stdout")] public string Stdout { get; set; }
+    public string Token { get; set; }
 
-    [JsonProperty("status")] public StatusDto Status { get; set; }
+    public string? Stdout { get; set; }
 
-    [JsonProperty("compile_output")] public string? CompileOutput { get; set; }
+    public StatusDto Status { get; set; }
 
-    [JsonProperty("stderr")] public string? Stderr { get; set; }
+    public string? CompileOutput { get; set; }
 
-    [JsonProperty("expected_output")] public string? ExpectedOutput { get; set; }
+    public string? Stderr { get; set; }
+
+    public string? ExpectedOutput { get; set; }
 }

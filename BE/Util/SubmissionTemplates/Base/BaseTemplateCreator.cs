@@ -2,6 +2,8 @@
 
 public abstract class BaseTemplateCreator
 {
+    // TODO: REMOVE WHEN DONE TESTING
+
     // this method iterates over the "stdInArray" and sets the character corresponding to the data type of the element
     protected static string[] SetArrayItemsTypeCharacter(string[] array)
     {
@@ -24,7 +26,6 @@ public abstract class BaseTemplateCreator
 
     protected static string SetTypeOfInput(string input)
     {
-        // TODO: figure out how to do it for complex objects like lists, arrays, etc., since they are plain words and should have double quotes around them
         if (!double.TryParse(input, out _))
         {
             return $"\"{input}\"";

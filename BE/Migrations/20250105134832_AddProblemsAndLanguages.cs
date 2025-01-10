@@ -43,6 +43,7 @@ namespace BE.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    IsSample = table.Column<bool>(type: "boolean", nullable: false),
                     ExpectedOutput = table.Column<string>(type: "text", nullable: false),
                     ProblemId = table.Column<int>(type: "integer", nullable: false)
                 },

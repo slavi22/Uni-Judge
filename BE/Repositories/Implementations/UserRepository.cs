@@ -9,11 +9,18 @@ public class UserRepository : IUserRepository
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public UserRepository(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+    public UserRepository(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpContextAccessor httpContextAccessor)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    public async Task<AppUser> GetCurrentUserAsync()
+    {
+        return await _userManager.FindByEmailAsync(_httpContextAccessor.HttpContext.User.Identity.Name);
     }
 
     public async Task<AppUser> FindByNameAsync(string email)

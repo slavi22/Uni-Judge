@@ -62,7 +62,7 @@ public class JwtService : IJwtService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = await GenerateClaims(user),
-            Expires = DateTime.UtcNow.AddMinutes(1),
+            Expires = DateTime.UtcNow.AddMinutes(15), //TODO: 15 mins is for debugging only
             Issuer = _configuration.GetSection("JWT:Issuer").Value,
             Audience = _configuration.GetSection("JWT:Audience").Value,
             SigningCredentials = credentials,

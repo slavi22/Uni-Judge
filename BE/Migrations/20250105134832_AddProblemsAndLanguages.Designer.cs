@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250101140240_AddProblemsAndLanguages")]
+    [Migration("20250105134832_AddProblemsAndLanguages")]
     partial class AddProblemsAndLanguages
     {
         /// <inheritdoc />
@@ -106,6 +106,9 @@ namespace BE.Migrations
                     b.Property<string>("ExpectedOutput")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsSample")
+                        .HasColumnType("boolean");
 
                     b.Property<int>("ProblemId")
                         .HasColumnType("integer");

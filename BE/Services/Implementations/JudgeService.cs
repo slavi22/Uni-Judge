@@ -10,20 +10,24 @@ namespace BE.Services.Implementations;
 
 public class JudgeService : IJudgeService
 {
+    //TODO: Chnage the logic based on the fact that i introduced "courses"
+
     //private readonly AppDbContext _dbContext;
     private readonly IMainMethodBodiesRepository _mainMethodBodiesRepository;
     private readonly IProblemRepository _problemRepository;
     private readonly IHttpClientFactory _httpClientFactory;
 
-    public JudgeService(IMainMethodBodiesRepository mainMethodBodiesRepository, IProblemRepository problemRepository, IHttpClientFactory httpClientFactory)
+    public JudgeService(IMainMethodBodiesRepository mainMethodBodiesRepository, IProblemRepository problemRepository,
+        IHttpClientFactory httpClientFactory)
     {
         _mainMethodBodiesRepository = mainMethodBodiesRepository;
         _problemRepository = problemRepository;
         _httpClientFactory = httpClientFactory;
     }
 
-    // this method is used to send a batch of submissions to the judge BE and return the status of each submission (used as test cases foreach test in the problem)
-    public async Task<List<SubmissionBatchResultResponseDto>> AddBatchSubmissions(ClientSubmissionDto clientSubmissionDto)
+    // this method is used to send a batch of submissions to the judge BE and return the status of each submissionModel (used as test cases foreach test in the problem)
+    public async Task<List<SubmissionBatchResultResponseDto>> AddBatchSubmissions(
+        ClientSubmissionDto clientSubmissionDto)
     {
         // Prepare the submissions, send them to the judge backend, poll for their status, and return the results
 
@@ -44,7 +48,9 @@ public class JudgeService : IJudgeService
         for (int i = 0; i < response.Count; i++)
         {
             var answer = submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").Last();
-            if (submissionStatuses.Submissions[i].Status.Id == 3 && answer == preparedSubmissionsWithResult.Submissions[i].ExpectedOutput)
+            if (submissionStatuses.Submissions[i].Status.Id == 3 &&
+                (answer == preparedSubmissionsWithResult.Submissions[i].ExpectedOutput ||
+                 answer == preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput))
             {
                 result.Add(new SubmissionBatchResultResponseDto
                 {
@@ -52,6 +58,8 @@ public class JudgeService : IJudgeService
                     Token = response[i].Token,
                     Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
                     Status = submissionStatuses.Submissions[i].Status,
+                    ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
+                    HiddenExpectedOutput = preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput,
                     Stderr = submissionStatuses.Submissions[i].Stderr
                 });
             }
@@ -64,7 +72,8 @@ public class JudgeService : IJudgeService
                     Token = response[i].Token,
                     Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
                     Status = submissionStatuses.Submissions[i].Status,
-                    ExpectedOutput = submissionStatuses.Submissions[i].ExpectedOutput,
+                    ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
+                    HiddenExpectedOutput = preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput,
                     Stderr = submissionStatuses.Submissions[i].Stderr
                 });
             }
@@ -81,7 +90,8 @@ public class JudgeService : IJudgeService
 
         var preparedSubmissions = new BatchSubmissionRequestDto();
 
-        var mainMethodBodyEntity = await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(clientSubmissionDto.ProblemId);
+        var mainMethodBodyEntity =
+            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(clientSubmissionDto.ProblemId);
         var problemEntity = await _problemRepository.GetProblemByIdAsync(clientSubmissionDto.ProblemId);
         switch (clientSubmissionDto.LanguageId)
         {
@@ -96,12 +106,21 @@ public class JudgeService : IJudgeService
 
         for (int i = 0; i < problemEntity.ExpectedOutputList.Count; i++)
         {
+            // index calculated to get the correct stdin for the submissionModel
+            int stdInIndex = i * problemEntity.StdInList.Count / problemEntity.ExpectedOutputList.Count;
+            string stdIn = problemEntity.StdInList[stdInIndex].StdIn;
+
             var submissionForRequest = new SubmissionRequestDto
             {
                 LanguageId = clientSubmissionDto.LanguageId,
                 SourceCode = clientSubmissionDto.SourceCode,
-                StdIn = problemEntity.StdInList[i].StdIn,
-                ExpectedOutput = problemEntity.ExpectedOutputList[i].ExpectedOutput
+                StdIn = stdIn,
+                ExpectedOutput = problemEntity.ExpectedOutputList[i].IsSample
+                    ? problemEntity.ExpectedOutputList[i].ExpectedOutput
+                    : null,
+                HiddenExpectedOutput = !problemEntity.ExpectedOutputList[i].IsSample
+                    ? problemEntity.ExpectedOutputList[i].ExpectedOutput
+                    : null
             };
 
             preparedSubmissions.Submissions.Add(submissionForRequest);
@@ -131,22 +150,22 @@ public class JudgeService : IJudgeService
     }
 
 
-    // this method is used to poll the judge BE for the status of each submission periodically (in this context every 1.5 seconds)
+    // this method is used to poll the judge BE for the status of each submissionModel periodically (in this context every 1.5 seconds)
     private async Task<SubmissionResultDto> PollSubmissionStatus(List<SubmissionResponseTokenDto> response)
     {
-        // Create a new HttpClient, send requests to the judge backend to get the status of each submission, and return the results
+        // Create a new HttpClient, send requests to the judge backend to get the status of each submissionModel, and return the results
         var httpClient = _httpClientFactory.CreateClient("Judge");
         SubmissionResultDto submissionList;
-        // loop until all the submissions are processed (not in queue)
+        // loop until all the submissions are accepted (not in queue)
         do
         {
             var newSubmissions = await httpClient.GetAsync(
-                $"submissions/batch?tokens={string.Join(",", response.Select(x => x.Token))}&base64_encoded=true&fields=status,stdout,stderr,compile_output,expected_output");
+                $"submissions/batch?tokens={string.Join(",", response.Select(x => x.Token))}&base64_encoded=true&fields=status,stdout,stderr,compile_output");
             submissionList =
                 JsonConvert.DeserializeObject<SubmissionResultDto>(await newSubmissions.Content.ReadAsStringAsync());
             // wait for 1.5 seconds before polling again (according to the judge BE documentation as it also uses 1.5 seconds as default)
             await Task.Delay(1500);
-        } while (submissionList.Submissions.TrueForAll(x => x.Status.Id == 1));
+        } while (submissionList.Submissions.TrueForAll(x => x.Status.Id == 1 || x.Status.Id == 2));
 
         return submissionList;
     }

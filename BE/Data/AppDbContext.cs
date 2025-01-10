@@ -1,5 +1,7 @@
 ﻿using BE.Models.Auth;
+using BE.Models.Courses;
 using BE.Models.Problem;
+using BE.Models.Submissions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -8,17 +10,27 @@ namespace BE.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
+    // "Courses" table
+    public DbSet<CoursesModel> Courses { get; set; }
+
+    // "Problem" table
     public DbSet<ProblemModel> Problems { get; set; }
     public DbSet<LanguageModel> Languages { get; set; }
     public DbSet<MainMethodBodyModel> MainMethodBodies { get; set; }
     public DbSet<ExpectedOutputListModel> ExpectedOutputs { get; set; }
     public DbSet<StdInListModel> StdIns { get; set; }
 
+    // "Submission" table
+    public DbSet<TestCaseModel> TestCases { get; set; }
+    public DbSet<TestCaseStatusModel> TestCaseStatuses { get; set; }
+    public DbSet<UserSubmissionModel> UserSubmissions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
         SeedRoles(builder);
         SeedLanguages(builder);
+        // Problem Language many-to-many relationship
         // https://www.learnentityframeworkcore.com/configuration/many-to-many-relationship-configuration#:~:text=The%20join%20table%20will,to%20map%20it%20successfully%3A
         builder.Entity<ProblemLanguageModel>()
             .HasKey(pl => new { pl.ProblemId, pl.LanguageId });

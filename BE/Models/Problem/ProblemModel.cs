@@ -1,10 +1,22 @@
-﻿namespace BE.Models.Problem;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using BE.Models.Courses;
+using BE.Models.Submissions;
+
+namespace BE.Models.Problem;
 
 public class ProblemModel
 {
     public int Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
+    [Range(0, 100)]
+    public int RequiredPercentageToPass { get; set; }
+
+    public string CourseId { get; set; }
+    public CoursesModel Course { get; set; }
+    public UserSubmissionModel UserSubmission { get; set; }
+
     public List<ExpectedOutputListModel> ExpectedOutputList { get; set; } = new List<ExpectedOutputListModel>();
     public List<StdInListModel> StdInList { get; set; } = new List<StdInListModel>();
 

@@ -4,13 +4,8 @@ using Newtonsoft.Json;
 namespace BE.DTOs.Judge.Requests;
 
 // make sure to replace all newline from the frontend with '\n' //code.split('\n') then use loop over it and add \n at the end of each line
-public class BatchSubmissionDto
-{
-    [JsonProperty("submissions")]
-    public List<SingleSubmissionDto> Submissions { get; set; }
-}
 
-public class SingleSubmissionDto
+public class ClientSubmissionDto
 {
     public int ProblemId { get; set; }
 
@@ -25,10 +20,10 @@ public class SingleSubmissionDto
 public class BatchSubmissionRequestDto
 {
     [JsonProperty("submissions")]
-    public List<SingleSubmissionRequestDto> Submissions { get; set; } = new List<SingleSubmissionRequestDto>();
+    public List<SubmissionRequestDto> Submissions { get; set; } = new List<SubmissionRequestDto>();
 }
 
-public class SingleSubmissionRequestDto
+public class SubmissionRequestDto
 {
     [JsonProperty("language_id")]
     public string LanguageId { get; set; }
@@ -44,4 +39,6 @@ public class SingleSubmissionRequestDto
     [JsonProperty("expected_output")]
     [JsonConverter(typeof(Base64Converter))]
     public string? ExpectedOutput { get; set; }
+
+    public string? HiddenExpectedOutput { get; set; }
 }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using BE.Data;
 using BE.ExceptionHandlers;
@@ -51,11 +52,22 @@ public class Program
                 ValidAudience = builder.Configuration["Jwt:Audience"],
                 IssuerSigningKey =
                     new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("DatabaseConnectionString"))),
+                        Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Secret").Value)),
                 ClockSkew = TimeSpan.Zero //default skew is 5 mins => token is still valid 5 mins after expiring
             };
             options.Events = new JwtBearerEvents
             {
+                OnForbidden = async context =>
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsJsonAsync(new ProblemDetails
+                    {
+                        Status = StatusCodes.Status403Forbidden,
+                        Title = "Access Denied!",
+                        Detail = "You don't have the correct privileges to access this page."
+                    });
+                },
                 //https://stackoverflow.com/a/70885152
                 OnChallenge = context =>
                 {
@@ -66,7 +78,7 @@ public class Program
                     {
                         Status = StatusCodes.Status401Unauthorized,
                         Title = "Access Denied!",
-                        Detail = "You are not logged in to access this page.",
+                        Detail = "You are not logged in to access this page."
                     });
                 }
             };
@@ -85,7 +97,6 @@ public class Program
         });
 
         // Add services to the container.
-        //builder.Services.AddControllers().AddNewtonsoftJson();
         builder.Services.AddControllers().AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
@@ -100,12 +111,17 @@ public class Program
         builder.Services.AddScoped<IUserRepository, UserRepository>();
         builder.Services.AddScoped<IMainMethodBodiesRepository, MainMethodBodiesRepository>();
         builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
+        builder.Services.AddScoped<IUserSubmissionRepository, UserSubmissionRepository>();
+        builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 
         // Services
         builder.Services.AddScoped<IAuthService, AuthService>();
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<IJudgeService, JudgeService>();
         builder.Services.AddScoped<IProblemService, ProblemService>();
+        builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
+        builder.Services.AddScoped<IUserSubmissionService, UserSubmissionService>();
+        builder.Services.AddScoped<ICourseService, CourseService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         // builder.Services.AddOpenApi();
@@ -120,6 +136,9 @@ public class Program
                     Title = "Uni-Judge Backend", Version = "v1",
                     Description = "Uni-Judge Backend API used for code assignments evaluation."
                 });
+            //https://learn.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-8.0&tabs=visual-studio#:~:text=var%20xmlFilename%20%3D%20%24%22%7BAssembly.GetExecutingAssembly().GetName().Name%7D.xml%22%3B%0A%20%20%20%20options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory%2C%20xmlFilename))%3B
+            var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            setup.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 
             var securitySchema = new OpenApiSecurityScheme
             {

@@ -1,11 +1,6 @@
-﻿using System.Text;
-using BE.Data;
-using BE.Util.SubmissionTemplates.Base;
-using Microsoft.EntityFrameworkCore;
+﻿namespace BE.Util.SubmissionTemplates;
 
-namespace BE.Util.SubmissionTemplates;
-
-public class CSharpTemplate : BaseTemplateCreator
+public static class CSharpTemplate
 {
     // maybe we get the solution method from the db?
 

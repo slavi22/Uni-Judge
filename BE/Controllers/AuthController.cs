@@ -1,6 +1,7 @@
 using BE.DTOs.Auth;
 using BE.DTOs.JWT;
 using BE.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // TODO: Add tests
