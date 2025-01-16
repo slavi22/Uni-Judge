@@ -103,6 +103,9 @@ public class Program
         });
 
         builder.Services.AddExceptionHandler<IncorrectTeacherSecretExceptionHandler>();
+        builder.Services.AddExceptionHandler<ProblemNotFoundExceptionHandler>();
+        builder.Services.AddExceptionHandler<CourseNotFoundExceptionHandler>();
+        // Global exception handler should be added last to catch all other unhandled exceptions
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
         builder.Services.AddProblemDetails();

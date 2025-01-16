@@ -4,6 +4,6 @@ namespace BE.Repositories.Interfaces;
 
 public interface IProblemRepository
 {
-    Task<ProblemModel> GetProblemByIdAsync(int id);
+    Task<ProblemModel> GetProblemByProblemIdAsync(string problemId);
     Task AddProblemAsync(ProblemModel problem);
 }

@@ -1,5 +1,6 @@
 ﻿using BE.DTOs.Judge.Requests;
 using BE.DTOs.Judge.Responses;
+using BE.DTOs.UserSubmission;
 using BE.Models.Submissions;
 using BE.Repositories.Interfaces;
 using BE.Services.Interfaces;
@@ -12,14 +13,16 @@ public class UserSubmissionService : IUserSubmissionService
     private readonly IUserSubmissionRepository _userSubmissionRepository;
     private readonly IProblemRepository _problemRepository;
 
-    public UserSubmissionService(IUserRepository userRepository, IUserSubmissionRepository userSubmissionRepository, IProblemRepository problemRepository)
+    public UserSubmissionService(IUserRepository userRepository, IUserSubmissionRepository userSubmissionRepository,
+        IProblemRepository problemRepository)
     {
         _userRepository = userRepository;
         _userSubmissionRepository = userSubmissionRepository;
         _problemRepository = problemRepository;
     }
 
-    public async Task AddUserSubmission(ClientSubmissionDto clientSubmissionDto, List<SubmissionBatchResultResponseDto> submissionBatchResultResponseDto)
+    public async Task<UserSubmissionDto> AddUserSubmission(ClientSubmissionDto clientSubmissionDto,
+        List<SubmissionBatchResultResponseDto> submissionBatchResultResponseDto)
     {
         var testCasesList = new List<TestCaseModel>();
         foreach (var submissionBatchResultResponse in submissionBatchResultResponseDto)
@@ -43,24 +46,51 @@ public class UserSubmissionService : IUserSubmissionService
         }
 
         var appUser = await _userRepository.GetCurrentUserAsync();
+        var problem = await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId);
         var entity = new UserSubmissionModel
         {
             LanguageId = int.Parse(clientSubmissionDto.LanguageId),
-            ProblemId = clientSubmissionDto.ProblemId,
+            CourseId = clientSubmissionDto.CourseId,
+            ProblemId = problem.Id,
             SourceCode = clientSubmissionDto.SourceCode,
+            IsPassing = await CalculateIsPassing(clientSubmissionDto.ProblemId, testCasesList),
             UserId = appUser.Id,
             TestCases = testCasesList
         };
 
         await _userSubmissionRepository.AddAsync(entity);
+        //TODO: Investigate if the token generated normally
+        var userSubmissionDto = new UserSubmissionDto
+        {
+            Token = entity.Id.ToString()
+        };
+        foreach (var testCaseModel in testCasesList)
+        {
+            userSubmissionDto.TestCases.Add(new TestCaseDto
+            {
+                IsCorrect = testCaseModel.IsCorrect,
+                CompileOutput = testCaseModel.CompileOutput,
+                ExpectedOutput = testCaseModel.ExpectedOutput,
+                Stdout = testCaseModel.Stdout,
+                Status = new TestCaseStatusDto
+                {
+                    Id = testCaseModel.TestCaseStatus.ResultId,
+                    Description = testCaseModel.TestCaseStatus.Description
+                }
+            });
+        }
+
+        return userSubmissionDto;
     }
 
-    private bool CalculateIsPassing(int problemId, List<TestCaseModel> testCasesList)
+    private async Task<bool> CalculateIsPassing(string problemId, List<TestCaseModel> testCasesList)
     {
-        foreach (var testCase in testCasesList)
-        {
-
-        }
-        return true;
+        var problem = await _problemRepository.GetProblemByProblemIdAsync(problemId);
+        var percentageToPass = problem.RequiredPercentageToPass;
+        var percentageInDecimal = (double)percentageToPass / 100;
+        var failedTestCases = testCasesList.Count(x => x.IsCorrect == false);
+        var totalTestCases = testCasesList.Count;
+        var result = totalTestCases / failedTestCases;
+        return result >= percentageInDecimal * totalTestCases;
     }
 }

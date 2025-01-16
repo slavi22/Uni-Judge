@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using BE.DTOs.Judge.Requests;
 using BE.DTOs.Judge.Responses;
+using BE.Exceptions;
 using BE.Repositories.Interfaces;
 using BE.Services.Interfaces;
 using BE.Util.SubmissionTemplates;
@@ -15,14 +16,17 @@ public class JudgeService : IJudgeService
     //private readonly AppDbContext _dbContext;
     private readonly IMainMethodBodiesRepository _mainMethodBodiesRepository;
     private readonly IProblemRepository _problemRepository;
+    private readonly ICourseRepository _courseRepository;
     private readonly IHttpClientFactory _httpClientFactory;
 
     public JudgeService(IMainMethodBodiesRepository mainMethodBodiesRepository, IProblemRepository problemRepository,
+        ICourseRepository courseRepository,
         IHttpClientFactory httpClientFactory)
     {
         _mainMethodBodiesRepository = mainMethodBodiesRepository;
         _problemRepository = problemRepository;
         _httpClientFactory = httpClientFactory;
+        _courseRepository = courseRepository;
     }
 
     // this method is used to send a batch of submissions to the judge BE and return the status of each submissionModel (used as test cases foreach test in the problem)
@@ -44,7 +48,6 @@ public class JudgeService : IJudgeService
             JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(await request.Content.ReadAsStringAsync());
         var submissionStatuses = await PollSubmissionStatus(response);
         var result = new List<SubmissionBatchResultResponseDto>();
-        // TODO: FINISH THIS
         for (int i = 0; i < response.Count; i++)
         {
             var answer = submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").Last();
@@ -86,13 +89,25 @@ public class JudgeService : IJudgeService
     private async Task<BatchSubmissionRequestDto> PrepareSubmissionBatchDtoWithResult(
         ClientSubmissionDto clientSubmissionDto)
     {
+        if (await _courseRepository.GetCourseByIdAsync(clientSubmissionDto.CourseId) == null)
+        {
+            throw new CourseNotFoundException($"Course with id '{clientSubmissionDto.CourseId}' was not found.");
+        }
+        
+        if (await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId) == null)
+        {
+            throw new ProblemNotFoundException($"Problem with id '{clientSubmissionDto.ProblemId}' was not found.");
+        }
+
         // Prepare the submissions by constructing the solution class body and return the prepared submissions
 
         var preparedSubmissions = new BatchSubmissionRequestDto();
 
+        var problemEntity = await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId);
+
         var mainMethodBodyEntity =
-            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(clientSubmissionDto.ProblemId);
-        var problemEntity = await _problemRepository.GetProblemByIdAsync(clientSubmissionDto.ProblemId);
+            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(problemEntity.Id);
+        // switch case to construct the solution class body based on the language
         switch (clientSubmissionDto.LanguageId)
         {
             case "51":
@@ -151,7 +166,7 @@ public class JudgeService : IJudgeService
 
 
     // this method is used to poll the judge BE for the status of each submissionModel periodically (in this context every 1.5 seconds)
-    private async Task<SubmissionResultDto> PollSubmissionStatus(List<SubmissionResponseTokenDto> response)
+    private async Task<SubmissionResultDto> PollSubmissionStatus(List<SubmissionResponseTokenDto> tokens)
     {
         // Create a new HttpClient, send requests to the judge backend to get the status of each submissionModel, and return the results
         var httpClient = _httpClientFactory.CreateClient("Judge");
@@ -160,7 +175,7 @@ public class JudgeService : IJudgeService
         do
         {
             var newSubmissions = await httpClient.GetAsync(
-                $"submissions/batch?tokens={string.Join(",", response.Select(x => x.Token))}&base64_encoded=true&fields=status,stdout,stderr,compile_output");
+                $"submissions/batch?tokens={string.Join(",", tokens.Select(x => x.Token))}&base64_encoded=true&fields=status,stdout,stderr,compile_output");
             submissionList =
                 JsonConvert.DeserializeObject<SubmissionResultDto>(await newSubmissions.Content.ReadAsStringAsync());
             // wait for 1.5 seconds before polling again (according to the judge BE documentation as it also uses 1.5 seconds as default)

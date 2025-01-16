@@ -14,10 +14,10 @@ public class ProblemRepository : IProblemRepository
         _dbContext = dbContext;
     }
 
-    public async Task<ProblemModel> GetProblemByIdAsync(int id)
+    public async Task<ProblemModel> GetProblemByProblemIdAsync(string problemId)
     {
         return await _dbContext.Problems.Include(problemModel => problemModel.StdInList)
-            .Include(problemModel => problemModel.ExpectedOutputList).FirstOrDefaultAsync(x => x.Id == id);
+            .Include(problemModel => problemModel.ExpectedOutputList).FirstOrDefaultAsync(x => x.ProblemId == problemId);
     }
 
     public async Task AddProblemAsync(ProblemModel problem)

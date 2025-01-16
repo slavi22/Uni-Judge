@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250110165450_AddUserSubmissionsAndCourses")]
-    partial class AddUserSubmissionsAndCourses
+    [Migration("20250116192027_AddProblemsAndLanguages")]
+    partial class AddProblemsAndLanguages
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,24 +95,6 @@ namespace BE.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("BE.Models.Courses.CoursesModel", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Courses");
-                });
-
             modelBuilder.Entity("BE.Models.Problem.ExpectedOutputListModel", b =>
                 {
                     b.Property<int>("Id")
@@ -128,8 +110,8 @@ namespace BE.Migrations
                     b.Property<bool>("IsSample")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -174,8 +156,8 @@ namespace BE.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SolutionTemplate")
                         .IsRequired()
@@ -190,8 +172,8 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Problem.ProblemLanguageModel", b =>
                 {
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
@@ -205,15 +187,9 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Problem.ProblemModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CourseId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -223,12 +199,14 @@ namespace BE.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("RequiredPercentageToPass")
-                        .HasColumnType("integer");
+                    b.Property<string>("ProblemId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CourseId");
+                    b.HasIndex("ProblemId")
+                        .IsUnique();
 
                     b.ToTable("Problems");
                 });
@@ -241,8 +219,8 @@ namespace BE.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("StdIn")
                         .IsRequired()
@@ -253,101 +231,6 @@ namespace BE.Migrations
                     b.HasIndex("ProblemId");
 
                     b.ToTable("StdIns");
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.TestCaseModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CompileOutput")
-                        .HasColumnType("text");
-
-                    b.Property<string>("ExpectedOutput")
-                        .HasColumnType("text");
-
-                    b.Property<string>("HiddenExpectedOutput")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Stderr")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Stdout")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("UserSubmissionModelId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserSubmissionModelId");
-
-                    b.ToTable("TestCases");
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.TestCaseStatusModel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int>("ResultId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("TestCaseId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TestCaseId")
-                        .IsUnique();
-
-                    b.ToTable("TestCaseStatuses");
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.UserSubmissionModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<bool>("IsPassing")
-                        .HasColumnType("boolean");
-
-                    b.Property<int>("LanguageId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("SourceCode")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("LanguageId")
-                        .IsUnique();
-
-                    b.HasIndex("ProblemId")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserSubmissions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -543,17 +426,6 @@ namespace BE.Migrations
                     b.Navigation("Problem");
                 });
 
-            modelBuilder.Entity("BE.Models.Problem.ProblemModel", b =>
-                {
-                    b.HasOne("BE.Models.Courses.CoursesModel", "Course")
-                        .WithMany("Problems")
-                        .HasForeignKey("CourseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Course");
-                });
-
             modelBuilder.Entity("BE.Models.Problem.StdInListModel", b =>
                 {
                     b.HasOne("BE.Models.Problem.ProblemModel", "Problem")
@@ -563,51 +435,6 @@ namespace BE.Migrations
                         .IsRequired();
 
                     b.Navigation("Problem");
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.TestCaseModel", b =>
-                {
-                    b.HasOne("BE.Models.Submissions.UserSubmissionModel", null)
-                        .WithMany("TestCases")
-                        .HasForeignKey("UserSubmissionModelId");
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.TestCaseStatusModel", b =>
-                {
-                    b.HasOne("BE.Models.Submissions.TestCaseModel", "TestCase")
-                        .WithOne("TestCaseStatus")
-                        .HasForeignKey("BE.Models.Submissions.TestCaseStatusModel", "TestCaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TestCase");
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.UserSubmissionModel", b =>
-                {
-                    b.HasOne("BE.Models.Problem.LanguageModel", "Language")
-                        .WithOne("UserSubmissionModel")
-                        .HasForeignKey("BE.Models.Submissions.UserSubmissionModel", "LanguageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BE.Models.Problem.ProblemModel", "Problem")
-                        .WithOne("UserSubmission")
-                        .HasForeignKey("BE.Models.Submissions.UserSubmissionModel", "ProblemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("BE.Models.Auth.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Language");
-
-                    b.Navigation("Problem");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -661,17 +488,9 @@ namespace BE.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BE.Models.Courses.CoursesModel", b =>
-                {
-                    b.Navigation("Problems");
-                });
-
             modelBuilder.Entity("BE.Models.Problem.LanguageModel", b =>
                 {
                     b.Navigation("ProblemLanguages");
-
-                    b.Navigation("UserSubmissionModel")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("BE.Models.Problem.ProblemModel", b =>
@@ -683,20 +502,6 @@ namespace BE.Migrations
                     b.Navigation("ProblemLanguages");
 
                     b.Navigation("StdInList");
-
-                    b.Navigation("UserSubmission")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.TestCaseModel", b =>
-                {
-                    b.Navigation("TestCaseStatus")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("BE.Models.Submissions.UserSubmissionModel", b =>
-                {
-                    b.Navigation("TestCases");
                 });
 #pragma warning restore 612, 618
         }

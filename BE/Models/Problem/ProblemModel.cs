@@ -2,12 +2,19 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using BE.Models.Courses;
 using BE.Models.Submissions;
+using Microsoft.EntityFrameworkCore;
 
 namespace BE.Models.Problem;
 
+// https://code-maze.com/efcore-add-unique-constraints-to-a-property-code-first/
+[Index(nameof(ProblemId), IsUnique = true)]
 public class ProblemModel
 {
-    public int Id { get; set; }
+    //TODO: Add the problemId field which specifies the problem name for the respective course
+
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public Guid Id { get; set; }
+    public string ProblemId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     [Range(0, 100)]
@@ -15,7 +22,7 @@ public class ProblemModel
 
     public string CourseId { get; set; }
     public CoursesModel Course { get; set; }
-    public UserSubmissionModel UserSubmission { get; set; }
+    public ICollection<UserSubmissionModel> UserSubmission { get; set; } = new List<UserSubmissionModel>();
 
     public List<ExpectedOutputListModel> ExpectedOutputList { get; set; } = new List<ExpectedOutputListModel>();
     public List<StdInListModel> StdInList { get; set; } = new List<StdInListModel>();

@@ -5,5 +5,5 @@ namespace BE.Services.Interfaces;
 
 public interface IProblemService
 {
-    public Task<ProblemModel> CreateProblem(CreateProblemDto dto);
+    public Task<CreatedProblemDto> CreateProblem(ClientProblemDto dto);
 }

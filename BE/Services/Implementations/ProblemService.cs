@@ -17,9 +17,9 @@ public class ProblemService : IProblemService
 
     // Here we are creating a new problem.
     // First we have to map the MainMethodBodyDto to the MainMethodBody entity so we iterate over the list of MainMethodBodyDto and create a new MainMethodBody entity for each one
-    // Then we create a new Problem entity and set its properties to the values from the CreateProblemDto
+    // Then we create a new Problem entity and set its properties to the values from the ClientProblemDto
     // Then we iterate over the list of languages and create a new ProblemLanguage entity for each language and add it to the Problem entity
-    public async Task<ProblemModel> CreateProblem(CreateProblemDto dto)
+    public async Task<CreatedProblemDto> CreateProblem(ClientProblemDto dto)
     {
         List<MainMethodBodyModel> mainMethodBodies = new List<MainMethodBodyModel>();
         foreach (var bodyDto in dto.MainMethodBodiesList)
@@ -34,6 +34,7 @@ public class ProblemService : IProblemService
 
         var problemEntity = new ProblemModel
         {
+            ProblemId = dto.ProblemId,
             Name = dto.Name,
             Description = dto.Description,
             RequiredPercentageToPass = dto.RequiredPercentageToPass,
@@ -74,6 +75,14 @@ public class ProblemService : IProblemService
         }
 
         await _problemRepository.AddProblemAsync(problemEntity);
-        return problemEntity;
+        var createdProblemDto = new CreatedProblemDto
+        {
+            ProblemId = problemEntity.ProblemId,
+            Name = problemEntity.Name,
+            Description = problemEntity.Description,
+            RequiredPercentageToPass = problemEntity.RequiredPercentageToPass,
+            CourseId = problemEntity.CourseId
+        };
+        return createdProblemDto;
     }
 }

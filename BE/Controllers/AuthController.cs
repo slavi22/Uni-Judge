@@ -50,8 +50,13 @@ namespace BE.Controllers
         [HttpPost("registerTeacher")]
         public async Task<IActionResult> RegisterTeacher(RegisterTeacherDto dto)
         {
-            await _authService.RegisterTeacher(dto);
-            return StatusCode(StatusCodes.Status201Created, "User registered successfully.");
+            var result = await _authService.RegisterTeacher(dto);
+            if (result == false)
+            {
+                return Problem(detail: "Teacher registration not successful.", statusCode: StatusCodes.Status400BadRequest,
+                    title: "Teacher not registered.");
+            }
+            return StatusCode(StatusCodes.Status201Created, "Teacher registered successfully.");
         }
 
         //https://www.c-sharpcorner.com/article/jwt-authentication-with-refresh-tokens-in-net-6-0/

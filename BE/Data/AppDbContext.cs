@@ -10,8 +10,7 @@ namespace BE.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
-    // "Courses" table
-    public DbSet<CoursesModel> Courses { get; set; }
+
 
     // "Problem" table
     public DbSet<ProblemModel> Problems { get; set; }
@@ -19,6 +18,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<MainMethodBodyModel> MainMethodBodies { get; set; }
     public DbSet<ExpectedOutputListModel> ExpectedOutputs { get; set; }
     public DbSet<StdInListModel> StdIns { get; set; }
+
+    // "Courses" table
+    public DbSet<CoursesModel> Courses { get; set; }
 
     // "Submission" table
     public DbSet<TestCaseModel> TestCases { get; set; }

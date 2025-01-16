@@ -4,5 +4,5 @@ namespace BE.Repositories.Interfaces;
 
 public interface IMainMethodBodiesRepository
 {
-    Task<MainMethodBodyModel> GetMainMethodBodyByIdAsync(int id);
+    Task<MainMethodBodyModel> GetMainMethodBodyByIdAsync(Guid problemId);
 }

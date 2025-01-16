@@ -11,6 +11,8 @@ public class SubmissionBatchResultResponseDto
 {
     public bool IsCorrect { get; set; }
 
+    public string? ExpectedOutput { get; set; }
+
     public string? HiddenExpectedOutput { get; set; }
 
     public string Token { get; set; }
@@ -22,6 +24,4 @@ public class SubmissionBatchResultResponseDto
     public string? CompileOutput { get; set; }
 
     public string? Stderr { get; set; }
-
-    public string? ExpectedOutput { get; set; }
 }

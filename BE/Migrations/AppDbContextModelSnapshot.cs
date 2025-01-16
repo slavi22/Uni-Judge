@@ -125,8 +125,8 @@ namespace BE.Migrations
                     b.Property<bool>("IsSample")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -171,8 +171,8 @@ namespace BE.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SolutionTemplate")
                         .IsRequired()
@@ -187,8 +187,8 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Problem.ProblemLanguageModel", b =>
                 {
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
@@ -202,11 +202,9 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Problem.ProblemModel", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("CourseId")
                         .IsRequired()
@@ -220,12 +218,19 @@ namespace BE.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("ProblemId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("RequiredPercentageToPass")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("ProblemId")
+                        .IsUnique();
 
                     b.ToTable("Problems");
                 });
@@ -238,8 +243,8 @@ namespace BE.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("StdIn")
                         .IsRequired()
@@ -317,14 +322,18 @@ namespace BE.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("CourseId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsPassing")
                         .HasColumnType("boolean");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProblemId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProblemId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("SourceCode")
                         .IsRequired()
@@ -336,11 +345,11 @@ namespace BE.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LanguageId")
-                        .IsUnique();
+                    b.HasIndex("CourseId");
 
-                    b.HasIndex("ProblemId")
-                        .IsUnique();
+                    b.HasIndex("LanguageId");
+
+                    b.HasIndex("ProblemId");
 
                     b.HasIndex("UserId");
 
@@ -582,15 +591,21 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Submissions.UserSubmissionModel", b =>
                 {
+                    b.HasOne("BE.Models.Courses.CoursesModel", "Course")
+                        .WithMany("UserSubmissions")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("BE.Models.Problem.LanguageModel", "Language")
-                        .WithOne("UserSubmissionModel")
-                        .HasForeignKey("BE.Models.Submissions.UserSubmissionModel", "LanguageId")
+                        .WithMany("UserSubmissions")
+                        .HasForeignKey("LanguageId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("BE.Models.Problem.ProblemModel", "Problem")
-                        .WithOne("UserSubmission")
-                        .HasForeignKey("BE.Models.Submissions.UserSubmissionModel", "ProblemId")
+                        .WithMany("UserSubmission")
+                        .HasForeignKey("ProblemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -599,6 +614,8 @@ namespace BE.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("Language");
 
@@ -661,14 +678,15 @@ namespace BE.Migrations
             modelBuilder.Entity("BE.Models.Courses.CoursesModel", b =>
                 {
                     b.Navigation("Problems");
+
+                    b.Navigation("UserSubmissions");
                 });
 
             modelBuilder.Entity("BE.Models.Problem.LanguageModel", b =>
                 {
                     b.Navigation("ProblemLanguages");
 
-                    b.Navigation("UserSubmissionModel")
-                        .IsRequired();
+                    b.Navigation("UserSubmissions");
                 });
 
             modelBuilder.Entity("BE.Models.Problem.ProblemModel", b =>
@@ -681,8 +699,7 @@ namespace BE.Migrations
 
                     b.Navigation("StdInList");
 
-                    b.Navigation("UserSubmission")
-                        .IsRequired();
+                    b.Navigation("UserSubmission");
                 });
 
             modelBuilder.Entity("BE.Models.Submissions.TestCaseModel", b =>

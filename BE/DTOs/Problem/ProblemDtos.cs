@@ -2,8 +2,9 @@
 
 namespace BE.DTOs.Problem;
 
-public class CreateProblemDto
+public class ClientProblemDto
 {
+    public string ProblemId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
     [Range(0, 100)]

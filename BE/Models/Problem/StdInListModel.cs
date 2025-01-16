@@ -4,6 +4,6 @@ public class StdInListModel
 {
     public int Id { get; set; }
     public string StdIn { get; set; }
-    public int ProblemId { get; set; }
+    public Guid ProblemId { get; set; }
     public ProblemModel Problem { get; set; }
 }

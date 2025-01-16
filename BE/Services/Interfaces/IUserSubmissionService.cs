@@ -1,9 +1,10 @@
 ﻿using BE.DTOs.Judge.Requests;
 using BE.DTOs.Judge.Responses;
+using BE.DTOs.UserSubmission;
 
 namespace BE.Services.Interfaces;
 
 public interface IUserSubmissionService
 {
-    public Task AddUserSubmission(ClientSubmissionDto clientSubmissionDto, List<SubmissionBatchResultResponseDto> submissionBatchResultResponseDto);
+    public Task<UserSubmissionDto> AddUserSubmission(ClientSubmissionDto clientSubmissionDto, List<SubmissionBatchResultResponseDto> submissionBatchResultResponseDto);
 }

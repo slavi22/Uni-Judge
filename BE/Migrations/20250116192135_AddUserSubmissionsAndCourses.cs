@@ -12,19 +12,19 @@ namespace BE.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "RequiredPercentageToPass",
-                table: "Problems",
-                type: "integer",
-                nullable: false,
-                defaultValue: 0);
-
             migrationBuilder.AddColumn<string>(
                 name: "CourseId",
                 table: "Problems",
                 type: "text",
                 nullable: false,
                 defaultValue: "");
+
+            migrationBuilder.AddColumn<int>(
+                name: "RequiredPercentageToPass",
+                table: "Problems",
+                type: "integer",
+                nullable: false,
+                defaultValue: 0);
 
             migrationBuilder.CreateTable(
                 name: "Courses",
@@ -46,9 +46,10 @@ namespace BE.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     SourceCode = table.Column<string>(type: "text", nullable: false),
                     IsPassing = table.Column<bool>(type: "boolean", nullable: false),
-                    UserId = table.Column<string>(type: "text", nullable: false),
-                    ProblemId = table.Column<int>(type: "integer", nullable: false),
-                    LanguageId = table.Column<int>(type: "integer", nullable: false)
+                    CourseId = table.Column<string>(type: "text", nullable: false),
+                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    LanguageId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,6 +58,12 @@ namespace BE.Migrations
                         name: "FK_UserSubmissions_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserSubmissions_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -134,16 +141,19 @@ namespace BE.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserSubmissions_CourseId",
+                table: "UserSubmissions",
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserSubmissions_LanguageId",
                 table: "UserSubmissions",
-                column: "LanguageId",
-                unique: true);
+                column: "LanguageId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSubmissions_ProblemId",
                 table: "UserSubmissions",
-                column: "ProblemId",
-                unique: true);
+                column: "ProblemId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserSubmissions_UserId",
@@ -167,9 +177,6 @@ namespace BE.Migrations
                 table: "Problems");
 
             migrationBuilder.DropTable(
-                name: "Courses");
-
-            migrationBuilder.DropTable(
                 name: "TestCaseStatuses");
 
             migrationBuilder.DropTable(
@@ -177,6 +184,9 @@ namespace BE.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserSubmissions");
+
+            migrationBuilder.DropTable(
+                name: "Courses");
 
             migrationBuilder.DropIndex(
                 name: "IX_Problems_CourseId",

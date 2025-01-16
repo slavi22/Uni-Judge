@@ -7,12 +7,12 @@ namespace BE.DTOs.Judge.Requests;
 
 public class ClientSubmissionDto
 {
-    public int ProblemId { get; set; }
+    public string CourseId { get; set; }
 
-    [JsonProperty("language_id")]
+    public string ProblemId { get; set; }
+
     public string LanguageId { get; set; }
 
-    [JsonProperty("source_code")]
     public string SourceCode { get; set; }
 
 }
