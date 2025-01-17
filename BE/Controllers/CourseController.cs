@@ -1,5 +1,6 @@
 using BE.DTOs.Course;
 using BE.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BE.Controllers
@@ -15,6 +16,7 @@ namespace BE.Controllers
             _courseService = courseService;
         }
 
+        [Authorize(Roles = "Teacher")]
         [HttpPost("createNewCourse")]
         public async Task<IActionResult> CreateCourse(CreateCourseDto dto)
         {

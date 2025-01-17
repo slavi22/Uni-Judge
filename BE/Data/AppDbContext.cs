@@ -10,8 +10,6 @@ namespace BE.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<AppUser>(options)
 {
-
-
     // "Problem" table
     public DbSet<ProblemModel> Problems { get; set; }
     public DbSet<LanguageModel> Languages { get; set; }
@@ -26,6 +24,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<TestCaseModel> TestCases { get; set; }
     public DbSet<TestCaseStatusModel> TestCaseStatuses { get; set; }
     public DbSet<UserSubmissionModel> UserSubmissions { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

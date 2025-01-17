@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -28,7 +27,7 @@ namespace BE.Migrations
                 name: "Problems",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     ProblemId = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false)
@@ -46,7 +45,7 @@ namespace BE.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     IsSample = table.Column<bool>(type: "boolean", nullable: false),
                     ExpectedOutput = table.Column<string>(type: "text", nullable: false),
-                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ProblemId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -68,7 +67,7 @@ namespace BE.Migrations
                     Language = table.Column<int>(type: "integer", nullable: false),
                     SolutionTemplate = table.Column<string>(type: "text", nullable: false),
                     MainMethodBodyContent = table.Column<string>(type: "text", nullable: false),
-                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ProblemId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,7 +84,7 @@ namespace BE.Migrations
                 name: "ProblemLanguage",
                 columns: table => new
                 {
-                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProblemId = table.Column<string>(type: "text", nullable: false),
                     LanguageId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -112,7 +111,7 @@ namespace BE.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     StdIn = table.Column<string>(type: "text", nullable: false),
-                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ProblemId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

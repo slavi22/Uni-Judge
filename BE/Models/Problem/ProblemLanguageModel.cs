@@ -7,7 +7,7 @@ namespace BE.Models.Problem;
 [Table("ProblemLanguage")]
 public class ProblemLanguageModel
 {
-    public Guid ProblemId { get; set; }
+    public string ProblemId { get; set; }
     // Doesnt matter if i set these navigation properties to null
     [JsonIgnore]
     public ProblemModel Problem { get; set; }

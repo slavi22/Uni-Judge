@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -12,19 +11,19 @@ namespace BE.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "CourseId",
-                table: "Problems",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
             migrationBuilder.AddColumn<int>(
                 name: "RequiredPercentageToPass",
                 table: "Problems",
                 type: "integer",
                 nullable: false,
                 defaultValue: 0);
+
+            migrationBuilder.AddColumn<string>(
+                name: "CourseId",
+                table: "Problems",
+                type: "text",
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.CreateTable(
                 name: "Courses",
@@ -43,11 +42,11 @@ namespace BE.Migrations
                 name: "UserSubmissions",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     SourceCode = table.Column<string>(type: "text", nullable: false),
                     IsPassing = table.Column<bool>(type: "boolean", nullable: false),
                     CourseId = table.Column<string>(type: "text", nullable: false),
-                    ProblemId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProblemId = table.Column<string>(type: "text", nullable: false),
                     LanguageId = table.Column<int>(type: "integer", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false)
                 },
@@ -84,23 +83,24 @@ namespace BE.Migrations
                 name: "TestCases",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Id = table.Column<string>(type: "text", nullable: false),
                     IsCorrect = table.Column<bool>(type: "boolean", nullable: false),
                     Stdout = table.Column<string>(type: "text", nullable: true),
                     CompileOutput = table.Column<string>(type: "text", nullable: true),
                     Stderr = table.Column<string>(type: "text", nullable: true),
                     ExpectedOutput = table.Column<string>(type: "text", nullable: true),
                     HiddenExpectedOutput = table.Column<string>(type: "text", nullable: true),
-                    UserSubmissionModelId = table.Column<Guid>(type: "uuid", nullable: true)
+                    UserSubmissionId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TestCases", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TestCases_UserSubmissions_UserSubmissionModelId",
-                        column: x => x.UserSubmissionModelId,
+                        name: "FK_TestCases_UserSubmissions_UserSubmissionId",
+                        column: x => x.UserSubmissionId,
                         principalTable: "UserSubmissions",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -111,7 +111,7 @@ namespace BE.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ResultId = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: false),
-                    TestCaseId = table.Column<Guid>(type: "uuid", nullable: false)
+                    TestCaseId = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -130,9 +130,9 @@ namespace BE.Migrations
                 column: "CourseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TestCases_UserSubmissionModelId",
+                name: "IX_TestCases_UserSubmissionId",
                 table: "TestCases",
-                column: "UserSubmissionModelId");
+                column: "UserSubmissionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TestCaseStatuses_TestCaseId",

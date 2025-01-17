@@ -11,7 +11,6 @@ namespace BE.Services.Implementations;
 
 public class JudgeService : IJudgeService
 {
-    //TODO: Chnage the logic based on the fact that i introduced "courses"
 
     //private readonly AppDbContext _dbContext;
     private readonly IMainMethodBodiesRepository _mainMethodBodiesRepository;
@@ -43,12 +42,15 @@ public class JudgeService : IJudgeService
             new StringContent(JsonConvert.SerializeObject(preparedSubmissionsWithoutResult), Encoding.UTF8,
                 "application/json");
 
-        var request = await httpClient.PostAsync("submissions/batch?base64_encoded=true", content);
-        var response =
-            JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(await request.Content.ReadAsStringAsync());
-        var submissionStatuses = await PollSubmissionStatus(response);
+        var judgeRequest = await httpClient.PostAsync("submissions/batch?base64_encoded=true", content);
+        var judgeResponse =
+            JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(await judgeRequest.Content.ReadAsStringAsync());
+        // poll the judge BE for the status of each submission
+        var submissionStatuses = await PollSubmissionStatuses(judgeResponse);
+        // create a list of SubmissionBatchResultResponseDto to return the results
         var result = new List<SubmissionBatchResultResponseDto>();
-        for (int i = 0; i < response.Count; i++)
+        // loop through the response and check if the submission is correct or not
+        for (int i = 0; i < judgeResponse.Count; i++)
         {
             var answer = submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").Last();
             if (submissionStatuses.Submissions[i].Status.Id == 3 &&
@@ -58,7 +60,7 @@ public class JudgeService : IJudgeService
                 result.Add(new SubmissionBatchResultResponseDto
                 {
                     IsCorrect = true,
-                    Token = response[i].Token,
+                    Token = judgeResponse[i].Token,
                     Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
                     Status = submissionStatuses.Submissions[i].Status,
                     ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
@@ -72,7 +74,7 @@ public class JudgeService : IJudgeService
                 result.Add(new SubmissionBatchResultResponseDto
                 {
                     IsCorrect = false,
-                    Token = response[i].Token,
+                    Token = judgeResponse[i].Token,
                     Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
                     Status = submissionStatuses.Submissions[i].Status,
                     ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
@@ -166,7 +168,7 @@ public class JudgeService : IJudgeService
 
 
     // this method is used to poll the judge BE for the status of each submissionModel periodically (in this context every 1.5 seconds)
-    private async Task<SubmissionResultDto> PollSubmissionStatus(List<SubmissionResponseTokenDto> tokens)
+    private async Task<SubmissionResultDto> PollSubmissionStatuses(List<SubmissionResponseTokenDto> tokens)
     {
         // Create a new HttpClient, send requests to the judge backend to get the status of each submissionModel, and return the results
         var httpClient = _httpClientFactory.CreateClient("Judge");

@@ -13,7 +13,7 @@ public class ProblemModel
     //TODO: Add the problemId field which specifies the problem name for the respective course
 
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string ProblemId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }

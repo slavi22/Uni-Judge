@@ -8,6 +8,6 @@ public class MainMethodBodyModel
     public LanguagesEnum Language { get; set; }
     public string SolutionTemplate { get; set; }
     public string MainMethodBodyContent { get; set; }
-    public Guid ProblemId { get; set; }
+    public string ProblemId { get; set; }
     public ProblemModel Problem { get; set; }
 }

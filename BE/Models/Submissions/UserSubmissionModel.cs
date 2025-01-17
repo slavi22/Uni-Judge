@@ -8,13 +8,13 @@ namespace BE.Models.Submissions;
 public class UserSubmissionModel
 {
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; }
+    public string Id { get; set; }
     public string SourceCode { get; set; }
     public bool IsPassing { get; set; }
 
     public string CourseId { get; set; }
     public CoursesModel Course { get; set; }
-    public Guid ProblemId { get; set; }
+    public string ProblemId { get; set; }
     public ProblemModel Problem { get; set; }
     public int LanguageId { get; set; }
     public LanguageModel Language { get; set; }

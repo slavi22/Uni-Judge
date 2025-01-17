@@ -125,8 +125,9 @@ namespace BE.Migrations
                     b.Property<bool>("IsSample")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("ProblemId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ProblemId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -171,8 +172,9 @@ namespace BE.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid>("ProblemId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ProblemId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("SolutionTemplate")
                         .IsRequired()
@@ -187,8 +189,8 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Problem.ProblemLanguageModel", b =>
                 {
-                    b.Property<Guid>("ProblemId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ProblemId")
+                        .HasColumnType("text");
 
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
@@ -202,9 +204,9 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Problem.ProblemModel", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("text");
 
                     b.Property<string>("CourseId")
                         .IsRequired()
@@ -243,8 +245,9 @@ namespace BE.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<Guid>("ProblemId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ProblemId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("StdIn")
                         .IsRequired()
@@ -259,8 +262,8 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Submissions.TestCaseModel", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<string>("CompileOutput")
                         .HasColumnType("text");
@@ -280,12 +283,13 @@ namespace BE.Migrations
                     b.Property<string>("Stdout")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("UserSubmissionModelId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("UserSubmissionId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserSubmissionModelId");
+                    b.HasIndex("UserSubmissionId");
 
                     b.ToTable("TestCases");
                 });
@@ -305,8 +309,9 @@ namespace BE.Migrations
                     b.Property<int>("ResultId")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("TestCaseId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("TestCaseId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -318,9 +323,9 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Submissions.UserSubmissionModel", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("text");
 
                     b.Property<string>("CourseId")
                         .IsRequired()
@@ -332,8 +337,9 @@ namespace BE.Migrations
                     b.Property<int>("LanguageId")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("ProblemId")
-                        .HasColumnType("uuid");
+                    b.Property<string>("ProblemId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("SourceCode")
                         .IsRequired()
@@ -573,9 +579,13 @@ namespace BE.Migrations
 
             modelBuilder.Entity("BE.Models.Submissions.TestCaseModel", b =>
                 {
-                    b.HasOne("BE.Models.Submissions.UserSubmissionModel", null)
+                    b.HasOne("BE.Models.Submissions.UserSubmissionModel", "UserSubmission")
                         .WithMany("TestCases")
-                        .HasForeignKey("UserSubmissionModelId");
+                        .HasForeignKey("UserSubmissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserSubmission");
                 });
 
             modelBuilder.Entity("BE.Models.Submissions.TestCaseStatusModel", b =>

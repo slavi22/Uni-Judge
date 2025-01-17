@@ -29,7 +29,7 @@ public class UserSubmissionService : IUserSubmissionService
         {
             var testCase = new TestCaseModel
             {
-                Id = Guid.Parse(submissionBatchResultResponse.Token),
+                Id = submissionBatchResultResponse.Token,
                 ExpectedOutput = submissionBatchResultResponse.ExpectedOutput,
                 HiddenExpectedOutput = submissionBatchResultResponse.HiddenExpectedOutput,
                 Stderr = submissionBatchResultResponse.Stderr,
@@ -59,10 +59,9 @@ public class UserSubmissionService : IUserSubmissionService
         };
 
         await _userSubmissionRepository.AddAsync(entity);
-        //TODO: Investigate if the token generated normally
         var userSubmissionDto = new UserSubmissionDto
         {
-            Token = entity.Id.ToString()
+            Token = entity.Id
         };
         foreach (var testCaseModel in testCasesList)
         {
