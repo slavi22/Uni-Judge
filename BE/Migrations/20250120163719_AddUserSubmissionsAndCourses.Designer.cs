@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BE.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250117202146_AddUserSubmissionsAndCourses")]
+    [Migration("20250120163719_AddUserSubmissionsAndCourses")]
     partial class AddUserSubmissionsAndCourses
     {
         /// <inheritdoc />
@@ -108,9 +108,27 @@ namespace BE.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Password")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("BE.Models.Courses.UserCourseModel", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CourseId")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "CourseId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("UserCourse");
                 });
 
             modelBuilder.Entity("BE.Models.Problem.ExpectedOutputListModel", b =>
@@ -517,6 +535,25 @@ namespace BE.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("BE.Models.Courses.UserCourseModel", b =>
+                {
+                    b.HasOne("BE.Models.Courses.CoursesModel", "Course")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BE.Models.Auth.AppUser", "User")
+                        .WithMany("UserCourses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Course");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("BE.Models.Problem.ExpectedOutputListModel", b =>
                 {
                     b.HasOne("BE.Models.Problem.ProblemModel", "Problem")
@@ -623,7 +660,7 @@ namespace BE.Migrations
                         .IsRequired();
 
                     b.HasOne("BE.Models.Auth.AppUser", "User")
-                        .WithMany()
+                        .WithMany("UserSubmissions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -688,9 +725,18 @@ namespace BE.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("BE.Models.Auth.AppUser", b =>
+                {
+                    b.Navigation("UserCourses");
+
+                    b.Navigation("UserSubmissions");
+                });
+
             modelBuilder.Entity("BE.Models.Courses.CoursesModel", b =>
                 {
                     b.Navigation("Problems");
+
+                    b.Navigation("UserCourses");
 
                     b.Navigation("UserSubmissions");
                 });

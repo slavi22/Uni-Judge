@@ -3,11 +3,14 @@ using System.Text;
 using BE.Data;
 using BE.ExceptionHandlers;
 using BE.Models.Auth;
+using BE.Policies.Handlers;
+using BE.Policies.Requirements;
 using BE.Repositories.Implementations;
 using BE.Repositories.Interfaces;
 using BE.Services.Implementations;
 using BE.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -84,6 +87,20 @@ public class Program
             };
         });
 
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("HasSignedUpForCourse", policy =>
+            {
+                // search google for docs of this
+                // https://github.com/dotnet/aspnetcore/issues/4656
+                policy.RequireAuthenticatedUser();
+                policy.Requirements.Add(new StudentHasSignedUpForCourseRequirement());
+            });
+        });
+
+        //Authorization handlers
+        builder.Services.AddScoped<IAuthorizationHandler, StudentHasSignedUpForCourseHandler>();
+
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             //https://github.com/dotnet/efcore/issues/35110#issuecomment-2517298432
@@ -105,6 +122,7 @@ public class Program
         builder.Services.AddExceptionHandler<IncorrectTeacherSecretExceptionHandler>();
         builder.Services.AddExceptionHandler<ProblemNotFoundExceptionHandler>();
         builder.Services.AddExceptionHandler<CourseNotFoundExceptionHandler>();
+        builder.Services.AddExceptionHandler<InvalidCoursePasswordExceptionHandler>();
         // Global exception handler should be added last to catch all other unhandled exceptions
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 

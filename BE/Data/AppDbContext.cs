@@ -45,6 +45,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             .HasOne(pl => pl.Language)
             .WithMany(l => l.ProblemLanguages)
             .HasForeignKey(pl => pl.LanguageId);
+
+        // UserCourse many-to-many relationship
+        builder.Entity<UserCourseModel>()
+            .HasKey(uc => new { uc.UserId, uc.CourseId });
+        builder.Entity<UserCourseModel>()
+            .HasOne(uc => uc.User)
+            .WithMany(u => u.UserCourses)
+            .HasForeignKey(uc => uc.UserId);
+        builder.Entity<UserCourseModel>()
+            .HasOne(uc => uc.Course)
+            .WithMany(c => c.UserCourses)
+            .HasForeignKey(uc => uc.CourseId);
     }
 
     private static void SeedRoles(ModelBuilder builder)

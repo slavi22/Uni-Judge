@@ -1,8 +1,8 @@
 ﻿namespace BE.DTOs.Course;
 
-public class CreateCourseDto
+public class ViewCourseProblemDto
 {
-    public string Id { get; set; }
+    public string ProblemId { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
 }
