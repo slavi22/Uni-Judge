@@ -1,5 +1,7 @@
-﻿using BE.Data;
+﻿using System.Security.Claims;
+using BE.Data;
 using BE.Policies.Requirements;
+using BE.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,11 +11,14 @@ public class StudentHasSignedUpForCourseHandler : AuthorizationHandler<StudentHa
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly AppDbContext _dbContext;
+    private readonly IUserRepository _userRepository;
 
-    public StudentHasSignedUpForCourseHandler(IHttpContextAccessor httpContextAccessor, AppDbContext dbContext)
+    public StudentHasSignedUpForCourseHandler(IHttpContextAccessor httpContextAccessor, AppDbContext dbContext,
+        IUserRepository userRepository)
     {
         _httpContextAccessor = httpContextAccessor;
         _dbContext = dbContext;
+        _userRepository = userRepository;
     }
 
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context,
@@ -24,7 +29,8 @@ public class StudentHasSignedUpForCourseHandler : AuthorizationHandler<StudentHa
         // https://stackoverflow.com/a/72832313
         var userCourse = await _dbContext.Courses.Where(c => c.Id == courseId).Include(c => c.UserCourses)
             .FirstOrDefaultAsync();
-        if (userCourse == null)
+        var currentUser = await _userRepository.GetCurrentUserAsync();
+        if (userCourse.UserCourses.Any(x => x.UserId == currentUser.Id) == false)
         {
             return;
         }

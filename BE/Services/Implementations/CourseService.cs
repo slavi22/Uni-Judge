@@ -20,7 +20,12 @@ public class CourseService : ICourseService
 
     public async Task<List<ViewCourseProblemDto>> GetProblemsForCourse(string courseId)
     {
+        // We get all the problems for a course and return them in a list of ViewCourseProblemDto
         var course = await _courseRepository.GetCourseAndProblemsByIdAsync(courseId);
+        if (course == null)
+        {
+            return null;
+        }
         var viewCourseProblemsList = new List<ViewCourseProblemDto>();
         foreach (var problem in course.Problems)
         {
@@ -37,12 +42,14 @@ public class CourseService : ICourseService
 
     public async Task<bool> SignUpForCourse(SignUpForCourseDto dto)
     {
+        // We sign up a user for a course. Some courses require a password to sign up which is checked here.
         var course = await _courseRepository.GetCourseByIdAsync(dto.CourseId);
         if (course.Password != dto.Password)
         {
             throw new InvalidCoursePasswordException("Invalid course password entered.");
         }
         var user = await _userRepository.GetCurrentUserAsync();
+
         var userCourse = new UserCourseModel
         {
             CourseId = course.Id,
@@ -54,6 +61,7 @@ public class CourseService : ICourseService
 
     public async Task CreateNewCourse(CreateCourseDto dto)
     {
+        // We create a new course with the provided data. Only users with have the teacher role can create courses.
         var courseModel = new CoursesModel
         {
             Id = dto.Id,

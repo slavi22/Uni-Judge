@@ -24,6 +24,10 @@ public class UserSubmissionService : IUserSubmissionService
     public async Task<UserSubmissionDto> AddUserSubmission(ClientSubmissionDto clientSubmissionDto,
         List<SubmissionBatchResultResponseDto> submissionBatchResultResponseDto)
     {
+        // Here we fill the test cases list with the data from the response from the judge service
+        // Then we create a new UserSubmissionModel entity and fill it with the data from the clientSubmissionDto and the test cases list
+        // We then calculate if the submission is passing or not and add the entity to the database
+        // After that we create a new UserSubmissionDto and fill it with the data from the entity and return it
         var testCasesList = new List<TestCaseModel>();
         foreach (var submissionBatchResultResponse in submissionBatchResultResponseDto)
         {
@@ -84,6 +88,8 @@ public class UserSubmissionService : IUserSubmissionService
 
     private async Task<bool> CalculateIsPassing(string problemId, List<TestCaseModel> testCasesList)
     {
+        // Here we calculate if the submission is passing or not
+        // We calculate it by getting the required percentage to pass from the problem then checking if the failed test cases are less than the required percentage to pass
         var problem = await _problemRepository.GetProblemByProblemIdAsync(problemId);
         var percentageToPass = problem.RequiredPercentageToPass;
         var percentageInDecimal = (double)percentageToPass / 100;

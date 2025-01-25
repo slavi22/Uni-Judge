@@ -29,10 +29,10 @@ namespace BE.Controllers
         [Authorize(Roles = "Teacher")]
         [HttpPost("createProblem")]
         [Consumes("application/json")]
+        [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(CreatedProblemDto))]
-        [Produces("application/json")]
         public async Task<IActionResult> CreateProblem(ClientProblemDto problem)
         {
             var result = await _problemService.CreateProblem(problem);

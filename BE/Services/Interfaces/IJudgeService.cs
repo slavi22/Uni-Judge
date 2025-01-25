@@ -10,5 +10,5 @@ public interface IJudgeService
     /// </summary>
     /// <param name="clientSubmissionDto">A DTO which contains the submissionModel submitted by the client <see cref="ClientSubmissionDto"/></param>
     /// <returns>A list with the tokens and respective statuses</returns>
-    Task<List<SubmissionBatchResultResponseDto>> AddBatchSubmissions(ClientSubmissionDto clientSubmissionDto);
+    Task<List<SubmissionBatchResultResponseDto>> CreateBatchSubmissions(ClientSubmissionDto clientSubmissionDto);
 }

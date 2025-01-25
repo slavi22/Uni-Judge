@@ -10,8 +10,6 @@ namespace BE.Models.Problem;
 [Index(nameof(ProblemId), IsUnique = true)]
 public class ProblemModel
 {
-    //TODO: Add the problemId field which specifies the problem name for the respective course
-
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public string Id { get; set; }
     public string ProblemId { get; set; }

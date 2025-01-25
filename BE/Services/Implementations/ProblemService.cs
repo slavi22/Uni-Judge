@@ -9,11 +9,11 @@ namespace BE.Services.Implementations;
 public class ProblemService : IProblemService
 {
     private readonly IProblemRepository _problemRepository;
+
     public ProblemService(IProblemRepository problemRepository)
     {
         _problemRepository = problemRepository;
     }
-
 
     // Here we are creating a new problem.
     // First we have to map the MainMethodBodyDto to the MainMethodBody entity so we iterate over the list of MainMethodBodyDto and create a new MainMethodBody entity for each one
@@ -63,7 +63,7 @@ public class ProblemService : IProblemService
             problemEntity.StdInList.Add(stdInList);
         }
 
-        
+
         foreach (var languageId in dto.LanguagesList)
         {
             var problemLanguage = new ProblemLanguageModel

@@ -4,5 +4,10 @@ namespace BE.Repositories.Interfaces;
 
 public interface IMainMethodBodiesRepository
 {
+    /// <summary>
+    /// Retrieves the main method body by its problem ID.
+    /// </summary>
+    /// <param name="problemId">The ID of the problem to retrieve the main method body for</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the main method body model</returns>
     Task<MainMethodBodyModel> GetMainMethodBodyByIdAsync(string problemId);
 }

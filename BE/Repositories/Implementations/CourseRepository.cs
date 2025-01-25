@@ -14,11 +14,21 @@ public class CourseRepository : ICourseRepository
         _dbContext = dbContext;
     }
 
+
     public async Task<bool> SignUpForCourseAsync(CoursesModel course, UserCourseModel userCourse)
     {
-        course.UserCourses.Add(userCourse);
-        await _dbContext.SaveChangesAsync();
-        return true;
+        // AsNoTracking() is used to avoid tracking the entity  because we only use it for fetching
+        var fetchedCourse =
+            await _dbContext.Courses.Include(x => x.UserCourses).AsNoTracking().FirstOrDefaultAsync(x => x.Id == course.Id);
+        // check if the user is already signed up for the course by checking if the user id and course id are already in the UserCourses list
+        if (fetchedCourse.UserCourses.Any(x => x.UserId == userCourse.UserId && x.CourseId == userCourse.CourseId) == false)
+        {
+            course.UserCourses.Add(userCourse);
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        return false;
     }
 
     public async Task CreateCourseAsync(CoursesModel courseModel)

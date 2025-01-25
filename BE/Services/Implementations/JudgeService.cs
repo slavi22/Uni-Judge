@@ -11,8 +11,6 @@ namespace BE.Services.Implementations;
 
 public class JudgeService : IJudgeService
 {
-
-    //private readonly AppDbContext _dbContext;
     private readonly IMainMethodBodiesRepository _mainMethodBodiesRepository;
     private readonly IProblemRepository _problemRepository;
     private readonly ICourseRepository _courseRepository;
@@ -29,11 +27,10 @@ public class JudgeService : IJudgeService
     }
 
     // this method is used to send a batch of submissions to the judge BE and return the status of each submissionModel (used as test cases foreach test in the problem)
-    public async Task<List<SubmissionBatchResultResponseDto>> AddBatchSubmissions(
+    public async Task<List<SubmissionBatchResultResponseDto>> CreateBatchSubmissions(
         ClientSubmissionDto clientSubmissionDto)
     {
         // Prepare the submissions, send them to the judge backend, poll for their status, and return the results
-
         var preparedSubmissionsWithResult = await PrepareSubmissionBatchDtoWithResult(clientSubmissionDto);
         var preparedSubmissionsWithoutResult = PrepareSubmissionBatchDtoWithoutResult(preparedSubmissionsWithResult);
 
@@ -44,9 +41,19 @@ public class JudgeService : IJudgeService
 
         var judgeRequest = await httpClient.PostAsync("submissions/batch?base64_encoded=true", content);
         var judgeResponse =
-            JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(await judgeRequest.Content.ReadAsStringAsync());
+            JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(
+                await judgeRequest.Content.ReadAsStringAsync());
         // poll the judge BE for the status of each submission
         var submissionStatuses = await PollSubmissionStatuses(judgeResponse);
+        // call the ConstructFinalResult method to construct the final result
+        var result = ConstructFinalResult(judgeResponse, submissionStatuses, preparedSubmissionsWithResult);
+        return result;
+    }
+
+    private List<SubmissionBatchResultResponseDto> ConstructFinalResult(
+        List<SubmissionResponseTokenDto> judgeResponse, SubmissionResultDto submissionStatuses,
+        BatchSubmissionRequestDto preparedSubmissionsWithResult)
+    {
         // create a list of SubmissionBatchResultResponseDto to return the results
         var result = new List<SubmissionBatchResultResponseDto>();
         // loop through the response and check if the submission is correct or not
@@ -95,7 +102,7 @@ public class JudgeService : IJudgeService
         {
             throw new CourseNotFoundException($"Course with id '{clientSubmissionDto.CourseId}' was not found.");
         }
-        
+
         if (await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId) == null)
         {
             throw new ProblemNotFoundException($"Problem with id '{clientSubmissionDto.ProblemId}' was not found.");
@@ -132,12 +139,14 @@ public class JudgeService : IJudgeService
                 LanguageId = clientSubmissionDto.LanguageId,
                 SourceCode = clientSubmissionDto.SourceCode,
                 StdIn = stdIn,
-                ExpectedOutput = problemEntity.ExpectedOutputList[i].IsSample
-                    ? problemEntity.ExpectedOutputList[i].ExpectedOutput
-                    : null,
-                HiddenExpectedOutput = !problemEntity.ExpectedOutputList[i].IsSample
-                    ? problemEntity.ExpectedOutputList[i].ExpectedOutput
-                    : null
+                ExpectedOutput =
+                    problemEntity.ExpectedOutputList[i].IsSample // check if the expected output is sample or not
+                        ? problemEntity.ExpectedOutputList[i].ExpectedOutput
+                        : null,
+                HiddenExpectedOutput =
+                    !problemEntity.ExpectedOutputList[i].IsSample // check if the expected output is hidden or not
+                        ? problemEntity.ExpectedOutputList[i].ExpectedOutput
+                        : null
             };
 
             preparedSubmissions.Submissions.Add(submissionForRequest);

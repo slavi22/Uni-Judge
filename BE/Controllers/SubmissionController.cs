@@ -1,11 +1,11 @@
 using BE.DTOs.Judge.Requests;
+using BE.DTOs.UserSubmission;
 using BE.Services.Interfaces;
 using BE.Util.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // TODO: Add tests
-// TODO: Add endpoints documentation
 namespace BE.Controllers
 {
     [ApiController]
@@ -21,16 +21,24 @@ namespace BE.Controllers
             _userSubmissionService = userSubmissionService;
         }
 
+        /// <summary>
+        /// Creates a new submission batch for a specific problem to be sent to the judge
+        /// </summary>
+        /// <remarks>Requires an authenticated user to access</remarks>
+        /// <param name="clientSubmissionDto">The client submission DTO containing the submission details</param>
+        /// <returns>A DTO containing the created user submission</returns>
+        /// <response code="404">Returns 404 if a problem or a course isn't found</response>
+        /// <response code="200">Returns 200 with the created user submission</response>
         [Authorize]
         [HttpPost("createSubmission")]
         [Consumes("application/json")]
         [Produces("application/json")]
-        // use [Produces] attribute to specify the response type
-        // throws 404 if problem or course not found
+        [ProducesResponseType(statusCode:StatusCodes.Status404NotFound, type:typeof(ProblemDetails))]
+        [ProducesResponseType(statusCode:StatusCodes.Status200OK, type:typeof(UserSubmissionDto))]
         public async Task<IActionResult> CreateSubmissionBatch(ClientSubmissionDto clientSubmissionDto)
         {
             var clientSubmissionDtoCopy = clientSubmissionDto.DeepCopyClientSubmissionDto();
-            var judgeResults = await _judgeService.AddBatchSubmissions(clientSubmissionDto);
+            var judgeResults = await _judgeService.CreateBatchSubmissions(clientSubmissionDto);
             var result = await _userSubmissionService.AddUserSubmission(clientSubmissionDtoCopy, judgeResults);
             return Ok(result);
         }

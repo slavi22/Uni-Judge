@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
@@ -91,7 +92,7 @@ public class Program
         {
             options.AddPolicy("HasSignedUpForCourse", policy =>
             {
-                // search google for docs of this
+                // search google for docs of this "RequireAuthenticatedUser" method
                 // https://github.com/dotnet/aspnetcore/issues/4656
                 policy.RequireAuthenticatedUser();
                 policy.Requirements.Add(new StudentHasSignedUpForCourseRequirement());
@@ -114,7 +115,11 @@ public class Program
         });
 
         // Add services to the container.
-        builder.Services.AddControllers().AddNewtonsoftJson(options =>
+        builder.Services.AddControllers(options =>
+        {
+            //https://stackoverflow.com/a/75483959
+            //options.Filters.Add(new AuthorizeFilter()); //this will make all controller endpoints require authentication
+        }).AddNewtonsoftJson(options =>
         {
             options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
         });
