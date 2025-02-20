@@ -1,4 +1,5 @@
-﻿using BE.Business.Services.Interfaces;
+﻿using System.Text;
+using BE.Business.Services.Interfaces;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Judge.Requests;
 using BE.DTOs.DTOs.Judge.Responses;
@@ -78,6 +79,7 @@ public class UserSubmissionService : IUserSubmissionService
                 CompileOutput = testCaseModel.CompileOutput,
                 ExpectedOutput = testCaseModel.ExpectedOutput,
                 Stdout = testCaseModel.Stdout,
+                Stderr = testCaseModel.Stderr,
                 Status = new TestCaseStatusDto
                 {
                     Id = testCaseModel.TestCaseStatus.ResultId,

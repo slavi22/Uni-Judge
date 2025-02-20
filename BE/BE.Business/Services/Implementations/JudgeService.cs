@@ -59,7 +59,7 @@ public class JudgeService : IJudgeService
         // loop through the response and check if the submission is correct or not
         for (int i = 0; i < judgeResponse.Count; i++)
         {
-            var answer = submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").Last();
+            var answer = submissionStatuses.Submissions[i].Stdout?.Trim().Split("\n").Last();
             if (submissionStatuses.Submissions[i].Status.Id == 3 &&
                 (answer == preparedSubmissionsWithResult.Submissions[i].ExpectedOutput ||
                  answer == preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput))
@@ -82,7 +82,9 @@ public class JudgeService : IJudgeService
                 {
                     IsCorrect = false,
                     Token = judgeResponse[i].Token,
-                    Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
+                    Stdout = submissionStatuses.Submissions[i].Stdout != null
+                        ? string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1))
+                        : null,
                     Status = submissionStatuses.Submissions[i].Status,
                     ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
                     HiddenExpectedOutput = preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput,
@@ -115,7 +117,8 @@ public class JudgeService : IJudgeService
         var problemEntity = await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId);
 
         var mainMethodBodyEntity =
-            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(problemEntity.Id, clientSubmissionDto.LanguageId);
+            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(problemEntity.Id,
+                clientSubmissionDto.LanguageId);
         // switch case to construct the solution class body based on the language
         switch (clientSubmissionDto.LanguageId)
         {
