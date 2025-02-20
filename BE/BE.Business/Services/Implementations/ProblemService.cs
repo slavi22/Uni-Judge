@@ -3,6 +3,7 @@ using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Problem.Requests;
 using BE.DTOs.DTOs.Problem.Responses;
 using BE.Models.Models.Problem;
+using BE.Models.Models.Problem.Enums;
 
 namespace BE.Business.Services.Implementations;
 
@@ -28,7 +29,7 @@ public class ProblemService : IProblemService
         {
             mainMethodBodies.Add(new MainMethodBodyModel
             {
-                Language = (LanguagesEnum)bodyDto.Language,
+                LanguageId = bodyDto.LanguageId,
                 MainMethodBodyContent = bodyDto.MainMethodBodyContent,
                 SolutionTemplate = bodyDto.SolutionTemplate,
             });

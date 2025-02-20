@@ -1,8 +1,10 @@
-﻿namespace BE.DTOs.DTOs.Problem.Requests;
+﻿using BE.Models.Models.Problem.Enums;
+
+namespace BE.DTOs.DTOs.Problem.Requests;
 
 public class MainMethodBodyDto
 {
-    public LanguagesEnumDto Language { get; set; }
+    public LanguagesEnum LanguageId { get; set; }
     public string SolutionTemplate { get; set; }
     public string MainMethodBodyContent { get; set; }
 }

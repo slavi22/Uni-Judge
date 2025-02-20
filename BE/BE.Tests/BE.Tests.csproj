@@ -24,8 +24,4 @@
       <ProjectReference Include="..\BE.Presentation\BE.Presentation.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Services\" />
-    </ItemGroup>
-
 </Project>

@@ -14,8 +14,8 @@ public class MainMethodBodiesRepository : IMainMethodBodiesRepository
         _dbContext = dbContext;
     }
 
-    public async Task<MainMethodBodyModel> GetMainMethodBodyByIdAsync(string problemId)
+    public async Task<MainMethodBodyModel> GetMainMethodBodyByIdAsync(string problemId, string languageId)
     {
-        return await _dbContext.MainMethodBodies.FirstOrDefaultAsync(x => x.ProblemId == problemId);
+        return await _dbContext.MainMethodBodies.FirstOrDefaultAsync(x => x.ProblemId == problemId && (int)x.LanguageId == int.Parse(languageId));
     }
 }

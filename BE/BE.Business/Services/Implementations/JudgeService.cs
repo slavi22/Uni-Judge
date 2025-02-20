@@ -115,13 +115,20 @@ public class JudgeService : IJudgeService
         var problemEntity = await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId);
 
         var mainMethodBodyEntity =
-            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(problemEntity.Id);
+            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(problemEntity.Id, clientSubmissionDto.LanguageId);
         // switch case to construct the solution class body based on the language
         switch (clientSubmissionDto.LanguageId)
         {
             case "51":
             {
-                clientSubmissionDto.SourceCode = CSharpTemplate.ConstructSolutionBase(
+                clientSubmissionDto.SourceCode = CSharpTemplate.ConstructCSharpSolutionBase(
+                    mainMethodBodyEntity.MainMethodBodyContent,
+                    clientSubmissionDto.SourceCode);
+                break;
+            }
+            case "63":
+            {
+                clientSubmissionDto.SourceCode = JsTemplate.ConstructJsSolutionBase(
                     mainMethodBodyEntity.MainMethodBodyContent,
                     clientSubmissionDto.SourceCode);
                 break;

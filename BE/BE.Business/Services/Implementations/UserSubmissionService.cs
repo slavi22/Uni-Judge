@@ -98,7 +98,7 @@ public class UserSubmissionService : IUserSubmissionService
         var percentageInDecimal = (double)percentageToPass / 100;
         var failedTestCases = testCasesList.Count(x => x.IsCorrect == false);
         var totalTestCases = testCasesList.Count;
-        var result = totalTestCases / failedTestCases;
+        var result = failedTestCases == 0 ? totalTestCases : totalTestCases / failedTestCases;
         return result >= percentageInDecimal * totalTestCases;
     }
 }

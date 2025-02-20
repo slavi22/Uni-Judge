@@ -61,7 +61,7 @@ public class UserRepository : IUserRepository
         await _userManager.UpdateAsync(user);
     }
 
-    public async Task<IList<string>>  GetRolesAsync(AppUser user)
+    public async Task<IList<string>> GetRolesAsync(AppUser user)
     {
         var result = await _userManager.GetRolesAsync(user);
         return result;

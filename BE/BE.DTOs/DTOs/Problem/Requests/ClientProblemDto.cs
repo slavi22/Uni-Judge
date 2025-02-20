@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using BE.Models.Models.Problem.Enums;
 
 namespace BE.DTOs.DTOs.Problem.Requests;
 
@@ -13,5 +14,5 @@ public class ClientProblemDto
     public List<MainMethodBodyDto> MainMethodBodiesList { get; set; }
     public List<ExpectedOutputListDto> ExpectedOutputList { get; set; }
     public List<string> StdInList { get; set; }
-    public List<LanguagesEnumDto> LanguagesList { get; set; }
+    public List<LanguagesEnum> LanguagesList { get; set; }
 }

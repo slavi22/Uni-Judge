@@ -88,6 +88,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
             {
                 Id = 51,
                 Name = "C#"
+            },
+            new LanguageModel
+            {
+                Id = 63,
+                Name = "JavaScript"
             }
         );
     }
