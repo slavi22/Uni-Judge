@@ -1,5 +1,7 @@
 ﻿using BE.DTOs.DTOs.Auth.Requests;
+using BE.DTOs.DTOs.Auth.Responses;
 using BE.DTOs.DTOs.JWT.Responses;
+using Microsoft.AspNetCore.Http;
 
 namespace BE.Business.Services.Interfaces;
 
@@ -25,4 +27,18 @@ public interface IAuthService
     /// <param name="dto">The registration details for the teacher</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the registration was successful</returns>
     Task<bool> RegisterTeacher(RegisterTeacherDto dto);
+
+    /// <summary>
+    /// Sets the access and refresh tokens inside a http only cookie.
+    /// </summary>
+    /// <param name="tokenDto"></param>
+    /// <param name="context"></param>
+    void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context);
+
+    /// <summary>
+    /// Gets the current logged-in user's information.
+    /// </summary>
+    /// <param name="email">The email obtained from the <c>User.Identity.Name</c> claim</param>
+    /// <returns></returns>
+    Task<UserInfoDto> GetUserInfo(string email);
 }

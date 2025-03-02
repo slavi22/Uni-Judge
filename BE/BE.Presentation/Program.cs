@@ -40,53 +40,72 @@ public class Program
             .AddEntityFrameworkStores<AppDbContext>();
 
         builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                        Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Secret").Value)),
-                ClockSkew = TimeSpan.Zero //default skew is 5 mins => token is still valid 5 mins after expiring
-            };
-            options.Events = new JwtBearerEvents
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
             {
-                OnForbidden = async context =>
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsJsonAsync(new ProblemDetails
-                    {
-                        Status = StatusCodes.Status403Forbidden,
-                        Title = "Access Denied!",
-                        Detail = "You don't have the correct privileges to access this page."
-                    });
-                },
-                //https://stackoverflow.com/a/70885152
-                OnChallenge = context =>
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(builder.Configuration.GetSection("Jwt:Secret").Value)),
+                    ClockSkew = TimeSpan.Zero //default skew is 5 mins => token is still valid 5 mins after expiring
+                };
+                options.Events = new JwtBearerEvents
                 {
-                    context.HandleResponse();
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "application/json";
-                    return context.Response.WriteAsJsonAsync(new ProblemDetails
+                    //https://code-maze.com/how-to-use-httponly-cookie-in-net-core-for-authentication-and-refresh-token-actions/
+                    //https://www.youtube.com/watch?v=Qm64zinOVpc
+                    OnMessageReceived = context =>
                     {
-                        Status = StatusCodes.Status401Unauthorized,
-                        Title = "Access Denied!",
-                        Detail = "You are not logged in to access this page."
-                    });
-                }
-            };
-        });
+                        context.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+                        if (!string.IsNullOrEmpty(accessToken))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+                    OnForbidden = async context =>
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsJsonAsync(new ProblemDetails
+                        {
+                            Status = StatusCodes.Status403Forbidden,
+                            Title = "Access Denied!",
+                            Detail = "You don't have the correct privileges to access this page."
+                        });
+                    },
+                    //https://stackoverflow.com/a/70885152
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        context.Response.ContentType = "application/json";
+                        return context.Response.WriteAsJsonAsync(new ProblemDetails
+                        {
+                            Status = StatusCodes.Status401Unauthorized,
+                            Title = "Access Denied!",
+                            Detail = "You are not logged in to access this page."
+                        });
+                    }
+                };
+            })
+            .AddGoogleOpenIdConnect(options =>
+            {
+                options.ClientId = builder.Configuration.GetSection("Authentication:Google:ClientId").Value;
+                options.ClientSecret = builder.Configuration.GetSection("Authentication:Google:ClientSecret").Value;
+                options.SkipUnrecognizedRequests = true;
+            });
 
         builder.Services.AddAuthorization(options =>
         {
@@ -94,7 +113,8 @@ public class Program
             {
                 // search google for docs of this "RequireAuthenticatedUser" method
                 // https://github.com/dotnet/aspnetcore/issues/4656
-                policy.RequireAuthenticatedUser();
+                //policy.RequireAuthenticatedUser(); //THIS IS BUGGED AND DOESN'T WORK AT ALL => https://github.com/dotnet/aspnetcore/issues/4656#issuecomment-605012014
+                // i need to check if the user is authenticated in the requirement handler for the auth check to work
                 policy.Requirements.Add(new StudentHasSignedUpForCourseRequirement());
             });
         });
@@ -105,13 +125,24 @@ public class Program
         builder.Services.AddDbContext<AppDbContext>(options =>
         {
             //https://github.com/dotnet/efcore/issues/35110#issuecomment-2517298432
-            options.ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning)); //used to remove warning about pending migrations
+            options.ConfigureWarnings(w =>
+                w.Ignore(RelationalEventId
+                    .PendingModelChangesWarning)); //used to remove warning about pending migrations
             options.UseNpgsql(builder.Configuration.GetConnectionString("DatabaseConnectionString"));
         });
 
-        builder.Services.AddHttpClient("Judge", client =>
+        // https://www.milanjovanovic.tech/blog/the-right-way-to-use-httpclient-in-dotnet#:~:text=Reducing%20Code%20Duplication%20With%20Named%20Clients
+        builder.Services.AddHttpClient("Judge",
+            client => { client.BaseAddress = new Uri(builder.Configuration.GetSection("JudgeServerAddress").Value); });
+
+        builder.Services.AddCors(options =>
         {
-            client.BaseAddress = new Uri(builder.Configuration.GetSection("JudgeServerAddress").Value);
+            options.AddPolicy(name: "CorsPolicy", policy =>
+            {
+                var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FEAddress").Value;
+                // possibly add AllowCredentials() for the httponly cookies if they don't work
+                policy.WithOrigins(allowedOrigins).AllowCredentials().AllowAnyMethod().AllowAnyHeader();
+            });
         });
 
         // Add services to the container.
@@ -149,6 +180,7 @@ public class Program
         builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
         builder.Services.AddScoped<IUserSubmissionService, UserSubmissionService>();
         builder.Services.AddScoped<ICourseService, CourseService>();
+        builder.Services.AddScoped<IAuthProvidersService, AuthProvidersService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         // builder.Services.AddOpenApi();
@@ -209,6 +241,7 @@ public class Program
 
         app.UseHttpsRedirection();
 
+        app.UseCors("CorsPolicy");
 
         app.UseAuthentication();
         app.UseAuthorization();

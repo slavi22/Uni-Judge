@@ -55,7 +55,7 @@ namespace BE.Presentation.Controllers
         /// <response code="401">Returns 401 if the user is not authenticated</response>
         /// <response code="200">Returns 200 if the user was signed up successfully</response>
         [Authorize]
-        [HttpPost("signUpForCourse")]
+        [HttpPost("signup-for-course")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest, type: typeof(ProblemDetails))]
@@ -82,7 +82,7 @@ namespace BE.Presentation.Controllers
         /// <response code="401">Returns 401 if the user is not authorized to create a course</response>
         /// <response code="200">Returns 200 if the course was created successfully</response>
         [Authorize(Roles = "Teacher")]
-        [HttpPost("createNewCourse")]
+        [HttpPost("create-new-course")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status403Forbidden, type: typeof(ProblemDetails))]

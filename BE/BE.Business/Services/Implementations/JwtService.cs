@@ -35,7 +35,7 @@ public class JwtService : IJwtService
         var userName = token.Claims.FirstOrDefault(claim => claim.Type == "unique_name")?.Value;
         // We try to find the user in the database
         var user = await _userRepository.FindByNameAsync(userName);
-        // If the user is not found or the refresh token is invalid, we throw an exception
+        // If the user is not found or the refresh token is invalid/expired, we throw an exception
         if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
             //TODO: make a custom exception maybe?

@@ -11,7 +11,7 @@ public interface IUserRepository
     Task<AppUser> GetCurrentUserAsync();
 
     /// <summary>
-    /// Finds a user by their email. Currently, our user's email is also their username.
+    /// Finds a user by their email. Currently, the user's email is also their username.
     /// </summary>
     /// <param name="email">The email of the user to find</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the user if found</returns>

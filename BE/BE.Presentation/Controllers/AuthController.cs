@@ -1,6 +1,8 @@
 using BE.Business.Services.Interfaces;
 using BE.DTOs.DTOs.Auth.Requests;
+using BE.DTOs.DTOs.Auth.Responses;
 using BE.DTOs.DTOs.JWT.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // TODO: Add tests
@@ -25,12 +27,12 @@ namespace BE.Presentation.Controllers
         /// <param name="dto">DTO containing the login credentials</param>
         /// <returns>A DTO containing the created user submission</returns>
         /// <response code="404">Returns 404 if a user isn't found or the provided credentials are incorrect</response>
-        /// <response code="200">Returns 200 with the generated JWT and Refresh token</response>
+        /// <response code="200">Returns 200 and sets 2 httponly cookies, one for the access and another for the refresh token</response>
         [HttpPost("login")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ProblemDetails))]
-        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(TokenDto))]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             var loginToken = await _authService.LoginUser(dto);
@@ -39,8 +41,13 @@ namespace BE.Presentation.Controllers
                 return Problem(detail: "The requested user could not be found.",
                     statusCode: StatusCodes.Status404NotFound, title: "User not found.");
             }
+            // since im using "AddIdentity" it apparently adds a cookie with the name ".AspNetCore.Identity.Application" so i have to delete the Set-Cookie header
+            // otherwise it will get set along with the accessToken and refreshToken cookies
+            // https://github.com/openiddict/openiddict-core/issues/578#issuecomment-375818767
+            HttpContext.Response.Headers.Remove("Set-Cookie");
+            _authService.SetTokensInsideCookie(loginToken, HttpContext);
 
-            return Ok(loginToken);
+            return Ok();
         }
 
         /// <summary>
@@ -48,7 +55,7 @@ namespace BE.Presentation.Controllers
         /// </summary>
         /// <param name="dto">DTO containing the register credentials</param>
         /// <returns>Returns a response message indicating whether the registration was successful</returns>
-        /// <response code="400">Returns a problem detail with status code 400 if the registration wasn't successful</response>
+        /// <response code="400">Returns a problem detail with status code 400 if the registration wasn't successfu.</response>
         /// <response code="201">Returns 201 if the user was registered successfully</response>
         [HttpPost("register")]
         [Consumes("application/json")]
@@ -74,7 +81,7 @@ namespace BE.Presentation.Controllers
         /// <returns>Returns a response message indicating whether the registration was successful</returns>
         /// <response code="400">Returns a problem detail with status code 400 if the teacher registration wasn't successful</response>
         /// <response code="201">Returns 201 if the teacher was registered successfully</response>
-        [HttpPost("registerTeacher")]
+        [HttpPost("register-teacher")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest, type: typeof(ProblemDetails))]
@@ -84,27 +91,32 @@ namespace BE.Presentation.Controllers
             var result = await _authService.RegisterTeacher(dto);
             if (result == false)
             {
-                return Problem(detail: "Teacher registration not successful.", statusCode: StatusCodes.Status400BadRequest,
+                return Problem(detail: "Teacher registration not successful.",
+                    statusCode: StatusCodes.Status400BadRequest,
                     title: "Teacher not registered.");
             }
+
             return StatusCode(StatusCodes.Status201Created, "Teacher registered successfully.");
         }
 
         /// <summary>
         /// Refreshes the JWT token of a user with the provided refresh token
         /// </summary>
-        /// <param name="dto">DTO containing the access and refresh tokens</param>
         /// <returns>The newly generated token</returns>
         /// <response code="200">Returns 200 with the newly generated token</response>
         //https://www.c-sharpcorner.com/article/jwt-authentication-with-refresh-tokens-in-net-6-0/
-        [HttpPost("refreshToken")]
+        [HttpPost("refresh-token")]
         [Consumes("application/json")]
         [Produces("application/json")]
-        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(TokenDto))]
-        public async Task<IActionResult> RefreshToken(TokenDto dto)
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        public async Task<IActionResult> RefreshToken()
         {
-            var newToken = await _jwtService.GenerateAccessTokenFromRefreshToken(dto);
-            return Ok(newToken);
+            HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+            HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+            var tokenDto = new TokenDto { AccessToken = accessToken, RefreshToken = refreshToken };
+            var newToken = await _jwtService.GenerateAccessTokenFromRefreshToken(tokenDto);
+            _authService.SetTokensInsideCookie(newToken, HttpContext);
+            return Ok();
         }
 
         /// <summary>
@@ -129,6 +141,22 @@ namespace BE.Presentation.Controllers
             }
 
             return Ok();
+        }
+
+        /// <summary>
+        /// Gets the user info of the currently authenticated user.
+        /// </summary>
+        /// <returns>Returns 200 with the user info.</returns>
+        /// <response code="200">Returns 200 with the user's info, if the user is authenticated.</response>
+        [Authorize]
+        [HttpGet("me")]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(UserInfoDto))]
+        public async Task<IActionResult> UserInfo()
+        {
+            var userInfo = await _authService.GetUserInfo(User.Identity.Name);
+            return Ok(userInfo);
         }
     }
 }

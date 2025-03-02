@@ -1,5 +1,7 @@
-﻿using BE.Business.Services.Interfaces;
+﻿using System.Security.Claims;
+using BE.Business.Services.Interfaces;
 using BE.DTOs.DTOs.Auth.Requests;
+using BE.DTOs.DTOs.Auth.Responses;
 using BE.DTOs.DTOs.JWT.Responses;
 using BE.Presentation.Controllers;
 using Microsoft.AspNetCore.Http;
@@ -29,14 +31,17 @@ public class AuthControllerTests
         var loginDto = new LoginDto { Email = "user@example.com", Password = "password" };
         var tokenDto = new TokenDto { AccessToken = "access", RefreshToken = "refresh" };
         _authServiceMock.Setup(s => s.LoginUser(loginDto)).ReturnsAsync(tokenDto);
-
+        // https://stackoverflow.com/a/58973035
+        _controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext()
+        };
         // Act
         var result = await _controller.Login(loginDto);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
+        var okResult = Assert.IsType<OkResult>(result);
         Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
-        Assert.Equal(tokenDto, okResult.Value);
     }
 
     [Fact]
@@ -116,5 +121,37 @@ public class AuthControllerTests
         // Assert
         var problemResult = Assert.IsType<ObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, problemResult.StatusCode);
+    }
+
+    [Fact]
+    public async Task UserInfo_ReturnsUserInfo_WhenUserIsAuthenticated()
+    {
+        // Arrange
+        var email = "user@gmail.com";
+        var userInfo = new UserInfoDto { Email = email };
+        _authServiceMock.Setup(service => service.GetUserInfo(email)).ReturnsAsync(userInfo);
+        var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, email) }, "mock"));
+        _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext { User = user } };
+
+        // Act
+        var result = await _controller.UserInfo();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Equal(userInfo, okResult.Value);
+    }
+
+    [Fact]
+    public async Task UserInfo_ReturnsNull_WhenUserIsNotAuthenticated()
+    {
+        // Arrange
+        _controller.ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() };
+
+        // Act
+        var result = await _controller.UserInfo();
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        Assert.Null(okResult.Value);
     }
 }

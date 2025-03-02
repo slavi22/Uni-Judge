@@ -27,7 +27,7 @@ namespace BE.Presentation.Controllers
         /// <response code="403">Returns 403 if the user attempting to create a new problem does not have the "Teacher" role</response>
         /// <response code="200">Returns 200 with the created problem details</response>
         [Authorize(Roles = "Teacher")]
-        [HttpPost("createProblem")]
+        [HttpPost("create-problem")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

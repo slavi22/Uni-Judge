@@ -30,7 +30,7 @@ namespace BE.Presentation.Controllers
         /// <response code="404">Returns 404 if a problem or a course isn't found</response>
         /// <response code="200">Returns 200 with the created user submission</response>
         [Authorize]
-        [HttpPost("createSubmission")]
+        [HttpPost("create-submission")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode:StatusCodes.Status404NotFound, type:typeof(ProblemDetails))]
