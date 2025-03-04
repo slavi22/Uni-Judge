@@ -42,7 +42,7 @@ namespace BE.Presentation.Controllers
             var payload = await _authProvidersService.GetGoogleJwtToken(code);
             var token = await _authProvidersService.SignInGoogle(payload.Email);
             _authProvidersService.SetTokensInsideCookie(token, HttpContext);
-            return RedirectPermanent(_configuration.GetSection("Addresses:FE").Value + "?redirected=true");
+            return RedirectPermanent(_configuration.GetSection("Addresses:FE").Value);
         }
 
     }

@@ -141,7 +141,7 @@ public class Program
             {
                 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FEAddress").Value;
                 // possibly add AllowCredentials() for the httponly cookies if they don't work
-                policy.WithOrigins(allowedOrigins).AllowCredentials().AllowAnyMethod().AllowAnyHeader();
+                policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
         });
 

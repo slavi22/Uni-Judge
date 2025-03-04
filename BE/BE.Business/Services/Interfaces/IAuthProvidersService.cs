@@ -21,7 +21,7 @@ public interface IAuthProvidersService
     /// <summary>
     /// Sets the access and refresh tokens inside a http only cookie.
     /// </summary>
-    /// <param name="tokenDto"></param> //TODO: Add more information about the tokenDto
-    /// <param name="context"></param> //TODO: Add more information about the context
+    /// <param name="tokenDto">The token dto containing the access and refresh token which will be set as an httponly cookie</param>
+    /// <param name="context">The current HttpContext</param>
     void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context);
 }

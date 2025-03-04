@@ -41,6 +41,7 @@ namespace BE.Presentation.Controllers
                 return Problem(detail: "The requested user could not be found.",
                     statusCode: StatusCodes.Status404NotFound, title: "User not found.");
             }
+
             // since im using "AddIdentity" it apparently adds a cookie with the name ".AspNetCore.Identity.Application" so i have to delete the Set-Cookie header
             // otherwise it will get set along with the accessToken and refreshToken cookies
             // https://github.com/openiddict/openiddict-core/issues/578#issuecomment-375818767
@@ -104,15 +105,25 @@ namespace BE.Presentation.Controllers
         /// </summary>
         /// <returns>The newly generated token</returns>
         /// <response code="200">Returns 200 with the newly generated token</response>
+        /// <response code="400">Returns 200 when either the access or refresh token is missing from the request</response>
         //https://www.c-sharpcorner.com/article/jwt-authentication-with-refresh-tokens-in-net-6-0/
         [HttpPost("refresh-token")]
-        [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshToken()
         {
             HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
             HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
+            if (accessToken == null || refreshToken == null)
+            {
+                Response.Cookies.Delete("accessToken",
+                    new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
+                Response.Cookies.Delete("refreshToken",
+                    new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
+                return BadRequest();
+            }
+
             var tokenDto = new TokenDto { AccessToken = accessToken, RefreshToken = refreshToken };
             var newToken = await _jwtService.GenerateAccessTokenFromRefreshToken(tokenDto);
             _authService.SetTokensInsideCookie(newToken, HttpContext);
@@ -127,8 +138,6 @@ namespace BE.Presentation.Controllers
         /// <response code="404">Returns 404 if the user isn't found</response>
         /// <response code="200">Returns 200 if the token was revoked successfully</response>
         [HttpPatch("revoke/{username}")]
-        [Consumes("application/json")]
-        [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ProblemDetails))]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Revoke(string username)
@@ -140,6 +149,23 @@ namespace BE.Presentation.Controllers
                     statusCode: StatusCodes.Status404NotFound, title: "User not found.");
             }
 
+            return Ok();
+        }
+
+        /// <summary>
+        /// Logs out the currently authenticated user
+        /// </summary>
+        /// <response code="200">Returns 200 indicating the successful logout</response>
+        /// <returns>Returns 200 indicating the successful logout</returns>
+        [Authorize]
+        [HttpPost("logout")]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("accessToken",
+                new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
+            Response.Cookies.Delete("refreshToken",
+                new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
             return Ok();
         }
 

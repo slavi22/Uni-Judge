@@ -64,7 +64,6 @@ public class AuthProvidersService : IAuthProvidersService
         var refreshToken = _jwtService.GenerateRefreshToken();
         newUser.RefreshToken = refreshToken;
         newUser.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7); //TODO: For debugging only
-        //TODO: GENERATE ROLES
         await _userRepository.CreateAsync(newUser, null!);
         await _userRepository.AddToRoleAsync(newUser, "Student");
 

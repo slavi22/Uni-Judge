@@ -75,7 +75,8 @@ public class JwtService : IJwtService
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = await GenerateClaims(user),
-            Expires = DateTime.UtcNow.AddMinutes(60), //TODO: 60 mins is for debugging only
+            /*Expires = DateTime.UtcNow.AddMinutes(60),*/ //TODO: 60 mins is for debugging only //DateTime.MinValue to make the cookie session => https://stackoverflow.com/a/1780485
+            Expires = DateTime.UtcNow.AddMinutes(60),//AddSeconds(3),
             Issuer = _configuration.GetSection("JWT:Issuer").Value,
             Audience = _configuration.GetSection("JWT:Audience").Value,
             SigningCredentials = credentials,
