@@ -102,7 +102,7 @@ public class AuthProvidersService : IAuthProvidersService
             HttpOnly = true,
             IsEssential = true,
             Secure = true,
-            SameSite = SameSiteMode.None
+            SameSite = SameSiteMode.None // TODO: When deploying check to see if either Lax or Strict will work (since the be and fe will be on different domains)
         });
         context.Response.Cookies.Append("refreshToken", tokenDto.RefreshToken, new CookieOptions
         {
@@ -111,7 +111,7 @@ public class AuthProvidersService : IAuthProvidersService
             HttpOnly = true,
             IsEssential = true,
             Secure = true,
-            SameSite = SameSiteMode.None
+            SameSite = SameSiteMode.None // TODO: When deploying check to see if either Lax or Strict will work (since the be and fe will be on different domains)
         });
     }
 }

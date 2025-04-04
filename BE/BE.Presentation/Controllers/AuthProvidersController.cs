@@ -43,6 +43,7 @@ namespace BE.Presentation.Controllers
             var token = await _authProvidersService.SignInGoogle(payload.Email);
             _authProvidersService.SetTokensInsideCookie(token, HttpContext);
             return RedirectPermanent(_configuration.GetSection("Addresses:FE").Value);
+            //return RedirectPermanent("https://localhost:5173");
         }
 
     }

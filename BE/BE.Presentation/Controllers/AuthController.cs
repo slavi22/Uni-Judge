@@ -121,6 +121,7 @@ namespace BE.Presentation.Controllers
                     new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
                 Response.Cookies.Delete("refreshToken",
                     new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
+                // TODO: Change this to a more fitting response
                 return BadRequest();
             }
 

@@ -1,0 +1,94 @@
+﻿services:
+  be.presentation:
+    image: be.presentation
+    build:
+      context: .
+      dockerfile: BE.Presentation/Dockerfile
+    ports:
+      - "5127:5127" # http
+      - "8080:8080" # https
+    environment:
+      # setup docker https => https://learn.microsoft.com/en-us/aspnet/core/security/docker-compose-https?view=aspnetcore-9.0
+      # and => https://www.reddit.com/r/dotnet/comments/1h37bep/solution_for_error_exporting_the_https_developer/
+      - ASPNETCORE_ENVIRONMENT=<Development_Environment>
+      - ASPNETCORE_URLS=https://+:8080;http://+:5127 # TODO: test if i need that in prod
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=<Password for the certificate> # (if using local https)
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=<Path to the certificate> # (if using local https)
+      # how to set values from the appsettings in the docker environment => https://stackoverflow.com/a/71655648
+      # or here => https://www.restack.io/p/containerized-development-environments-answer-docker-compose-appsettings-json-cat-ai#:~:text=a%20containerized%20environment.-,Environment%20Variables,-In%20a%20Docker
+      - ConnectionStrings__DatabaseConnectionString=Host=postgres:5432;Database=uni-judge;Username=<Postgres_Username>;Password=<Postgres_Password>
+      - JWT__Secret=<JWT_Secret>
+      - JWT__Issuer=<JWT_Issuer>
+      - JWT__Audience=<JWT_Audience>
+      - JudgeServerAddress=http://judge0-server:2358
+      - TeacherSecret=<Teacher_Secret>
+      - Addresses__GoogleRedirectUri=https://localhost:8080/api/auth-providers/signin-google # TODO: This should be changed to the correct prod BE URL
+      - Addresses__FE=<Frontend_URL> # used for sign in provider's redirect url, change it to the correct prod FE URL
+      - AllowedOrigins__FEAddress=<Frontend_URL> # used for CORS, change it to the correct prod FE URL
+      - Authentication__Google__ClientId=<Google_Client_ID> # used for Google sign in
+      - Authentication__Google__ClientSecret=<Google_Client_Secret> # used for Google sign in
+    # required for us to point to the local certificate on host system
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    depends_on:
+      - postgres
+      - judge0-server
+  postgres:
+    image: postgres:17.4
+    container_name: postgres-csharp-api
+    environment:
+      - POSTGRES_DB=uni-judge
+      - POSTGRES_USER=<Postgres_Username>
+      - POSTGRES_PASSWORD=<Postgres_Password>
+    ports:
+      - "5430:5432"
+    volumes: # add a volume to persist the data
+      # named will disappear when i docker-copmpose down the container but bind mount will save it on my local system
+      # named volume vs bind mount in docker compose example =>
+      # https://www.reddit.com/r/docker/comments/1fnnyxs/comment/lokuefo/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+      - ./.postgres-data:/var/lib/postgresql/data # bind volue (saved data on local system)
+      #- postgres-data:/var/lib/postgresql/data # named volume (data will be lost when i docker-compose down the container)
+
+  # config taken mostly from here => https://github.com/judge0/judge0/releases/tag/v1.13.1#:~:text=Deployment%20Procedure
+  judge0-server:
+    image: judge0/judge0:1.13.1
+    volumes: # we should have a docker-config/judge0.conf file in the root of the project to configure the judge0 stuff
+      - ./docker-config/judge0.conf:/judge0.conf:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+    #<<: *default-logging
+    restart: always
+
+  judge0-workers:
+    image: judge0/judge0:1.13.1
+    command: [ "./scripts/workers" ]
+    volumes: # we should have a docker-config/judge0.conf file in the root of the project to configure the judge0 stuff
+      - ./docker-config/judge0.conf:/judge0.conf:ro
+    privileged: true
+    #<<: *default-logging
+    restart: always
+  judge0-db: # we should have a docker-config/judge0.conf file in the root of the project to configure the judge0 stuff
+    image: postgres:16.2
+    env_file: docker-config/judge0.conf
+    volumes:
+      - data:/var/lib/postgresql/data/
+    ports:
+      - "5431:5432"
+    #<<: *default-logging
+    restart: always
+  judge0-redis: # we should have a docker-config/judge0.conf file in the root of the project to configure the judge0 stuff
+    image: redis:7.2.4
+    command: [
+      "bash", "-c",
+      'docker-entrypoint.sh --appendonly no --requirepass "$$REDIS_PASSWORD"'
+    ]
+    ports:
+      - "6379:6379"
+    env_file: docker-config/judge0.conf
+    #<<: *default-logging
+    restart: always
+
+volumes:
+  postgres-data:
+  data:

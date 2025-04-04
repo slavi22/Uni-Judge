@@ -486,3 +486,7 @@ $RECYCLE.BIN/
 # Custom additions
 appsettings.*
 !appsettings.Example.json
+# Docker config/compose files
+docker-config/judge0.conf
+compose.dev.local.yaml
+.postgres-data

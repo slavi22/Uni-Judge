@@ -141,7 +141,8 @@ public class Program
             {
                 var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins:FEAddress").Value;
                 // possibly add AllowCredentials() for the httponly cookies if they don't work
-                policy.WithOrigins(allowedOrigins).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+                // TODO: Remove the https address since we will only have 1 in prod
+                policy.WithOrigins(allowedOrigins, "https://localhost:5173").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
         });
 
@@ -231,6 +232,17 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
+            using var scope = app.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var context = services.GetRequiredService<AppDbContext>();
+            if (context.Database.GetPendingMigrations().Any())
+            {
+                // https://www.youtube.com/watch?v=WQFx2m5Ub9M
+
+                // Apply migrations if none have been applied - for docker compose
+                Console.WriteLine("Applying migration");
+                context.Database.Migrate();
+            }
             //app.MapOpenApi();
             app.UseSwagger();
             app.UseSwaggerUI();
