@@ -72,7 +72,7 @@
     image: postgres:16.2
     env_file: docker-config/judge0.conf
     volumes:
-      - data:/var/lib/postgresql/data/
+      - judge0-data:/var/lib/postgresql/data/
     ports:
       - "5431:5432"
     #<<: *default-logging
@@ -91,4 +91,4 @@
 
 volumes:
   postgres-data:
-  data:
+  judge0-data:
