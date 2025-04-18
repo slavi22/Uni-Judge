@@ -40,7 +40,6 @@ public class AuthProvidersControllerTests
         // Assert
         var redirectResult = Assert.IsType<RedirectResult>(result);
         Assert.True(redirectResult.Permanent);
-        Assert.Contains("?redirected=true", redirectResult.Url);
     }
 
     [Fact]

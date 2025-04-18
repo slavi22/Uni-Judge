@@ -31,12 +31,10 @@ public class JwtServiceTests
         };
         var tokenDto = new TokenDto
         {
-            AccessToken =
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InRlc3R1c2VyQHRlc3QuY29tIiwicm9sZSI6WyJTdHVkZW50Il19.DV1wVmy27XWi4YLQB2t3_PbL6TzBrqlZfaU4d6VgcTI",
             RefreshToken = "validRefreshToken"
         };
 
-        _userRepositoryMock.Setup(repo => repo.FindByNameAsync("testuser@test.com")).ReturnsAsync(user);
+        _userRepositoryMock.Setup(repo => repo.GetUserByRefreshToken("validRefreshToken")).ReturnsAsync(user);
         _userRepositoryMock.Setup(repo => repo.GetRolesAsync(user)).ReturnsAsync(new List<string> { "Student" });
         _configurationMock.Setup(config => config.GetSection("JWT:Secret").Value)
             .Returns("supersecretkey123supersecretkey123");
@@ -58,17 +56,15 @@ public class JwtServiceTests
         // Arrange
         var user = new AppUser
         {
-            UserName = "testuser", RefreshToken = "invalidRefreshToken",
+            UserName = "testuser", RefreshToken = "refreshToken",
             RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(5)
         };
         var tokenDto = new TokenDto
         {
-            AccessToken =
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6InRlc3R1c2VyQHRlc3QuY29tIiwicm9sZSI6WyJTdHVkZW50Il19.DV1wVmy27XWi4YLQB2t3_PbL6TzBrqlZfaU4d6VgcTI",
-            RefreshToken = "validRefreshToken"
+            RefreshToken = "wrongRefreshToken"
         };
 
-        _userRepositoryMock.Setup(repo => repo.FindByNameAsync("testuser")).ReturnsAsync(user);
+        _userRepositoryMock.Setup(repo => repo.GetUserByRefreshToken("refreshToken")).ReturnsAsync(user);
 
         // Act & Assert
         await Assert.ThrowsAsync<Exception>(() => _jwtService.GenerateAccessTokenFromRefreshToken(tokenDto));

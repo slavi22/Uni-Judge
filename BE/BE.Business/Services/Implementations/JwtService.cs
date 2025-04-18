@@ -29,12 +29,9 @@ public class JwtService : IJwtService
     public async Task<TokenDto> GenerateAccessTokenFromRefreshToken(TokenDto dto)
     {
         // Here we generate a new access token from the refresh token
-        var handler = new JwtSecurityTokenHandler();
-        var token = handler.ReadJwtToken(dto.AccessToken);
-        // We extract the username from the token
-        var userName = token.Claims.FirstOrDefault(claim => claim.Type == "unique_name")?.Value;
-        // We try to find the user in the database
-        var user = await _userRepository.FindByNameAsync(userName);
+
+        // We try to find the user in the database based on the refresh token
+        var user = await _userRepository.GetUserByRefreshToken(dto.RefreshToken);
         // If the user is not found or the refresh token is invalid/expired, we throw an exception
         if (user == null || user.RefreshToken != dto.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {

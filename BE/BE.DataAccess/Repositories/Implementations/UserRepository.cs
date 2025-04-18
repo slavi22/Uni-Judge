@@ -1,4 +1,5 @@
-﻿using BE.DataAccess.Repositories.Interfaces;
+﻿using BE.DataAccess.Data;
+using BE.DataAccess.Repositories.Interfaces;
 using BE.Models.Models.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -11,12 +12,14 @@ public class UserRepository : IUserRepository
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly AppDbContext _dbContext;
 
-    public UserRepository(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpContextAccessor httpContextAccessor)
+    public UserRepository(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpContextAccessor httpContextAccessor, AppDbContext dbContext)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _httpContextAccessor = httpContextAccessor;
+        _dbContext = dbContext;
     }
 
     public async Task<AppUser> GetCurrentUserAsync()
@@ -71,5 +74,11 @@ public class UserRepository : IUserRepository
     {
         var result = await _userManager.GetRolesAsync(user);
         return result;
+    }
+
+    public async Task<AppUser> GetUserByRefreshToken(string refreshToken)
+    {
+        var user = await _dbContext.Users.FirstOrDefaultAsync(user => user.RefreshToken == refreshToken);
+        return user;
     }
 }

@@ -55,7 +55,7 @@ public class AuthControllerTests
         var result = await _controller.Login(loginDto);
 
         // Assert
-        var problemResult = Assert.IsType<ObjectResult>(result);
+        var problemResult = Assert.IsType<NotFoundObjectResult>(result);
         Assert.Equal(StatusCodes.Status404NotFound, problemResult.StatusCode);
     }
 

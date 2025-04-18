@@ -31,15 +31,20 @@ namespace BE.Presentation.Controllers
         [HttpPost("login")]
         [Consumes("application/json")]
         [Produces("application/json")]
-        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ProblemDetails))]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(NotFoundResponse))]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
         public async Task<IActionResult> Login(LoginDto dto)
         {
             var loginToken = await _authService.LoginUser(dto);
             if (loginToken == null)
             {
-                return Problem(detail: "The requested user could not be found.",
-                    statusCode: StatusCodes.Status404NotFound, title: "User not found.");
+                /*return Problem(detail: "The requested user could not be found.",
+                    statusCode: StatusCodes.Status404NotFound, title: "User not found.");*/
+                return NotFound(new NotFoundResponse
+                {
+                    Detail = "The requested user could not be found.", Title = "User not found.",
+                    Status = StatusCodes.Status404NotFound
+                });
             }
 
             // since im using "AddIdentity" it apparently adds a cookie with the name ".AspNetCore.Identity.Application" so i have to delete the Set-Cookie header
@@ -105,7 +110,7 @@ namespace BE.Presentation.Controllers
         /// </summary>
         /// <returns>The newly generated token</returns>
         /// <response code="200">Returns 200 with the newly generated token</response>
-        /// <response code="400">Returns 200 when either the access or refresh token is missing from the request</response>
+        /// <response code="401">Returns 401 when the refresh token is missing from the request</response>
         //https://www.c-sharpcorner.com/article/jwt-authentication-with-refresh-tokens-in-net-6-0/
         [HttpPost("refresh-token")]
         [Produces("application/json")]
@@ -113,19 +118,20 @@ namespace BE.Presentation.Controllers
         [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshToken()
         {
-            HttpContext.Request.Cookies.TryGetValue("accessToken", out var accessToken);
+            // TODO: refine the implementation, because it currently needs an access token to be able to refresh the refresh token
+            // => https://youtu.be/kR_9gRBeRMQ?si=DOPAFx1ebqfQ2J7-&t=514
             HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
-            if (accessToken == null || refreshToken == null)
+            if (refreshToken == null)
             {
                 Response.Cookies.Delete("accessToken",
                     new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
                 Response.Cookies.Delete("refreshToken",
                     new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
                 // TODO: Change this to a more fitting response
-                return BadRequest();
+                return Unauthorized();
             }
 
-            var tokenDto = new TokenDto { AccessToken = accessToken, RefreshToken = refreshToken };
+            var tokenDto = new TokenDto { RefreshToken = refreshToken };
             var newToken = await _jwtService.GenerateAccessTokenFromRefreshToken(tokenDto);
             _authService.SetTokensInsideCookie(newToken, HttpContext);
             return Ok();

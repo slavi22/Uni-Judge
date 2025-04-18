@@ -70,4 +70,11 @@ public interface IUserRepository
     /// <param name="user">The user to get the roles for</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of roles</returns>
     Task<IList<string>> GetRolesAsync(AppUser user);
+
+    /// <summary>
+    /// Retrieves a user by their refresh token.
+    /// </summary>
+    /// <param name="refreshToken">The refresh token obtained from the http-only "refreshToken" cookie in the request</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the user associated with the refresh token, if found</returns>
+    Task<AppUser> GetUserByRefreshToken(string refreshToken);
 }
