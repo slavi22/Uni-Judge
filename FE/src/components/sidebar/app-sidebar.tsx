@@ -1,6 +1,4 @@
-import * as React from "react";
-import { BookOpen, Notebook, University } from "lucide-react";
-
+import { University } from "lucide-react";
 import { NavMain } from "@/components/sidebar/nav-main.tsx";
 import { NavUser } from "@/components/sidebar/nav-user.tsx";
 import {
@@ -12,36 +10,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar.tsx";
-import {Link} from "react-router";
-
-const data = {
-  //TODO: maybe replace inside the navmain component ?? like fetch the user's stuff and dynamically generate the menu
-  navMain: [
-    {
-      title: "Student",
-      url: "#",
-      icon: Notebook,
-      isActive: true,
-      items: [
-        {
-          title: "My Submissions",
-          url: "#",
-        },
-        {
-          title: "My Courses",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "All Courses",
-      icon: BookOpen,
-      url: "#",
-    },
-  ],
-};
+import { Link } from "react-router";
+import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
+import { nav } from "@/utils/constants/nav-main-content.ts";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -62,7 +37,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {isAuthenticated ? (
+          <NavMain items={nav.main} isAuthenticated />
+        ) : (
+          <NavMain isAuthenticated={false} />
+        )}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

@@ -1,5 +1,5 @@
 ﻿import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Theme, ThemeState } from "@/features/theme/types/theme-types.ts";
+import type { Theme, ThemeState } from "@/features/theme/types/theme-types.ts";
 
 const initialState: ThemeState = {
   theme: (localStorage.getItem("theme") as Theme) || "system",

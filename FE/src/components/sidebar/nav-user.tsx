@@ -25,13 +25,15 @@ import {
 import ThemeToggle from "@/features/theme/components/theme-toggle.tsx";
 import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 import { Link } from "react-router";
+import { useLogoutMutation } from "@/features/auth/api/auth-api.ts";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { isAuthenticated, email } = useAppSelector((state) => state.auth);
+  const [logout] = useLogoutMutation();
   const content = isAuthenticated ? (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
+      <DropdownMenuTrigger asChild className="cursor-pointer">
         <SidebarMenuButton
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
@@ -71,7 +73,7 @@ export function NavUser() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem className="cursor-pointer">
             <CircleUserRound />
             Account
           </DropdownMenuItem>
@@ -79,9 +81,15 @@ export function NavUser() {
         <DropdownMenuSeparator />
         <ThemeToggle />
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
           <LogOut />
           Log out
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/login">
+            <LogIn />
+            Log in
+          </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -106,7 +114,7 @@ export function NavUser() {
       >
         <ThemeToggle />
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
+        <DropdownMenuItem asChild className="cursor-pointer">
           <Link to="/login">
             <LogIn />
             Log in

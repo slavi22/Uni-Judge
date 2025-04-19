@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, LogInIcon, type LucideIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -32,57 +32,71 @@ type OuterItems = {
   items?: InnerItems[];
 };
 
-type Items = {
-  items: OuterItems[];
+type NavProps = {
+  items?: OuterItems[];
+  isAuthenticated: boolean;
 };
 
-export function NavMain({ items }: Items) {
-  const allCourses = items.find((item) => item.title === "All Courses")!;
+export function NavMain({ items, isAuthenticated }: NavProps) {
+  const allCourses =
+    items && items.find((item) => item.title === "All Courses");
 
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Navigation</SidebarGroupLabel>
       <SidebarMenu>
-        {items
-          .filter((item) => item.title !== "All Courses")
-          .map((item) => (
-            <Collapsible
-              key={item.title}
-              asChild
-              defaultOpen={item.isActive}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {item.items?.map((subItem) => (
-                      <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
-                          <a href={subItem.url}>
-                            <span>{subItem.title}</span>
-                          </a>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
-                    ))}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          ))}
+        {items &&
+          items
+            .filter((item) => item.title !== "All Courses")
+            .map((item) => (
+              <Collapsible
+                key={item.title}
+                asChild
+                defaultOpen={item.isActive}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger className="cursor-pointer" asChild>
+                    <SidebarMenuButton tooltip={item.title}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <a href={subItem.url}>
+                              <span>{subItem.title}</span>
+                            </a>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            ))}
         <SidebarMenuItem>
-          <SidebarMenuButton asChild>
-            <Link to="/"> {/* TODO: Replace with the real link */}
-              {allCourses.icon && <allCourses.icon />}
-              <span>{allCourses.title}</span>
-            </Link>
-          </SidebarMenuButton>
+          {isAuthenticated ? (
+            <SidebarMenuButton asChild>
+              <Link to="/">
+                {" "}
+                {/* TODO: Replace with the real link */}
+                {allCourses && allCourses.icon && <allCourses.icon />}
+                <span>{allCourses && allCourses.title}</span>
+              </Link>
+            </SidebarMenuButton>
+          ) : (
+            <SidebarMenuButton asChild>
+              <Link to="/login">
+                <LogInIcon />
+                Login to view all options
+              </Link>
+            </SidebarMenuButton>
+          )}
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarGroup>

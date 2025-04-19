@@ -1,6 +1,6 @@
 ﻿import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 import { changeTheme } from "@/features/theme/stores/theme-slice.ts";
-import { Theme } from "@/features/theme/types/theme-types.ts";
+import { type Theme } from "@/features/theme/types/theme-types.ts";
 
 export default function useTheme() {
   const dispatch = useAppDispatch();

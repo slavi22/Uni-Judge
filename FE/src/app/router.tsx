@@ -2,6 +2,8 @@
 import RootLayout from "@/components/layouts/root-layout.tsx";
 import HomePage from "@/app/routes/home-page.tsx";
 import LoginPage from "@/app/routes/auth/login-page.tsx";
+import ProtectedRoute from "@/components/protected/protected-route.tsx";
+import RegisterPage from "@/app/routes/auth/register-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -13,8 +15,21 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: "*",
+        path: "/login",
         element: <LoginPage />,
+      },
+      {
+        path: "/register",
+        element: <RegisterPage />,
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "/me",
+            element: <div>My profile</div>,
+          },
+        ],
       },
       {
         path: "test-breadcrumb",

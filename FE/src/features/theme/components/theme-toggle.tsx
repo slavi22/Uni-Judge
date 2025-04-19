@@ -20,7 +20,8 @@ export default function ThemeToggle() {
 
   return (
     // onSelect meaning => https://github.com/shadcn-ui/ui/issues/2677#issuecomment-2668027089
-    <DropdownMenuItem onClick={handleClick} onSelect={(e) => e.preventDefault()}>
+    // Theme select on select dont close the dropdown
+    <DropdownMenuItem onClick={handleClick} onSelect={(e) => e.preventDefault()} className="cursor-pointer">
       {isLight ? <Moon/> : <Sun/>}
       Toggle {isLight ? "dark" : "light"} mode
     </DropdownMenuItem>

@@ -16,13 +16,22 @@ import {
 import { useEffect } from "react";
 import useTheme from "@/features/theme/hooks/use-theme.ts";
 import { Link, Outlet, useLocation } from "react-router";
-import splitLocationPathname from "@/utils/split-location-pathname.ts";
+import splitLocationPathname from "@/utils/functions/split-location-pathname.ts";
+import { useLazyFetchUserProfileQuery } from "@/features/auth/api/auth-api.ts";
+import { Toaster } from "@/components/ui/sonner.tsx";
+import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
+import LoadingSpinner from "@/components/spinners/loading-spinner.tsx";
 
 export default function RootLayout() {
   const { theme } = useTheme();
   const location = useLocation();
-  const { pathnameSplit, pathnameSplitWithoutLastElement, pathnameSplitLastElement } =
-    splitLocationPathname(location.pathname);
+  const {
+    pathnameSplit,
+    pathnameSplitWithoutLastElement,
+    pathnameSplitLastElement,
+  } = splitLocationPathname(location.pathname);
+  const [fetchUserProfileTrigger] = useLazyFetchUserProfileQuery();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -40,13 +49,17 @@ export default function RootLayout() {
     root.classList.add(theme);
   }, [theme]);
 
-  return (
+  useEffect(() => {
+    fetchUserProfileTrigger();
+  }, [fetchUserProfileTrigger]);
+
+  return isAuthenticated !== null ? (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
+            <SidebarTrigger className="-ml-1 cursor-pointer" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <Breadcrumb>
               <BreadcrumbList>
@@ -67,7 +80,7 @@ export default function RootLayout() {
                 ))}
                 <BreadcrumbItem>
                   <BreadcrumbPage className="capitalize">
-                    {pathnameSplitLastElement}
+                    {pathnameSplitLastElement ?? "Home"}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -76,8 +89,11 @@ export default function RootLayout() {
         </header>
         <section className="bg-background relative flex w-full flex-1 flex-col">
           <Outlet />
+          <Toaster richColors visibleToasts={1} />
         </section>
       </SidebarInset>
     </SidebarProvider>
+  ) : (
+    <LoadingSpinner />
   );
 }
