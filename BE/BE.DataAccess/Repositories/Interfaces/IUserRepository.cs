@@ -1,4 +1,5 @@
 ﻿using BE.Models.Models.Auth;
+using Microsoft.AspNetCore.Identity;
 
 namespace BE.DataAccess.Repositories.Interfaces;
 
@@ -28,8 +29,8 @@ public interface IUserRepository
     /// </summary>
     /// <param name="user">The user to create</param>
     /// <param name="password">The password for the new user</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the creation was successful</returns>
-    Task<bool> CreateAsync(AppUser user, string password);
+    /// <returns>A task that represents the asynchronous operation. The task result contains an IdentityResult indicating whether the user creation was successful</returns>
+    Task<IdentityResult> CreateAsync(AppUser user, string password);
 
     /// <summary>
     /// Signs in a user with the specified email and password.

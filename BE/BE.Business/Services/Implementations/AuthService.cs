@@ -43,26 +43,34 @@ public class AuthService : IAuthService
         return null;
     }
 
-    public async Task<bool> RegisterUser(RegisterDto dto)
+    public async Task<UserRegistrationDto> RegisterUser(RegisterDto dto)
     {
         // Register new user with the given email and password
 
-        var user = new AppUser { UserName = dto.Email, Email = dto.Email };
+        var user = new AppUser
+            { UserName = dto.Email, Email = dto.Email }; // TODO: Do not bind the email to the username for the future
         var result = await _userRepository.CreateAsync(user, dto.Password);
         // If the user count is less than or equal to 1 that means that the user is the first user to be registered and should be given all roles, essentially he is the admin
-        if (result && await _userRepository.GetUserCountAsync() <= 1)
+        if (result.Succeeded && await _userRepository.GetUserCountAsync() <= 1)
         {
             await _userRepository.AddRolesAsync(user, new string[] { "Student", "Teacher", "Admin" });
         }
-        else if (result && await _userRepository.GetUserCountAsync() > 1)
+        else if (result.Succeeded && await _userRepository.GetUserCountAsync() > 1)
         {
             await _userRepository.AddToRoleAsync(user, "Student");
         }
 
-        return result;
+        var resultDto = new UserRegistrationDto
+        {
+            Succeeded = result.Succeeded,
+            Description = result.Succeeded
+                ? "Registration successful"
+                : result.Errors.FirstOrDefault(e => e.Code == "DuplicateEmail").Description,
+        };
+        return resultDto;
     }
 
-    public async Task<bool> RegisterTeacher(RegisterTeacherDto dto)
+    public async Task<UserRegistrationDto> RegisterTeacher(RegisterTeacherDto dto)
     {
         // Register new teacher with the given email, password and secret
         var secret = _configuration.GetSection("TeacherSecret").Value;
@@ -74,8 +82,19 @@ public class AuthService : IAuthService
 
         var user = new AppUser { UserName = dto.Email, Email = dto.Email };
         var result = await _userRepository.CreateAsync(user, dto.Password);
-        await _userRepository.AddRolesAsync(user, new string[] { "Student", "Teacher" });
-        return result;
+        if (result.Succeeded)
+        {
+            await _userRepository.AddRolesAsync(user, new string[] { "Student", "Teacher" });
+        }
+        var resultDto = new UserRegistrationDto
+        {
+            Succeeded = result.Succeeded,
+            Description = result.Succeeded
+                ? "Registration successful"
+                : result.Errors.FirstOrDefault(e => e.Code == "DuplicateEmail").Description,
+        };
+
+        return resultDto;
     }
 
     public void SetTokensInsideCookie(TokenDto tokenDto, HttpContext context)
@@ -90,7 +109,8 @@ public class AuthService : IAuthService
         });
         context.Response.Cookies.Append("refreshToken", tokenDto.RefreshToken, new CookieOptions
         {
-            Expires = DateTime.UtcNow.AddDays(7), //TODO: Change that to the corresponding value in the AuthService LoginUser method
+            Expires = DateTime.UtcNow
+                .AddDays(7), //TODO: Change that to the corresponding value in the AuthService LoginUser method
             HttpOnly = true,
             IsEssential = true,
             Secure = true,

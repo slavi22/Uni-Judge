@@ -4,6 +4,7 @@ using BE.Common.Exceptions;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Auth.Requests;
 using BE.Models.Models.Auth;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Moq;
 
@@ -63,14 +64,15 @@ public class AuthServiceTests
     {
         // Arrange
         var registerDto = new RegisterDto { Email = "test@example.com", Password = "Password123" };
-        _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<AppUser>(), registerDto.Password)).ReturnsAsync(true);
+        var resultDto = IdentityResult.Success;
+        _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<AppUser>(), registerDto.Password)).ReturnsAsync(resultDto);
         _userRepositoryMock.Setup(repo => repo.GetUserCountAsync()).ReturnsAsync(1);
 
         // Act
         var result = await _authService.RegisterUser(registerDto);
 
         // Assert
-        Assert.True(result);
+        Assert.True(result.Succeeded);
     }
 
     [Fact]
@@ -78,7 +80,7 @@ public class AuthServiceTests
     {
         // Arrange
         var registerDto = new RegisterDto { Email = "test@example.com", Password = "Password123" };
-        _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<AppUser>(), registerDto.Password)).ReturnsAsync(true);
+        _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<AppUser>(), registerDto.Password)).ReturnsAsync(IdentityResult.Success);
         _userRepositoryMock.Setup(repo => repo.GetUserCountAsync()).ReturnsAsync(2);
 
         // Act
@@ -93,14 +95,15 @@ public class AuthServiceTests
     {
         // Arrange
         var registerTeacherDto = new RegisterTeacherDto { Email = "teacher@example.com", Password = "Password123", Secret = "ValidSecret" };
+        var resultDto = IdentityResult.Success;
         _configurationMock.Setup(config => config.GetSection("TeacherSecret").Value).Returns("ValidSecret");
-        _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<AppUser>(), registerTeacherDto.Password)).ReturnsAsync(true);
+        _userRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<AppUser>(), registerTeacherDto.Password)).ReturnsAsync(resultDto);
 
         // Act
         var result = await _authService.RegisterTeacher(registerTeacherDto);
 
         // Assert
-        Assert.True(result);
+        Assert.True(result.Succeeded);
     }
 
     [Fact]

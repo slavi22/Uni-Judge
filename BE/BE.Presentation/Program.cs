@@ -36,6 +36,7 @@ public class Program
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireDigit = false;
+                options.User.RequireUniqueEmail = true; // TODO: will be used in the future when separating the username from the email
             })
             .AddEntityFrameworkStores<AppDbContext>();
 

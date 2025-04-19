@@ -37,16 +37,16 @@ public class UserRepository : IUserRepository
         return await _userManager.Users.CountAsync();
     }
 
-    public async Task<bool> CreateAsync(AppUser user, string password)
+    public async Task<IdentityResult> CreateAsync(AppUser user, string password)
     {
         // if the password is null, we are creating a passwordless user (we are going through an auth provider)
         if (password == null)
         {
             var passwordlessResult = await _userManager.CreateAsync(user);
-            return passwordlessResult.Succeeded;
+            return passwordlessResult;
         }
         var result = await _userManager.CreateAsync(user, password);
-        return result.Succeeded;
+        return result;
     }
 
     public async Task<bool> PasswordSignInAsync(string email, string password, bool isPersistent, bool lockoutOnFailure)

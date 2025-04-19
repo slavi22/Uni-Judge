@@ -18,15 +18,15 @@ public interface IAuthService
     /// Registers a new user with the provided registration details.
     /// </summary>
     /// <param name="dto">The registration details</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the registration was successful</returns>
-    Task<bool> RegisterUser(RegisterDto dto);
+    /// <returns>A task that represents the asynchronous operation. The task result contains a UserRegistrationDto with registration status and description</returns>
+    Task<UserRegistrationDto> RegisterUser(RegisterDto dto);
 
     /// <summary>
     /// Registers a new teacher with the provided registration details.
     /// </summary>
     /// <param name="dto">The registration details for the teacher</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the registration was successful</returns>
-    Task<bool> RegisterTeacher(RegisterTeacherDto dto);
+    /// <returns>A task that represents the asynchronous operation. The task result contains a UserRegistrationDto with registration status and description</returns>
+    Task<UserRegistrationDto> RegisterTeacher(RegisterTeacherDto dto);
 
     /// <summary>
     /// Sets the access and refresh tokens inside a http only cookie.

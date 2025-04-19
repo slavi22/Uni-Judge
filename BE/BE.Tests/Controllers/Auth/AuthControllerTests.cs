@@ -64,7 +64,12 @@ public class AuthControllerTests
     {
         // Arrange
         var registerDto = new RegisterDto { Email = "newuser@example.com", Password = "password" };
-        _authServiceMock.Setup(s => s.RegisterUser(registerDto)).ReturnsAsync(true);
+        var resultDto = new UserRegistrationDto
+        {
+            Succeeded = true,
+            Description = "Registration successful"
+        };
+        _authServiceMock.Setup(s => s.RegisterUser(registerDto)).ReturnsAsync(resultDto);
 
         // Act
         var result = await _controller.Register(registerDto);
@@ -80,13 +85,14 @@ public class AuthControllerTests
     {
         // Arrange
         var registerDto = new RegisterDto { Email = "newuser@example.com", Password = "password" };
-        _authServiceMock.Setup(s => s.RegisterUser(registerDto)).ReturnsAsync(false);
+        var resultDto = new UserRegistrationDto { Succeeded = false };
+        _authServiceMock.Setup(s => s.RegisterUser(registerDto)).ReturnsAsync(resultDto);
 
         // Act
         var result = await _controller.Register(registerDto);
 
         // Assert
-        var problemResult = Assert.IsType<ObjectResult>(result);
+        var problemResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, problemResult.StatusCode);
     }
 
@@ -96,7 +102,12 @@ public class AuthControllerTests
         // Arrange
         var registerTeacherDto = new RegisterTeacherDto
             { Email = "newteacher@example.com", Password = "password", Secret = "secret" };
-        _authServiceMock.Setup(s => s.RegisterTeacher(registerTeacherDto)).ReturnsAsync(true);
+        var resultDto = new UserRegistrationDto
+        {
+            Succeeded = true,
+            Description = "Registration successful"
+        };
+        _authServiceMock.Setup(s => s.RegisterTeacher(registerTeacherDto)).ReturnsAsync(resultDto);
 
         // Act
         var result = await _controller.RegisterTeacher(registerTeacherDto);
@@ -113,13 +124,14 @@ public class AuthControllerTests
         // Arrange
         var registerTeacherDto = new RegisterTeacherDto
             { Email = "newteacher@example.com", Password = "password", Secret = "secret" };
-        _authServiceMock.Setup(s => s.RegisterTeacher(registerTeacherDto)).ReturnsAsync(false);
+        var resultDto = new UserRegistrationDto { Succeeded = false };
+        _authServiceMock.Setup(s => s.RegisterTeacher(registerTeacherDto)).ReturnsAsync(resultDto);
 
         // Act
         var result = await _controller.RegisterTeacher(registerTeacherDto);
 
         // Assert
-        var problemResult = Assert.IsType<ObjectResult>(result);
+        var problemResult = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal(StatusCodes.Status400BadRequest, problemResult.StatusCode);
     }
 

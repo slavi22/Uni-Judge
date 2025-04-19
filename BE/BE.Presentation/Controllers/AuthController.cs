@@ -1,4 +1,5 @@
 using BE.Business.Services.Interfaces;
+using BE.Common.Responses;
 using BE.DTOs.DTOs.Auth.Requests;
 using BE.DTOs.DTOs.Auth.Responses;
 using BE.DTOs.DTOs.JWT.Responses;
@@ -38,11 +39,9 @@ namespace BE.Presentation.Controllers
             var loginToken = await _authService.LoginUser(dto);
             if (loginToken == null)
             {
-                /*return Problem(detail: "The requested user could not be found.",
-                    statusCode: StatusCodes.Status404NotFound, title: "User not found.");*/
                 return NotFound(new NotFoundResponse
                 {
-                    Detail = "The requested user could not be found.", Title = "User not found.",
+                    Detail = "Invalid email or password entered.", Title = "Invalid credentials.",
                     Status = StatusCodes.Status404NotFound
                 });
             }
@@ -71,10 +70,14 @@ namespace BE.Presentation.Controllers
         public async Task<IActionResult> Register(RegisterDto dto)
         {
             var result = await _authService.RegisterUser(dto);
-            if (result == false)
+            if (result.Succeeded == false)
             {
-                return Problem(detail: "User registration not successful.", statusCode: StatusCodes.Status400BadRequest,
-                    title: "User not registered.");
+                return BadRequest(new BadRequestResponse
+                {
+                    Title = "User registration failed.",
+                    Detail = result.Description,
+                    Status = StatusCodes.Status400BadRequest
+                });
             }
 
             return StatusCode(StatusCodes.Status201Created, "User registered successfully.");
@@ -95,11 +98,14 @@ namespace BE.Presentation.Controllers
         public async Task<IActionResult> RegisterTeacher(RegisterTeacherDto dto)
         {
             var result = await _authService.RegisterTeacher(dto);
-            if (result == false)
+            if (result.Succeeded == false)
             {
-                return Problem(detail: "Teacher registration not successful.",
-                    statusCode: StatusCodes.Status400BadRequest,
-                    title: "Teacher not registered.");
+                return BadRequest(new BadRequestResponse
+                {
+                    Title = "User registration failed.",
+                    Detail = result.Description,
+                    Status = StatusCodes.Status400BadRequest
+                });
             }
 
             return StatusCode(StatusCodes.Status201Created, "Teacher registered successfully.");
