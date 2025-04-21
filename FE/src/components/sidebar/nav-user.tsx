@@ -29,7 +29,8 @@ import { useLogoutMutation } from "@/features/auth/api/auth-api.ts";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const { isAuthenticated, email } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, email, roles } = useAppSelector((state) => state.auth);
+  console.log(roles);
   const [logout] = useLogoutMutation();
   const content = isAuthenticated ? (
     <DropdownMenu>
@@ -45,7 +46,7 @@ export function NavUser() {
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">{email}</span>
-            <span className="truncate text-xs">Role - Student</span>{" "}
+            <span className="truncate text-xs">{roles[roles.length-1]}</span>{" "}
             {/*TODO: change*/}
           </div>
           <ChevronsUpDown className="ml-auto size-4" />
@@ -66,7 +67,7 @@ export function NavUser() {
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
               <span className="truncate font-medium">{email}</span>
-              <span className="truncate text-xs">Role - Student</span>
+              <span className="truncate text-xs">{roles[roles.length-1]}</span>
               {/*TODO: change*/}
             </div>
           </div>

@@ -40,19 +40,83 @@ type NavProps = {
 export function NavMain({ items, isAuthenticated }: NavProps) {
   const allCourses =
     items && items.find((item) => item.title === "All Courses");
+  const teacherAdminItems =
+    items &&
+    items.filter((item) => item.title === "Teacher" || item.title === "Admin");
+  console.log(teacherAdminItems);
 
   return (
-    <SidebarGroup>
-      <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-      <SidebarMenu>
-        {items &&
-          items
-            .filter((item) => item.title !== "All Courses")
-            .map((item) => (
+    <>
+      <SidebarGroup>
+        <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+        <SidebarMenu>
+          {items &&
+            items
+              .filter((item) => item.title !== "All Courses")
+              .filter((item) => item.title !== "Teacher")
+              .filter((item) => item.title !== "Admin")
+              .map((item) => (
+                <Collapsible
+                  key={item.title}
+                  asChild
+                  defaultOpen={item.isActive}
+                  className="group/collapsible"
+                >
+                  <SidebarMenuItem>
+                    <CollapsibleTrigger className="cursor-pointer" asChild>
+                      <SidebarMenuButton tooltip={item.title}>
+                        {item.icon && <item.icon />}
+                        <span>{item.title}</span>
+                        <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      </SidebarMenuButton>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <SidebarMenuSub>
+                        {item.items?.map((subItem) => (
+                          <SidebarMenuSubItem key={subItem.title}>
+                            <SidebarMenuSubButton asChild>
+                              <a href={subItem.url}>
+                                <span>{subItem.title}</span>
+                              </a>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </CollapsibleContent>
+                  </SidebarMenuItem>
+                </Collapsible>
+              ))}
+          <SidebarMenuItem>
+            {isAuthenticated ? (
+              <>
+                <SidebarMenuButton asChild>
+                  <Link to="/">
+                    {" "}
+                    {/* TODO: Replace with the real link */}
+                    {allCourses && allCourses.icon && <allCourses.icon />}
+                    <span>{allCourses && allCourses.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </>
+            ) : (
+              <SidebarMenuButton asChild>
+                <Link to="/login">
+                  <LogInIcon />
+                  Login to view all options
+                </Link>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroup>
+      {teacherAdminItems &&
+        teacherAdminItems.map((item) => (
+          <SidebarGroup key={item.title}>
+            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+            <SidebarMenu>
               <Collapsible
                 key={item.title}
                 asChild
-                defaultOpen={item.isActive}
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
@@ -78,27 +142,9 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
-            ))}
-        <SidebarMenuItem>
-          {isAuthenticated ? (
-            <SidebarMenuButton asChild>
-              <Link to="/">
-                {" "}
-                {/* TODO: Replace with the real link */}
-                {allCourses && allCourses.icon && <allCourses.icon />}
-                <span>{allCourses && allCourses.title}</span>
-              </Link>
-            </SidebarMenuButton>
-          ) : (
-            <SidebarMenuButton asChild>
-              <Link to="/login">
-                <LogInIcon />
-                Login to view all options
-              </Link>
-            </SidebarMenuButton>
-          )}
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
+        ))}
+    </>
   );
 }

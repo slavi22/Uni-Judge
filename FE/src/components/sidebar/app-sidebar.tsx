@@ -12,10 +12,25 @@ import {
 } from "@/components/ui/sidebar.tsx";
 import { Link } from "react-router";
 import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
-import { nav } from "@/utils/constants/nav-main-content.ts";
+import { adminNav, studentNav, teacherNav } from "@/utils/constants/nav-main-content.ts";
+import { type JSX } from "react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const { isAuthenticated, roles } = useAppSelector((state) => state.auth);
+  let navElement: JSX.Element;
+
+  if(isAuthenticated && roles.includes("Admin")) {
+    navElement = <NavMain items={adminNav.navItems} isAuthenticated />
+  }
+  else if (isAuthenticated && roles.includes("Teacher") && !roles.includes("Admin")) {
+    navElement = <NavMain items={teacherNav.navItems} isAuthenticated />
+  }
+  else if (isAuthenticated && roles.includes("Student") && !roles.includes("Admin")) {
+    navElement = <NavMain items={studentNav.navItems} isAuthenticated />
+  }
+  else {
+    navElement = <NavMain isAuthenticated={false} />
+  }
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -37,11 +52,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {isAuthenticated ? (
-          <NavMain items={nav.main} isAuthenticated />
-        ) : (
-          <NavMain isAuthenticated={false} />
-        )}
+        {navElement}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
