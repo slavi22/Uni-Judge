@@ -6,7 +6,6 @@ using BE.DTOs.DTOs.JWT.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-// TODO: Add tests
 namespace BE.Presentation.Controllers
 {
     [ApiController]
@@ -124,7 +123,7 @@ namespace BE.Presentation.Controllers
         [ProducesResponseType(statusCode: StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> RefreshToken()
         {
-            // TODO: refine the implementation, because it currently needs an access token to be able to refresh the refresh token
+            // refined implementation that doesn't need the access token to refresh
             // => https://youtu.be/kR_9gRBeRMQ?si=DOPAFx1ebqfQ2J7-&t=514
             HttpContext.Request.Cookies.TryGetValue("refreshToken", out var refreshToken);
             if (refreshToken == null)
@@ -133,7 +132,6 @@ namespace BE.Presentation.Controllers
                     new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
                 Response.Cookies.Delete("refreshToken",
                     new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
-                // TODO: Change this to a more fitting response
                 return Unauthorized();
             }
 
@@ -196,6 +194,13 @@ namespace BE.Presentation.Controllers
         {
             var userInfo = await _authService.GetUserInfo(User.Identity.Name);
             return Ok(userInfo);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            return Ok();
         }
     }
 }

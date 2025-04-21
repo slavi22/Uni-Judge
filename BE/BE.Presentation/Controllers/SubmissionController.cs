@@ -5,7 +5,6 @@ using BE.Extensions.ExtensionMethods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-// TODO: Add tests
 namespace BE.Presentation.Controllers
 {
     [ApiController]

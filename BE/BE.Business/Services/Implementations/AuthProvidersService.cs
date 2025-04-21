@@ -79,9 +79,15 @@ public class AuthProvidersService : IAuthProvidersService
     {
         // mostly got it working from here and a little help from chatgpt => https://github.com/googleapis/google-api-dotnet-client/issues/1486
         // which i found from this thread => https://github.com/MomenSherif/react-oauth/issues/12#issuecomment-2248557741
-        // google token validation from here
+        // => https://github.com/googleapis/google-api-dotnet-client/issues/1486#issuecomment-566993416
+        // => from this it shows creating the GoogleAuthorizationCodeFlow with client secrets
+        // then in the if (tokenResponse == null), it shows how to exchange the code for a token
+        // after that in here => https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins?view=aspnetcore-9.0#sign-in-with-google
+        // the last line it tells us to do this => GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(credential);
+        // for us to get the final payload which includes the email and other information
+
+        // some reference from here as well
         // => https://code-maze.com/how-to-sign-in-with-google-angular-aspnet-webapi/#:~:text=After%20that%2C%20we%20can%20add%20a%20new%20method%20to%20validate%20idtoken%3A
-        // also here => https://learn.microsoft.com/en-us/aspnet/core/security/authentication/social/google-logins?view=aspnetcore-9.0#sign-in-with-google
         var flow = new GoogleAuthorizationCodeFlow(new GoogleAuthorizationCodeFlow.Initializer
         {
             ClientSecrets = new ClientSecrets
