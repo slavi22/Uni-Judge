@@ -1,6 +1,7 @@
 ﻿import { baseApi } from "@/stores/base-api.ts";
 import type {
   LoginData,
+  TeacherRegister,
   UserLogin,
   UserRegister,
 } from "@/features/auth/types/auth-types.ts";
@@ -105,7 +106,26 @@ const authApi = baseApi.injectEndpoints({
       async onQueryStarted(_args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("Registration successful.", { closeButton: true });
+          toast.success("Registration successful. You can now log in.", {
+            closeButton: true,
+          });
+        } catch {
+          toast.error("Error registering.", { closeButton: true });
+        }
+      },
+    }),
+    registerTeacher: build.mutation<string, TeacherRegister>({
+      query: (registerTeacherData) => ({
+        url: "auth/register-teacher",
+        method: "POST",
+        body: registerTeacherData,
+      }),
+      async onQueryStarted(_args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Teacher registration successful. You can now log in.", {
+            closeButton: true,
+          });
         } catch {
           toast.error("Error registering.", { closeButton: true });
         }
@@ -124,6 +144,7 @@ export const {
   useLazyFetchUserProfileQuery,
   useLogoutMutation,
   useRegisterMutation,
+  useRegisterTeacherMutation,
   //TODO: remove
   useTestQuery,
   useLazyTestQuery,

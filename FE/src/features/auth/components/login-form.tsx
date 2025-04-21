@@ -158,7 +158,7 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
             </div>
             <div className="mt-2 text-center text-sm">
               <Link
-                to="/teacher-register"
+                to="/register-teacher"
                 className="text-primary underline underline-offset-4 hover:text-primary/90 font-medium"
               >
                 Register as a teacher

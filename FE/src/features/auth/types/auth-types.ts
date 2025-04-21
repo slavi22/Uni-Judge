@@ -19,3 +19,9 @@ export type UserRegister = {
   password: string;
   //TODO: add more fields if needed in the future
 };
+
+export type TeacherRegister = {
+  email: string;
+  password: string;
+  secret: string;
+};
