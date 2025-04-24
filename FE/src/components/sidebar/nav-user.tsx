@@ -24,13 +24,13 @@ import {
 } from "@/components/ui/sidebar.tsx";
 import ThemeToggle from "@/features/theme/components/theme-toggle.tsx";
 import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useLogoutMutation } from "@/features/auth/api/auth-api.ts";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { isAuthenticated, email, roles } = useAppSelector((state) => state.auth);
-  console.log(roles);
+  const navigate = useNavigate();
   const [logout] = useLogoutMutation();
   const content = isAuthenticated ? (
     <DropdownMenu>
@@ -74,7 +74,7 @@ export function NavUser() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="cursor-pointer">
+          <DropdownMenuItem className="cursor-pointer" onClick={() => navigate("me")}>
             <CircleUserRound />
             Account
           </DropdownMenuItem>

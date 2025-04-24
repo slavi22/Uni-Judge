@@ -13,7 +13,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar.tsx";
-import { useEffect } from "react";
+import { Fragment, useEffect } from "react";
 import useTheme from "@/features/theme/hooks/use-theme.ts";
 import { Link, Outlet, useLocation } from "react-router";
 import splitLocationPathname from "@/utils/functions/split-location-pathname.ts";
@@ -64,23 +64,22 @@ export default function RootLayout() {
             <Breadcrumb>
               <BreadcrumbList>
                 {pathnameSplitWithoutLastElement.map((path, index) => (
-                  <>
+                  <Fragment key={path} >
                     <BreadcrumbItem
                       className="hidden md:block capitalize"
-                      key={path}
                     >
                       <BreadcrumbLink asChild>
                         <Link to={pathnameSplit.slice(0, index + 1).join("/")}>
-                          {path}
+                          {path?.replaceAll("-", " ")}
                         </Link>
                       </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
-                  </>
+                  </Fragment>
                 ))}
                 <BreadcrumbItem>
                   <BreadcrumbPage className="capitalize">
-                    {pathnameSplitLastElement ?? "Home"}
+                    {pathnameSplitLastElement?.replaceAll("-", " ") ?? "Home"}
                   </BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -89,7 +88,7 @@ export default function RootLayout() {
         </header>
         <section className="bg-background relative flex w-full flex-1 flex-col">
           <Outlet />
-          <Toaster richColors visibleToasts={1} />
+          <Toaster richColors visibleToasts={1} closeButton/>
         </section>
       </SidebarInset>
     </SidebarProvider>

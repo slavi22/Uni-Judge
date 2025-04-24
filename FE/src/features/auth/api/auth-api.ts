@@ -32,7 +32,7 @@ const authApi = baseApi.injectEndpoints({
           const userData = (await userInfo.json()) as LoginData;
           dispatch(login(userData));
         } catch {
-          toast.error("Error logging in.", { closeButton: true });
+          toast.error("Error logging in.");
         }
       },
       // queryFn equivalent
@@ -110,7 +110,7 @@ const authApi = baseApi.injectEndpoints({
             closeButton: true,
           });
         } catch {
-          toast.error("Error registering.", { closeButton: true });
+          toast.error("Error registering.");
         }
       },
     }),
@@ -127,7 +127,7 @@ const authApi = baseApi.injectEndpoints({
             closeButton: true,
           });
         } catch {
-          toast.error("Error registering.", { closeButton: true });
+          toast.error("Error registering.");
         }
       },
     }),

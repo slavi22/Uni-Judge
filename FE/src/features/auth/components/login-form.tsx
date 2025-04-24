@@ -126,7 +126,7 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                 className="w-full cursor-pointer mb-4"
                 disabled={isLoading}
               >
-                {isLoading ? "Submitting..." : "Loading"}
+                {isLoading ? "Submitting..." : "Log in"}
               </Button>
               <div className="mb-4 after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
                 <span className="bg-card text-muted-foreground relative z-10 px-2">

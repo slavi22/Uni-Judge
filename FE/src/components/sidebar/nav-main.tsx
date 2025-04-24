@@ -26,7 +26,6 @@ type InnerItems = {
 
 type OuterItems = {
   title: string;
-  url: string;
   icon: LucideIcon;
   isActive?: boolean;
   items?: InnerItems[];
@@ -43,18 +42,15 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
   const teacherAdminItems =
     items &&
     items.filter((item) => item.title === "Teacher" || item.title === "Admin");
-  console.log(teacherAdminItems);
 
   return (
     <>
       <SidebarGroup>
-        <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+        <SidebarGroupLabel>Student</SidebarGroupLabel>
         <SidebarMenu>
           {items &&
             items
-              .filter((item) => item.title !== "All Courses")
-              .filter((item) => item.title !== "Teacher")
-              .filter((item) => item.title !== "Admin")
+              .filter((item) => item.title !== "All Courses" && item.title !== "Teacher" && item.title !== "Admin")
               .map((item) => (
                 <Collapsible
                   key={item.title}
@@ -75,9 +71,9 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
                         {item.items?.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton asChild>
-                              <a href={subItem.url}>
+                              <Link to={subItem.url}>
                                 <span>{subItem.title}</span>
-                              </a>
+                              </Link>
                             </SidebarMenuSubButton>
                           </SidebarMenuSubItem>
                         ))}
@@ -90,7 +86,7 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
             {isAuthenticated ? (
               <>
                 <SidebarMenuButton asChild>
-                  <Link to="/">
+                  <Link to="/courses/all-courses">
                     {" "}
                     {/* TODO: Replace with the real link */}
                     {allCourses && allCourses.icon && <allCourses.icon />}
@@ -117,6 +113,7 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
               <Collapsible
                 key={item.title}
                 asChild
+                defaultOpen={item.isActive}
                 className="group/collapsible"
               >
                 <SidebarMenuItem>
@@ -132,9 +129,9 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
-                            <a href={subItem.url}>
+                            <Link to={subItem.url}>
                               <span>{subItem.title}</span>
-                            </a>
+                            </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       ))}

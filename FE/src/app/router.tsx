@@ -5,6 +5,8 @@ import LoginPage from "@/app/routes/auth/login-page.tsx";
 import ProtectedRoute from "@/components/protected/protected-route.tsx";
 import RegisterPage from "@/app/routes/auth/register-page.tsx";
 import RegisterTeacherPage from "@/app/routes/auth/register-teacher-page.tsx";
+import TeacherProtectedRoute from "@/components/protected/teacher-protected-route.tsx";
+import CreateNewCoursePage from "@/app/routes/course/create-new-course-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -31,8 +33,26 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           {
-            path: "/me",
+            path: "me",
             element: <div>My profile</div>,
+          },
+          {
+            path: "courses",
+            children: [
+              {
+                path: "all-courses",
+                element: <div>All Courses</div>,
+              },
+              {
+                element: <TeacherProtectedRoute />,
+                children: [
+                  {
+                    path: "create-new-course",
+                    element: <CreateNewCoursePage />,
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
