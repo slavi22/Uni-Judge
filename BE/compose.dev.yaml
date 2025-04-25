@@ -16,7 +16,7 @@
       - ASPNETCORE_Kestrel__Certificates__Default__Path=<Path to the certificate> # (if using local https)
       # how to set values from the appsettings in the docker environment => https://stackoverflow.com/a/71655648
       # or here => https://www.restack.io/p/containerized-development-environments-answer-docker-compose-appsettings-json-cat-ai#:~:text=a%20containerized%20environment.-,Environment%20Variables,-In%20a%20Docker
-      - ConnectionStrings__DatabaseConnectionString=Host=postgres:5432;Database=uni-judge;Username=<Postgres_Username>;Password=<Postgres_Password>
+      - ConnectionStrings__DatabaseConnectionString=Host=postgres;Port=5432;Database=uni-judge;Username=<Postgres_Username>;Password=<Postgres_Password>
       - JWT__Secret=<JWT_Secret>
       - JWT__Issuer=<JWT_Issuer>
       - JWT__Audience=<JWT_Audience>
