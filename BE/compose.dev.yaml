@@ -31,8 +31,11 @@
     volumes:
       - ~/.aspnet/https:/https:ro
     depends_on:
-      - postgres
-      - judge0-server
+      postgres:
+        condition: service_healthy
+      judge0-server:
+        condition: service_started
+
   postgres:
     image: postgres:17.4
     container_name: postgres-csharp-api
