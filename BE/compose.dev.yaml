@@ -48,6 +48,12 @@
       # https://www.reddit.com/r/docker/comments/1fnnyxs/comment/lokuefo/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
       - ./.postgres-data:/var/lib/postgresql/data # bind volue (saved data on local system)
       #- postgres-data:/var/lib/postgresql/data # named volume (data will be lost when i docker-compose down the container)
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d uni-judge" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   # config taken mostly from here => https://github.com/judge0/judge0/releases/tag/v1.13.1#:~:text=Deployment%20Procedure
   judge0-server:
