@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BE.Models", "src\BE.Models\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BE.Extensions", "src\BE.Extensions\BE.Extensions.csproj", "{EDF0E3F8-3789-4758-8A48-1E88F406E9EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BE.Tests", "test\BE.Tests\BE.Tests.csproj", "{430546A6-0B09-46BF-91D9-35FF2715CC79}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BE.Tests", "tests\BE.Tests\BE.Tests.csproj", "{430546A6-0B09-46BF-91D9-35FF2715CC79}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{896823BC-EE15-4123-8A99-F2E84CAFA8A1}"
 	ProjectSection(SolutionItems) = preProject
@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{ADF5010B-E979-4F98-A054-A868ACEBB786}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{4691B318-1F17-443D-8F46-7F613E6DD664}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4691B318-1F17-443D-8F46-7F613E6DD664}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
