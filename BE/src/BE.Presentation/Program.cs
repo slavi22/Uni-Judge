@@ -22,6 +22,7 @@ using Newtonsoft.Json;
 // The name could be either "Presentation" or "API" for the main project
 namespace BE.Presentation;
 
+// Project structure => https://learn.microsoft.com/en-us/dotnet/core/porting/project-structure
 // Folder structure for N-Tier Architecture => https://medium.com/@csns.giri/guide-to-building-an-n-tier-architecture-for-a-net-8-web-api-a49f4a83335e
 public class Program
 {

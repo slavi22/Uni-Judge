@@ -20,8 +20,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BE.Business\BE.Business.csproj" />
-      <ProjectReference Include="..\BE.Presentation\BE.Presentation.csproj" />
+      <ProjectReference Include="..\..\src\BE.Business\BE.Business.csproj" />
+      <ProjectReference Include="..\..\src\BE.Presentation\BE.Presentation.csproj" />
     </ItemGroup>
 
 </Project>
