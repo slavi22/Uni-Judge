@@ -17,4 +17,11 @@ public interface IProblemRepository
     /// <param name="problem">The problem model to add</param>
     /// <returns>A task that represents the asynchronous operation</returns>
     Task AddProblemAsync(ProblemModel problem);
+
+    /// <summary>
+    /// Retrieves all problems associated with a specific teacher.
+    /// </summary>
+    /// <param name="teacherId">The unique identifier of the teacher whose problems are to be retrieved</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of problem models created by the teacher</returns>
+    Task<List<ProblemModel>> GetTeacherProblems(string teacherId);
 }

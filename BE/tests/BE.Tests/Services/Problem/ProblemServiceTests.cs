@@ -11,13 +11,15 @@ public class ProblemServiceTests
 {
     private readonly Mock<IProblemRepository> _problemRepositoryMock;
     private readonly Mock<ICourseRepository> _courseRepositoryMock;
+    private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly ProblemService _problemService;
 
     public ProblemServiceTests()
     {
         _problemRepositoryMock = new Mock<IProblemRepository>();
         _courseRepositoryMock = new Mock<ICourseRepository>();
-        _problemService = new ProblemService(_problemRepositoryMock.Object, _courseRepositoryMock.Object);
+        _userRepositoryMock = new Mock<IUserRepository>();
+        _problemService = new ProblemService(_problemRepositoryMock.Object, _courseRepositoryMock.Object, _userRepositoryMock.Object);
     }
 
     [Fact]

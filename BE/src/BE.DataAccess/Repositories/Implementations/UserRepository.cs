@@ -11,7 +11,7 @@ public class UserRepository : IUserRepository
 {
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor; // apparently this is auto-registered in DI because of my call to "AddIdentity" in Program.cs, thats why Im not registering it in the DI container in Program.cs
     private readonly AppDbContext _dbContext;
 
     public UserRepository(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IHttpContextAccessor httpContextAccessor, AppDbContext dbContext)

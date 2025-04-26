@@ -11,11 +11,13 @@ public class ProblemService : IProblemService
 {
     private readonly IProblemRepository _problemRepository;
     private readonly ICourseRepository _courseRepository;
+    private readonly IUserRepository _userRepository;
 
-    public ProblemService(IProblemRepository problemRepository, ICourseRepository courseRepository)
+    public ProblemService(IProblemRepository problemRepository, ICourseRepository courseRepository, IUserRepository userRepository)
     {
         _problemRepository = problemRepository;
         _courseRepository = courseRepository;
+        _userRepository = userRepository;
     }
 
     // Here we are creating a new problem.
@@ -36,6 +38,7 @@ public class ProblemService : IProblemService
         }
 
         var courseEntity = await _courseRepository.GetCourseByCourseIdAsync(dto.CourseId);
+        var currentUser = await _userRepository.GetCurrentUserAsync();
 
         var problemEntity = new ProblemModel
         {
@@ -44,7 +47,8 @@ public class ProblemService : IProblemService
             Description = dto.Description,
             RequiredPercentageToPass = dto.RequiredPercentageToPass,
             CourseId = courseEntity.Id,
-            MainMethodBodiesList = mainMethodBodies
+            MainMethodBodiesList = mainMethodBodies,
+            User = currentUser
         };
 
         foreach (var testCase in dto.ExpectedOutputList)
@@ -89,5 +93,15 @@ public class ProblemService : IProblemService
             CourseId = courseEntity.CourseId
         };
         return createdProblemDto;
+    }
+
+    public async Task<TeacherProblemsDto> GetTeacherProblems()
+    {
+        //TODO: implement
+        /*var dto = new TeacherProblemsDto
+        {
+
+        }*/
+        return null;
     }
 }

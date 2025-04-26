@@ -11,4 +11,10 @@ public interface IProblemService
     /// <param name="dto">The client problem DTO containing the problem details</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the created problem DTO</returns>
     public Task<CreatedProblemDto> CreateProblem(ClientProblemDto dto);
+
+    /// <summary>
+    /// Retrieves the problems created by a specific teacher.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the teacher problems DTO with all problems created by the teacher</returns>
+    public Task<TeacherProblemsDto> GetTeacherProblems();
 }

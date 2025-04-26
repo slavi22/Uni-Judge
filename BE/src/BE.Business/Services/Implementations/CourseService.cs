@@ -67,12 +67,14 @@ public class CourseService : ICourseService
         {
             throw new DuplicateCourseIdException($"A course with the given ID - '{course.CourseId}' already exists.");
         }
+        var currentUser = await _userRepository.GetCurrentUserAsync();
         var newCourseModel = new CoursesModel
         {
             CourseId = dto.CourseId,
             Name = dto.Name,
             Description = dto.Description,
-            Password = dto.Password
+            Password = dto.Password,
+            User = currentUser
         };
         await _courseRepository.CreateCourseAsync(newCourseModel);
     }

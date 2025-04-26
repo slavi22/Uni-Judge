@@ -25,4 +25,10 @@ public class ProblemRepository : IProblemRepository
         await _dbContext.Problems.AddAsync(problem);
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task<List<ProblemModel>> GetTeacherProblems(string teacherId)
+    {
+        var teacherProblems = await _dbContext.Problems.Include(p => p.User).Where(p => p.UserId == teacherId).ToListAsync();
+        return teacherProblems;
+    }
 }

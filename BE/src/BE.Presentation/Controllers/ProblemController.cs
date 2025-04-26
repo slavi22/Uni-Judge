@@ -38,5 +38,17 @@ namespace BE.Presentation.Controllers
             var result = await _problemService.CreateProblem(problem);
             return Ok(result);
         }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpGet("get-problems")]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(TeacherProblemsDto))]
+        public async Task<IActionResult> GetTeacherProblems()
+        {
+            return Ok();
+        }
     }
 }

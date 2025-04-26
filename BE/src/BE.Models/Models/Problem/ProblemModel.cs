@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using BE.Models.Models.Auth;
 using BE.Models.Models.Courses;
 using BE.Models.Models.Submissions;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,10 @@ public class ProblemModel
 
     public string CourseId { get; set; }
     public CoursesModel Course { get; set; }
+
+    public string UserId { get; set; }
+    public AppUser User { get; set; }
+
     public ICollection<UserSubmissionModel> UserSubmission { get; set; } = new List<UserSubmissionModel>();
 
     public List<ExpectedOutputListModel> ExpectedOutputList { get; set; } = new List<ExpectedOutputListModel>();
