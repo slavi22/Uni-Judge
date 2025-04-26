@@ -51,7 +51,7 @@ public class ProblemServiceTests
             .ReturnsAsync(courseEntity);
 
         // Act
-        var result = await _problemService.CreateProblem(clientProblemDto);
+        var result = await _problemService.CreateProblemAsync(clientProblemDto);
 
         // Assert
         Assert.NotNull(result);
@@ -83,6 +83,6 @@ public class ProblemServiceTests
             .Throws<Exception>();
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() => _problemService.CreateProblem(clientProblemDto));
+        await Assert.ThrowsAsync<Exception>(() => _problemService.CreateProblemAsync(clientProblemDto));
     }
 }

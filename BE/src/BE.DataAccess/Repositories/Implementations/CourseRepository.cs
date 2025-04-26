@@ -19,9 +19,11 @@ public class CourseRepository : ICourseRepository
     {
         // AsNoTracking() is used to avoid tracking the entity  because we only use it for fetching
         var fetchedCourse =
-            await _dbContext.Courses.Include(x => x.UserCourses).AsNoTracking().FirstOrDefaultAsync(x => x.CourseId == course.CourseId);
+            await _dbContext.Courses.Include(x => x.UserCourses).AsNoTracking()
+                .FirstOrDefaultAsync(x => x.CourseId == course.CourseId);
         // check if the user is already signed up for the course by checking if the user id and course id are already in the UserCourses list
-        if (fetchedCourse.UserCourses.Any(x => x.UserId == userCourse.UserId && x.CourseId == userCourse.CourseId) == false)
+        if (fetchedCourse.UserCourses.Any(x => x.UserId == userCourse.UserId && x.CourseId == userCourse.CourseId) ==
+            false)
         {
             course.UserCourses.Add(userCourse);
             await _dbContext.SaveChangesAsync();
@@ -45,5 +47,11 @@ public class CourseRepository : ICourseRepository
     public async Task<CoursesModel> GetCourseAndProblemsByIdAsync(string courseId)
     {
         return await _dbContext.Courses.Include(c => c.Problems).FirstOrDefaultAsync(c => c.CourseId == courseId);
+    }
+
+    public async Task<List<CoursesModel>> GetTeacherCoursesAsync(string teacherId)
+    {
+        var teacherCourses = await _dbContext.Courses.Include(c => c.User).ToListAsync();
+        return teacherCourses;
     }
 }

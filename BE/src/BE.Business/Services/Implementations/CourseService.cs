@@ -26,6 +26,7 @@ public class CourseService : ICourseService
         {
             return null;
         }
+
         var viewCourseProblemsList = new List<ViewCourseProblemDto>();
         foreach (var problem in course.Problems)
         {
@@ -48,6 +49,7 @@ public class CourseService : ICourseService
         {
             throw new InvalidCoursePasswordException("Invalid course password entered.");
         }
+
         var user = await _userRepository.GetCurrentUserAsync();
 
         var userCourse = new UserCourseModel
@@ -67,6 +69,7 @@ public class CourseService : ICourseService
         {
             throw new DuplicateCourseIdException($"A course with the given ID - '{course.CourseId}' already exists.");
         }
+
         var currentUser = await _userRepository.GetCurrentUserAsync();
         var newCourseModel = new CoursesModel
         {
@@ -77,5 +80,22 @@ public class CourseService : ICourseService
             User = currentUser
         };
         await _courseRepository.CreateCourseAsync(newCourseModel);
+    }
+
+    //TODO: add test
+    public async Task<List<TeacherCoursesDto>> GetMyCoursesAsync()
+    {
+        var coursesList = new List<TeacherCoursesDto>();
+        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var teacherCourses = await _courseRepository.GetTeacherCoursesAsync(currentUser.Id);
+        foreach (var course in teacherCourses)
+        {
+            coursesList.Add(new TeacherCoursesDto
+            {
+                CourseId = course.CourseId, Name = course.Name, Description = course.Description
+            });
+        }
+
+        return coursesList;
     }
 }

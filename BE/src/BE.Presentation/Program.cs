@@ -163,6 +163,7 @@ public class Program
         builder.Services.AddExceptionHandler<CourseNotFoundExceptionHandler>();
         builder.Services.AddExceptionHandler<InvalidCoursePasswordExceptionHandler>();
         builder.Services.AddExceptionHandler<DuplicateCourseIdExceptionHandler>();
+        builder.Services.AddExceptionHandler<DuplicateProblemIdExceptionHandler>();
         // Global exception handler should be added last to catch all other unhandled exceptions
         builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 

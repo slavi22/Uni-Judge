@@ -93,5 +93,19 @@ namespace BE.Presentation.Controllers
             await _courseService.CreateNewCourse(dto);
             return Ok();
         }
+
+        //TODO: add test
+        [Authorize(Roles = "Teacher")]
+        [HttpGet("get-my-courses")]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<TeacherCoursesDto>))]
+        public async Task<IActionResult> GetMyCourses()
+        {
+            var result = await _courseService.GetMyCoursesAsync();
+            return Ok(result);
+        }
     }
 }

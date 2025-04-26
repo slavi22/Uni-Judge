@@ -35,20 +35,30 @@ namespace BE.Presentation.Controllers
         [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(CreatedProblemDto))]
         public async Task<IActionResult> CreateProblem(ClientProblemDto problem)
         {
-            var result = await _problemService.CreateProblem(problem);
+            var result = await _problemService.CreateProblemAsync(problem);
             return Ok(result);
         }
 
+        //TODO: add test
+        /// <summary>
+        /// Get all problems created by the authenticated teacher
+        /// </summary>
+        /// <remarks>Only users with the "Teacher" role can access this endpoint. It returns all problems created by the currently authenticated teacher.</remarks>
+        /// <returns>A list of problems created by the teacher with basic details including course ID, problem ID, name, and description</returns>
+        /// <response code="401">Returns 401 if the user is not authenticated</response>
+        /// <response code="403">Returns 403 if the user attempting to access problems does not have the "Teacher" role</response>
+        /// <response code="200">Returns 200 with the list of problems created by the teacher</response>
         [Authorize(Roles = "Teacher")]
-        [HttpGet("get-problems")]
+        [HttpGet("get-my-problems")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(TeacherProblemsDto))]
-        public async Task<IActionResult> GetTeacherProblems()
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<TeacherProblemsDto>))]
+        public async Task<IActionResult> GetMyProblems()
         {
-            return Ok();
+            var result = await _problemService.GeyMyProblemsAsync();
+            return Ok(result);
         }
     }
 }

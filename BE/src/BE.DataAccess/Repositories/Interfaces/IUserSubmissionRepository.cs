@@ -9,5 +9,5 @@ public interface IUserSubmissionRepository
     /// </summary>
     /// <param name="submissionModel">The user submission model to add</param>
     /// <returns>A task that represents the asynchronous operation</returns>
-    public Task AddAsync(UserSubmissionModel submissionModel);
+    Task AddAsync(UserSubmissionModel submissionModel);
 }

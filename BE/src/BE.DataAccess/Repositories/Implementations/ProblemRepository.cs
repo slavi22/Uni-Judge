@@ -17,7 +17,8 @@ public class ProblemRepository : IProblemRepository
     public async Task<ProblemModel> GetProblemByProblemIdAsync(string problemId)
     {
         return await _dbContext.Problems.Include(problemModel => problemModel.StdInList)
-            .Include(problemModel => problemModel.ExpectedOutputList).FirstOrDefaultAsync(x => x.ProblemId == problemId);
+            .Include(problemModel => problemModel.ExpectedOutputList)
+            .FirstOrDefaultAsync(x => x.ProblemId == problemId);
     }
 
     public async Task AddProblemAsync(ProblemModel problem)
@@ -28,7 +29,9 @@ public class ProblemRepository : IProblemRepository
 
     public async Task<List<ProblemModel>> GetTeacherProblems(string teacherId)
     {
-        var teacherProblems = await _dbContext.Problems.Include(p => p.User).Where(p => p.UserId == teacherId).ToListAsync();
+        var teacherProblems =
+            await _dbContext.Problems.Include(p => p.User).Include(p => p.Course).Where(p => p.UserId == teacherId)
+                .ToListAsync();
         return teacherProblems;
     }
 }

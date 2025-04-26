@@ -25,4 +25,10 @@ public interface ICourseService
     /// <param name="dto">The details of the course to create</param>
     /// <returns>A task that represents the asynchronous operation</returns>
     Task CreateNewCourse(CreateCourseDto dto);
+
+    /// <summary>
+    /// Retrieves the courses created by a specific teacher.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of teacher courses DTOs</returns>
+    Task<List<TeacherCoursesDto>> GetMyCoursesAsync();
 }

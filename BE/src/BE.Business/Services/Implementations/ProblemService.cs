@@ -1,4 +1,5 @@
 ﻿using BE.Business.Services.Interfaces;
+using BE.Common.Exceptions;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Problem.Requests;
 using BE.DTOs.DTOs.Problem.Responses;
@@ -13,7 +14,8 @@ public class ProblemService : IProblemService
     private readonly ICourseRepository _courseRepository;
     private readonly IUserRepository _userRepository;
 
-    public ProblemService(IProblemRepository problemRepository, ICourseRepository courseRepository, IUserRepository userRepository)
+    public ProblemService(IProblemRepository problemRepository, ICourseRepository courseRepository,
+        IUserRepository userRepository)
     {
         _problemRepository = problemRepository;
         _courseRepository = courseRepository;
@@ -24,8 +26,15 @@ public class ProblemService : IProblemService
     // First we have to map the MainMethodBodyDto to the MainMethodBody entity so we iterate over the list of MainMethodBodyDto and create a new MainMethodBody entity for each one
     // Then we create a new Problem entity and set its properties to the values from the ClientProblemDto
     // Then we iterate over the list of languages and create a new ProblemLanguage entity for each language and add it to the Problem entity
-    public async Task<CreatedProblemDto> CreateProblem(ClientProblemDto dto)
+    public async Task<CreatedProblemDto> CreateProblemAsync(ClientProblemDto dto)
     {
+        var problem = await _problemRepository.GetProblemByProblemIdAsync(dto.ProblemId);
+        if (problem != null)
+        {
+            throw new DuplicateProblemIdException(
+                $"A problem with the given ID - '{problem.ProblemId}' already exists.");
+        }
+
         List<MainMethodBodyModel> mainMethodBodies = new List<MainMethodBodyModel>();
         foreach (var bodyDto in dto.MainMethodBodiesList)
         {
@@ -95,13 +104,21 @@ public class ProblemService : IProblemService
         return createdProblemDto;
     }
 
-    public async Task<TeacherProblemsDto> GetTeacherProblems()
+    //TODO: add test
+    public async Task<List<TeacherProblemsDto>> GeyMyProblemsAsync()
     {
-        //TODO: implement
-        /*var dto = new TeacherProblemsDto
+        var problemsList = new List<TeacherProblemsDto>();
+        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var teacherProblems = await _problemRepository.GetTeacherProblems(currentUser.Id);
+        foreach (var problem in teacherProblems)
         {
+            problemsList.Add(new TeacherProblemsDto
+            {
+                CourseId = problem.Course.CourseId, ProblemId = problem.ProblemId, Name = problem.Name,
+                Description = problem.Description
+            });
+        }
 
-        }*/
-        return null;
+        return problemsList;
     }
 }

@@ -27,7 +27,7 @@ public class ProblemControllerTests
         // Arrange
         var clientProblemDto = new ClientProblemDto { Name = "New Problem" };
         var createdProblem = new CreatedProblemDto { ProblemId = "problem123", Name = "New Problem" };
-        _mockProblemService.Setup(service => service.CreateProblem(clientProblemDto)).ReturnsAsync(createdProblem);
+        _mockProblemService.Setup(service => service.CreateProblemAsync(clientProblemDto)).ReturnsAsync(createdProblem);
 
         // Act
         var result = await _controller.CreateProblem(clientProblemDto);
@@ -42,7 +42,7 @@ public class ProblemControllerTests
     public async Task CreateProbmel_ThrowsException_WhenProblemServiceThrowsException()
     {
         // Arrange
-        _mockProblemService.Setup(service => service.CreateProblem(It.IsAny<ClientProblemDto>()))
+        _mockProblemService.Setup(service => service.CreateProblemAsync(It.IsAny<ClientProblemDto>()))
             .ThrowsAsync(new Exception("An error occurred"));
 
         // Act & Assert
