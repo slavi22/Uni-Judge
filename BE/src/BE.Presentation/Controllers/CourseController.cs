@@ -102,9 +102,9 @@ namespace BE.Presentation.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<TeacherCoursesDto>))]
-        public async Task<IActionResult> GetMyCourses()
+        public async Task<IActionResult> GetMyCreatedCourses()
         {
-            var result = await _courseService.GetMyCoursesAsync();
+            var result = await _courseService.GetMyCreatedCoursesAsync();
             return Ok(result);
         }
     }

@@ -83,7 +83,7 @@ public class CourseService : ICourseService
     }
 
     //TODO: add test
-    public async Task<List<TeacherCoursesDto>> GetMyCoursesAsync()
+    public async Task<List<TeacherCoursesDto>> GetMyCreatedCoursesAsync()
     {
         var coursesList = new List<TeacherCoursesDto>();
         var currentUser = await _userRepository.GetCurrentUserAsync();

@@ -16,5 +16,5 @@ public interface IProblemService
     /// Retrieves the problems created by a specific teacher.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains the teacher problems DTO with all problems created by the teacher</returns>
-    Task<List<TeacherProblemsDto>> GeyMyProblemsAsync();
+    Task<List<TeacherProblemsDto>> GeyMyCreatedProblemsAsync();
 }

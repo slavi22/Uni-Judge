@@ -18,4 +18,9 @@ public class LanguageRepository : ILanguageRepository
     {
         return await _dbContext.Languages.FirstOrDefaultAsync(x => x.Id == languageId);
     }
+
+    public async Task<List<LanguageModel>> GetAllLanguagesAsync()
+    {
+        return await _dbContext.Languages.ToListAsync();
+    }
 }

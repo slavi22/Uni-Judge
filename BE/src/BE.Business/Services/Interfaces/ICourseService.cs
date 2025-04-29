@@ -30,5 +30,5 @@ public interface ICourseService
     /// Retrieves the courses created by a specific teacher.
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of teacher courses DTOs</returns>
-    Task<List<TeacherCoursesDto>> GetMyCoursesAsync();
+    Task<List<TeacherCoursesDto>> GetMyCreatedCoursesAsync();
 }

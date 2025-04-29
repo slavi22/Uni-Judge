@@ -105,7 +105,7 @@ public class ProblemService : IProblemService
     }
 
     //TODO: add test
-    public async Task<List<TeacherProblemsDto>> GeyMyProblemsAsync()
+    public async Task<List<TeacherProblemsDto>> GeyMyCreatedProblemsAsync()
     {
         var problemsList = new List<TeacherProblemsDto>();
         var currentUser = await _userRepository.GetCurrentUserAsync();

@@ -175,6 +175,7 @@ public class Program
         builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
         builder.Services.AddScoped<IUserSubmissionRepository, UserSubmissionRepository>();
         builder.Services.AddScoped<ICourseRepository, CourseRepository>();
+        builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 
         // Services
         builder.Services.AddScoped<IAuthService, AuthService>();
@@ -185,6 +186,7 @@ public class Program
         builder.Services.AddScoped<IUserSubmissionService, UserSubmissionService>();
         builder.Services.AddScoped<ICourseService, CourseService>();
         builder.Services.AddScoped<IAuthProvidersService, AuthProvidersService>();
+        builder.Services.AddScoped<ILanguageService, LanguageService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         // builder.Services.AddOpenApi();

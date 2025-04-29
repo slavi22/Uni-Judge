@@ -50,14 +50,13 @@ namespace BE.Presentation.Controllers
         /// <response code="200">Returns 200 with the list of problems created by the teacher</response>
         [Authorize(Roles = "Teacher")]
         [HttpGet("get-my-problems")]
-        [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<TeacherProblemsDto>))]
-        public async Task<IActionResult> GetMyProblems()
+        public async Task<IActionResult> GetMyCreatedProblems()
         {
-            var result = await _problemService.GeyMyProblemsAsync();
+            var result = await _problemService.GeyMyCreatedProblemsAsync();
             return Ok(result);
         }
     }
