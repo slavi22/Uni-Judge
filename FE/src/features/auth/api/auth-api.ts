@@ -1,9 +1,9 @@
 ﻿import { baseApi } from "@/stores/base-api.ts";
 import type {
-  LoginData,
-  TeacherRegister,
-  UserLogin,
-  UserRegister,
+  LoginDataResponseDto,
+  TeacherRegisterDto,
+  UserLoginDto,
+  UserRegisterDto,
 } from "@/features/auth/types/auth-types.ts";
 import {
   initialLoad,
@@ -16,7 +16,7 @@ import { toast } from "sonner";
 const authApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // for the generic, the left one is the return type, the right one is the argument (parameters) type
-    login: build.mutation<void, UserLogin>({
+    login: build.mutation<void, UserLoginDto>({
       // fixed the queryFn issue related to the return type => https://redux-toolkit.js.org/rtk-query/usage/customizing-queries#fetchbasequery-defaults
       query: (loginData) => ({
         url: "auth/login",
@@ -29,7 +29,7 @@ const authApi = baseApi.injectEndpoints({
           const userInfo = await fetch(BE_URL + "auth/me", {
             credentials: "include",
           });
-          const userData = (await userInfo.json()) as LoginData;
+          const userData = (await userInfo.json()) as LoginDataResponseDto;
           dispatch(login(userData));
         } catch {
           toast.error("Error logging in.");
@@ -61,7 +61,7 @@ const authApi = baseApi.injectEndpoints({
                                       return { data: undefined };
                                     },*/
     }),
-    fetchUserProfile: build.query<LoginData, void>({
+    fetchUserProfile: build.query<LoginDataResponseDto, void>({
       query: () => "auth/me",
       async onQueryStarted(_args, { dispatch, queryFulfilled }) {
         try {
@@ -97,7 +97,7 @@ const authApi = baseApi.injectEndpoints({
         dispatch(logout());
       },
     }),
-    register: build.mutation<string, UserRegister>({
+    register: build.mutation<string, UserRegisterDto>({
       query: (registerData) => ({
         url: "auth/register",
         method: "POST",
@@ -114,7 +114,7 @@ const authApi = baseApi.injectEndpoints({
         }
       },
     }),
-    registerTeacher: build.mutation<string, TeacherRegister>({
+    registerTeacher: build.mutation<string, TeacherRegisterDto>({
       query: (registerTeacherData) => ({
         url: "auth/register-teacher",
         method: "POST",
@@ -123,9 +123,7 @@ const authApi = baseApi.injectEndpoints({
       async onQueryStarted(_args, { queryFulfilled }) {
         try {
           await queryFulfilled;
-          toast.success("Teacher registration successful. You can now log in.", {
-            closeButton: true,
-          });
+          toast.success("Teacher registration successful. You can now log in.");
         } catch {
           toast.error("Error registering.");
         }

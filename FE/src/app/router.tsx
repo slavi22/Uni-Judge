@@ -7,6 +7,7 @@ import RegisterPage from "@/app/routes/auth/register-page.tsx";
 import RegisterTeacherPage from "@/app/routes/auth/register-teacher-page.tsx";
 import TeacherProtectedRoute from "@/components/protected/teacher-protected-route.tsx";
 import CreateNewCoursePage from "@/app/routes/course/create-new-course-page.tsx";
+import CreateNewProblemPage from "@/app/routes/problems/create-new-problem-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -49,6 +50,20 @@ export const router = createBrowserRouter([
                   {
                     path: "create-new-course",
                     element: <CreateNewCoursePage />,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            path: "problems",
+            children: [
+              {
+                element: <TeacherProtectedRoute />,
+                children: [
+                  {
+                    path: "create-new-problem",
+                    element: <CreateNewProblemPage />,
                   },
                 ],
               },

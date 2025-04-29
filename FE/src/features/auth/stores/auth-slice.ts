@@ -1,5 +1,5 @@
 ﻿import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { AuthState, LoginData } from "@/features/auth/types/auth-types.ts";
+import type { AuthState, LoginDataResponseDto } from "@/features/auth/types/auth-types.ts";
 
 const initialState: AuthState = {
   isAuthenticated: null,
@@ -14,7 +14,7 @@ export const authSlice = createSlice({
     initialLoad: (state) => {
       state.isAuthenticated = false;
     },
-    login: (state, action: PayloadAction<LoginData>) => {
+    login: (state, action: PayloadAction<LoginDataResponseDto>) => {
       state.isAuthenticated = true;
       state.email = action.payload.email;
       state.roles = action.payload.roles;

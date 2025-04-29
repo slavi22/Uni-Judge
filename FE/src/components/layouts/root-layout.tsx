@@ -18,7 +18,6 @@ import useTheme from "@/features/theme/hooks/use-theme.ts";
 import { Link, Outlet, useLocation } from "react-router";
 import splitLocationPathname from "@/utils/functions/split-location-pathname.ts";
 import { useLazyFetchUserProfileQuery } from "@/features/auth/api/auth-api.ts";
-import { Toaster } from "@/components/ui/sonner.tsx";
 import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 import LoadingSpinner from "@/components/spinners/loading-spinner.tsx";
 
@@ -88,7 +87,6 @@ export default function RootLayout() {
         </header>
         <section className="bg-background relative flex w-full flex-1 flex-col">
           <Outlet />
-          <Toaster richColors visibleToasts={1} closeButton/>
         </section>
       </SidebarInset>
     </SidebarProvider>

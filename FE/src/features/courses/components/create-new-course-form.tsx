@@ -21,7 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";
 import { Input } from "@/components/ui/input.tsx";
 import { InfoIcon } from "lucide-react";
-import InputWithTooltip from "@/features/courses/components/input-with-tooltip.tsx";
+import InputWithTooltip from "@/components/inputs/input-with-tooltip.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { useCreateNewCourseMutation } from "@/features/courses/api/course-api.ts";
 import { useNavigate } from "react-router";

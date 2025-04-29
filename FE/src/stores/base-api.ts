@@ -7,7 +7,8 @@
 } from "@reduxjs/toolkit/query/react";
 import { BE_URL } from "@/utils/constants/consts.ts";
 import { initialLoad, login } from "@/features/auth/stores/auth-slice.ts";
-import { type LoginData } from "@/features/auth/types/auth-types.ts";
+import { type LoginDataResponseDto } from "@/features/auth/types/auth-types.ts";
+import { toast } from "sonner";
 
 const baseQuery = fetchBaseQuery({ baseUrl: BE_URL, credentials: "include" });
 
@@ -29,12 +30,13 @@ const baseQueryWithReauth: BaseQueryFn<
     );
     if (refreshResult.meta?.response?.status === 200) {
       result = await baseQuery("auth/me", api, extraOptions);
-      api.dispatch(login(result.data as LoginData));
+      api.dispatch(login(result.data as LoginDataResponseDto));
       //result = await baseQuery(args, api, extraOptions);
     } else {
       // set the login state to the initial since we couldn't refresh the token successfully
       // after we call the initialLoad if we are on a protected page we will be redirected to the login page automatically, thus we dont need to implement manual redirection
       api.dispatch(initialLoad());
+      toast.error("Error logging in. Please login again.");
     }
   }
   //console.log(result);

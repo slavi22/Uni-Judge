@@ -4,23 +4,23 @@
   roles: string[];
 };
 
-export type LoginData = {
+export type LoginDataResponseDto = {
   email: string;
   roles: string[];
 };
 
-export type UserLogin = {
+export type UserLoginDto = {
   email: string;
   password: string;
 };
 
-export type UserRegister = {
+export type UserRegisterDto = {
   email: string;
   password: string;
   //TODO: add more fields if needed in the future
 };
 
-export type TeacherRegister = {
+export type TeacherRegisterDto = {
   email: string;
   password: string;
   secret: string;

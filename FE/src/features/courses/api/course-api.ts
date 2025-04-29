@@ -1,10 +1,10 @@
 ﻿import { baseApi } from "@/stores/base-api.ts";
-import { NewCourse } from "@/features/courses/types/courses-types.ts";
+import { type NewCourseDto, TeacherCoursesDto } from "@/features/courses/types/courses-types.ts";
 import { toast } from "sonner";
 
 const courseApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    createNewCourse: build.mutation<void, NewCourse>({
+    createNewCourse: build.mutation<void, NewCourseDto>({
       query: (newCourseData) => ({
         url: "courses/create-new-course",
         method: "POST",
@@ -19,7 +19,10 @@ const courseApi = baseApi.injectEndpoints({
         }
       },
     }),
+    getMyCreatedCourses: build.query<TeacherCoursesDto[], void>({
+      query: () => "courses/get-my-courses",
+    })
   }),
 });
 
-export const { useCreateNewCourseMutation } = courseApi;
+export const { useCreateNewCourseMutation, useGetMyCreatedCoursesQuery } = courseApi;

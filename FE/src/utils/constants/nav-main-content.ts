@@ -50,10 +50,14 @@ export const teacherNav = {
       isActive: true,
       items: [
         {
-          title: "Add a new course",
+          title: "Create a new course",
           url: "/courses/create-new-course",
         },
-      ]
+        {
+          title: "Create a new problem",
+          url: "/problems/create-new-problem",
+        },
+      ],
     },
   ],
 };
@@ -85,6 +89,10 @@ export const adminNav = {
         {
           title: "Add a new course",
           url: "/courses/add-new-course",
+        },
+        {
+          title: "Create a new problem",
+          url: "/problems/create-new-problem",
         },
       ]
     },

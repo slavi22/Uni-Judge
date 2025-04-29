@@ -2,6 +2,10 @@
 import { Navigate, Outlet } from "react-router";
 
 export default function TeacherProtectedRoute() {
-  const {isAuthenticated, roles} = useAppSelector(state => state.auth);
-  return isAuthenticated && roles.includes("Teacher") ? <Outlet /> : <Navigate to="/login" replace />;
+  const { isAuthenticated, roles } = useAppSelector((state) => state.auth);
+  return isAuthenticated && roles.includes("Teacher") ? (
+    <Outlet />
+  ) : (
+    <Navigate to="/login" replace />
+  );
 }
