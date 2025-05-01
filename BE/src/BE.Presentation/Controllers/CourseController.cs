@@ -96,7 +96,7 @@ namespace BE.Presentation.Controllers
 
         //TODO: add test
         [Authorize(Roles = "Teacher")]
-        [HttpGet("get-my-courses")]
+        [HttpGet("get-my-created-courses")]
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
