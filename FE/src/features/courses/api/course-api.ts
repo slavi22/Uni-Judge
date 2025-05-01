@@ -20,7 +20,7 @@ const courseApi = baseApi.injectEndpoints({
       },
     }),
     getMyCreatedCourses: build.query<TeacherCoursesDto[], void>({
-      query: () => "courses/get-my-courses",
+      query: () => "courses/get-my-created-courses",
     })
   }),
 });

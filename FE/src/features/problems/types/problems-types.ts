@@ -1,4 +1,6 @@
-﻿export type ClientProblemDto = {
+﻿import { type FieldError } from "react-hook-form";
+
+export type ClientProblemDto = {
   courseId: string;
   problemId: string;
   name: string;
@@ -43,3 +45,30 @@ export type SolutionComponentProps = {
   id: string;
   pickedLanguageId: number | null;
 };
+
+export type SolutionDialogData = {
+  language: string;
+  solutionTemplate: string;
+  mainMethodBodyContent: string;
+};
+
+export type SolutionDialogDataObject = {
+  [key: string]: SolutionDialogData;
+};
+
+export type ProblemSolutionsState = {
+  allInputsValid: boolean | null;
+  solutionDialogData: SolutionDialogDataObject | null;
+};
+
+export type ProblemSolutions = {
+  languageId: number;
+  solutionTemplate: string;
+  mainMethodBodyContent: string;
+}
+
+export type ProblemSolutionsRHFFieldErrors = {
+  languageId: FieldError;
+  solutionTemplate: FieldError;
+  mainMethodBodyContent: FieldError;
+}

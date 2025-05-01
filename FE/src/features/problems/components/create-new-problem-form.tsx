@@ -15,13 +15,11 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";
-import InputWithTooltip from "@/components/inputs/input-with-tooltip.tsx";
-import { InfoIcon } from "lucide-react";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useEffect } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Select,
@@ -33,9 +31,22 @@ import {
   SelectValue,
 } from "@/components/ui/select.tsx";
 import { useGetMyCreatedCoursesQuery } from "@/features/courses/api/course-api.ts";
-import ProblemCodeEditorDialog from "@/features/problems/components/problem-code-editor-dialog.tsx";
+import ProblemInfoDialog from "@/features/problems/components/problem-info-dialog.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Slider } from "@/components/ui/slider.tsx";
+import { useAppDispatch } from "@/hooks/redux/redux-hooks.ts";
+import { clearSolutionDialogData } from "@/features/problems/stores/problem-solutions-slice.ts";
+import { type ProblemSolutionsRHFFieldErrors } from "@/features/problems/types/problems-types.ts";
+
+const problemSolutionsSchema = z.object({
+  languageId: z.number().min(1, { message: "Language ID cannot be empty." }),
+  solutionTemplate: z.string().min(1, {
+    message: "Solution template cannot be empty.",
+  }),
+  mainMethodBodyContent: z.string().min(1, {
+    message: "Main method body content cannot be empty.",
+  }),
+});
 
 const formSchema = z.object({
   courseId: z.string().min(1, { message: "Course ID cannot be empty." }),
@@ -45,7 +56,13 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Description cannot be empty." }),
   requiredPercentageToPass: z.number().min(1).max(100),
-  mainMethodBodiesList: z.string().min(1, { message: "Code cannot be empty." }),
+  mainMethodBodiesList: z
+    .array(problemSolutionsSchema)
+    .min(1, { message: "This problem requires at least one solution." }),
+  //TODO: finish expected output and stdIn
+  expectedOutputAndStdIn: z
+    .string()
+    .min(1, { message: "Expected outputs or StdIns cannot be empty." }),
 });
 
 export default function CreateNewProblemForm({
@@ -60,7 +77,8 @@ export default function CreateNewProblemForm({
       name: "",
       problemDescription: "",
       requiredPercentageToPass: 50,
-      mainMethodBodiesList: "",
+      mainMethodBodiesList: [],
+      expectedOutputAndStdIn: "", //TODO: finish expected output and stdIn
     },
   });
 
@@ -68,7 +86,18 @@ export default function CreateNewProblemForm({
     console.log(formData);
   }
 
-  const { data } = useGetMyCreatedCoursesQuery();
+  const { data, error } = useGetMyCreatedCoursesQuery();
+  const { update, remove } = useFieldArray({
+    control: form.control,
+    name: "mainMethodBodiesList",
+  });
+
+  const dispatch = useAppDispatch();
+  useEffect(() => {
+    return () => {
+      dispatch(clearSolutionDialogData());
+    };
+  }, [dispatch]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -79,9 +108,9 @@ export default function CreateNewProblemForm({
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            {/*{isFetchBaseQueryError(error) && (
+            {isFetchBaseQueryError(error) && (
               <p className="mb-6 text-destructive">{error.data.detail}</p>
-            )}*/}
+            )}
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
@@ -155,7 +184,11 @@ export default function CreateNewProblemForm({
                   <FormItem>
                     <FormLabel>problemDescription</FormLabel>
                     <FormControl>
-                      <Textarea {...field} />
+                      <Textarea
+                        {...field}
+                        className="h-28"
+                        placeholder="TODO... use a text editing component here with better styling capabilities"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -177,7 +210,7 @@ export default function CreateNewProblemForm({
                         step={1}
                         defaultValue={[field.value]}
                         onValueChange={(vals) => {
-                          field.onChange(vals[0])
+                          field.onChange(vals[0]);
                         }}
                       />
                     </FormControl>
@@ -193,18 +226,43 @@ export default function CreateNewProblemForm({
                   <FormItem>
                     <FormLabel>mainMethodBodiesList</FormLabel>
                     <FormControl>
-                      <ProblemCodeEditorDialog
-                        value={field.value}
-                        onChange={field.onChange}
-                        inputIsInvalid={
-                          !!form.getFieldState("mainMethodBodiesList", form.formState).error
+                      <ProblemInfoDialog
+                        problemSolutions={field.value}
+                        inputErrors={
+                          form.getFieldState("mainMethodBodiesList").error as
+                            | ProblemSolutionsRHFFieldErrors[]
+                            | undefined
                         }
+                        inputIsInvalid={
+                          !!form.getFieldState(
+                            "mainMethodBodiesList",
+                            form.formState,
+                          ).error
+                        }
+                        update={update}
+                        remove={remove}
+                        triggerMainFormFn={form.trigger}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="expectedOutputAndStdIn"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>expectedOutputAndStdIn</FormLabel>
+                    <FormControl>
+                      <Input placeholder="TODO... dialog" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/*<Button className="w-full" disabled={isLoading}>
                 {isLoading ? "Submitting..." : "Create course"}
               </Button>*/}

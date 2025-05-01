@@ -7,6 +7,7 @@ import authSliceReducer, {
 } from "@/features/auth/stores/auth-slice.ts";
 import { baseApi } from "@/stores/base-api.ts";
 import {setupListeners} from "@reduxjs/toolkit/query";
+import problemSliceReducer, { problemSolutionsSlice } from "@/features/problems/stores/problem-solutions-slice.ts";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     [baseApi.reducerPath]: baseApi.reducer,
     // slices
     [authSlice.name]: authSliceReducer,
+    [problemSolutionsSlice.name]: problemSliceReducer,
     [themeSlice.name]: themeSliceReducer,
   },
   middleware: (getDefaultMiddleware) =>
