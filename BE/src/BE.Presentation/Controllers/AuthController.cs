@@ -173,6 +173,7 @@ namespace BE.Presentation.Controllers
         [ProducesResponseType(statusCode: StatusCodes.Status200OK)]
         public IActionResult Logout()
         {
+            // TODO: maybe remove the refresh token from the database
             Response.Cookies.Delete("accessToken",
                 new CookieOptions { HttpOnly = true, Secure = true, SameSite = SameSiteMode.None });
             Response.Cookies.Delete("refreshToken",

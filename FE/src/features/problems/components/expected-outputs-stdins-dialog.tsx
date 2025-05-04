@@ -9,11 +9,10 @@
 import { Button } from "@/components/ui/button.tsx";
 import { useSidebar } from "@/components/ui/sidebar.tsx";
 import {
-  ControllerRenderProps,
   useFieldArray,
   useForm,
-  UseFormSetValue,
-  UseFormTrigger,
+  type UseFormSetValue,
+  type UseFormTrigger,
 } from "react-hook-form";
 import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -31,12 +30,10 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { useEffect, useState } from "react";
+import { type ExpectedOutputAndStdin } from "@/features/problems/types/problems-types.ts";
 
 type ExpectedOutputsStdinsDialogProps = {
-  parentField: ControllerRenderProps<
-    ProblemFormSchemaType,
-    "expectedOutputAndStdIn"
-  >;
+  expectedOutputsAndStdins: ExpectedOutputAndStdin[];
   inputIsInvalid: boolean;
   parentFormValidated: boolean;
   setExpectedOutputAndStdIn: UseFormSetValue<ProblemFormSchemaType>;
@@ -58,7 +55,7 @@ const formSchema = z.object({
 });
 
 export default function ExpectedOutputsStdinsDialog({
-  parentField,
+  expectedOutputsAndStdins,
   inputIsInvalid,
   parentFormValidated,
   setExpectedOutputAndStdIn,
@@ -69,7 +66,7 @@ export default function ExpectedOutputsStdinsDialog({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      expectedOutputAndStdIn: [...parentField.value],
+      expectedOutputAndStdIn: expectedOutputsAndStdins,
     },
   });
 
@@ -143,8 +140,8 @@ export default function ExpectedOutputsStdinsDialog({
             >
               Simulate form close to check form values
             </Button>
-            {fields.map((field, index) => (
-              <Card key={field.id} className="py-0">
+            {fields.map((formField, index) => (
+              <Card key={formField.id} className="py-0">
                 {/*<p>{item.stdInParam}</p>
                 <p>{item.expectedOutput}</p>
                 <p>{item.isSample ? "true" : "false"}</p>*/}

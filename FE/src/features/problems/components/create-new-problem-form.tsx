@@ -35,12 +35,12 @@ import ProblemInfoDialog from "@/features/problems/components/problem-info-dialo
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Slider } from "@/components/ui/slider.tsx";
 import { useAppDispatch } from "@/hooks/redux/redux-hooks.ts";
-import { clearSolutionDialogData } from "@/features/problems/stores/problem-solutions-slice.ts";
+import { clearUsedLanguages } from "@/features/problems/stores/problem-solutions-slice.ts";
 import { type ProblemSolutionsRHFFieldErrors } from "@/features/problems/types/problems-types.ts";
 import ExpectedOutputsStdinsDialog from "@/features/problems/components/expected-outputs-stdins-dialog.tsx";
 
 const problemSolutionsSchema = z.object({
-  languageId: z.number().min(1, { message: "Language ID cannot be empty." }),
+  languageId: z.string().min(1, { message: "Language ID cannot be empty." }),
   solutionTemplate: z.string().min(1, {
     message: "Solution template cannot be empty.",
   }),
@@ -98,15 +98,11 @@ export default function CreateNewProblemForm({
   }
 
   const { data, error } = useGetMyCreatedCoursesQuery();
-  const { update, remove } = useFieldArray({
-    control: form.control,
-    name: "mainMethodBodiesList",
-  });
 
   const dispatch = useAppDispatch();
   useEffect(() => {
     return () => {
-      dispatch(clearSolutionDialogData());
+      dispatch(clearUsedLanguages());
     };
   }, [dispatch]);
 
@@ -236,25 +232,31 @@ export default function CreateNewProblemForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>mainMethodBodiesList</FormLabel>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        console.log(form.getValues().mainMethodBodiesList)
+                      }
+                    >
+                      Check fields
+                    </Button>
                     <FormControl>
                       <ProblemInfoDialog
                         //TODO: maybe look into this on how to use this field value by mapping over the fields generated from the updateFn to make the validation i did simpler
                         // => https://react-hook-form.com/docs/usefieldarray //scroll down to example and maybe select nested form?
-                        problemSolutions={field.value}
+                        parentProblemSolutions={field.value}
+                        setMainMethodBodyContent={form.setValue}
                         inputErrors={
                           form.getFieldState("mainMethodBodiesList").error as
                             | ProblemSolutionsRHFFieldErrors[]
                             | undefined
                         }
-                        inputIsInvalid={
+                        parentFormIsInvalid={
                           !!form.getFieldState(
                             "mainMethodBodiesList",
                             form.formState,
                           ).error
                         }
-                        update={update}
-                        remove={remove}
-                        triggerMainFormFn={form.trigger}
                       />
                     </FormControl>
                     <FormMessage />
@@ -286,7 +288,7 @@ export default function CreateNewProblemForm({
                     </Button>
                     <FormControl>
                       <ExpectedOutputsStdinsDialog
-                        parentField={field}
+                        expectedOutputsAndStdins={field.value}
                         inputIsInvalid={
                           !!form.getFieldState(
                             "expectedOutputAndStdIn",

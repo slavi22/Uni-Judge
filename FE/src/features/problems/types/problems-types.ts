@@ -46,23 +46,17 @@ export type SolutionComponentProps = {
   pickedLanguageId: number | null;
 };
 
-export type SolutionDialogData = {
-  language: string;
-  solutionTemplate: string;
-  mainMethodBodyContent: string;
-};
-
-export type SolutionDialogDataObject = {
-  [key: string]: SolutionDialogData;
-};
-
 export type ProblemSolutionsState = {
-  allInputsValid: boolean | null;
-  solutionDialogData: SolutionDialogDataObject | null;
-};
+  usedLanguages: number[];
+}
+
+export type SetUsedLanguagesPayload = {
+  oldLanguageId: number;
+  newLanguageId: number;
+}
 
 export type ProblemSolutions = {
-  languageId: number;
+  languageId: string;
   solutionTemplate: string;
   mainMethodBodyContent: string;
 };

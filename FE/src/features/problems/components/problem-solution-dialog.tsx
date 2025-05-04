@@ -19,15 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.tsx";
-import {
-  type LanguageDto,
-  type ProblemSolutions,
+import type {
+  LanguageDto,
+  ProblemSolutions,
   ProblemSolutionsRHFFieldErrors,
-  type SolutionComponentProps,
-  SolutionDialogData,
 } from "@/features/problems/types/problems-types.ts";
 import { Textarea } from "@/components/ui/textarea.tsx";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormSetValue } from "react-hook-form";
 import { z } from "zod";
 import {
   Form,
@@ -38,10 +36,14 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAppDispatch } from "@/hooks/redux/redux-hooks.ts";
-import { setSolutionDialogData } from "@/features/problems/stores/problem-solutions-slice.ts";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
+import {
+  removeLanguage,
+  setUsedLanguages,
+} from "@/features/problems/stores/problem-solutions-slice.ts";
+import { MainMethodBodyList } from "@/features/problems/components/problem-info-dialog.tsx";
 
-type ProblemSolutionDialogProps = {
+/*type ProblemSolutionDialogProps = {
   id: string;
   languages: LanguageDto[];
   solutions: SolutionComponentProps[];
@@ -53,10 +55,19 @@ type ProblemSolutionDialogProps = {
   parentFormIsInvalid: boolean;
   problemValidationError: ProblemSolutionsRHFFieldErrors | undefined;
   triggerMainFormFn: () => void;
+};*/
+type ProblemSolutionDialogProps = {
+  solution: ProblemSolutions;
+  index: number;
+  languages: LanguageDto[];
+  setSolution: UseFormSetValue<MainMethodBodyList>;
+  deleteSolution: () => void;
+  parentFormIsInvalid: boolean;
+  problemValidationErrors: ProblemSolutionsRHFFieldErrors | undefined;
 };
 
 const formSchema = z.object({
-  language: z.string().min(1, { message: "Language cannot be empty." }),
+  languageId: z.string().min(1, { message: "Language cannot be empty." }),
   solutionTemplate: z
     .string()
     .min(1, { message: "Solution template cannot be empty." }),
@@ -66,29 +77,27 @@ const formSchema = z.object({
 });
 
 export default function ProblemSolutionDialog({
-  id,
+  solution,
+  index,
   languages,
-  solutions,
   setSolution,
-  handleSolutionDeletion,
-  solutionDialogData,
-  rhfUpdateFn,
-  updateFnIndex,
+  deleteSolution,
   parentFormIsInvalid,
-  problemValidationError,
-  triggerMainFormFn
+  problemValidationErrors,
 }: ProblemSolutionDialogProps) {
+  //console.log(solution);
   const { open } = useSidebar();
   const [selectedLanguage, setSelectedLanguage] = useState<string | undefined>(
-    solutionDialogData?.language,
+    solution.languageId,
   );
   const dispatch = useAppDispatch();
+  const { usedLanguages } = useAppSelector((state) => state.problemSolutions);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      language: solutionDialogData?.language || "",
-      solutionTemplate: solutionDialogData?.solutionTemplate || "",
-      mainMethodBodyContent: solutionDialogData?.mainMethodBodyContent || "",
+      languageId: solution?.languageId || "",
+      solutionTemplate: solution?.solutionTemplate || "",
+      mainMethodBodyContent: solution?.mainMethodBodyContent || "",
     },
   });
 
@@ -99,16 +108,11 @@ export default function ProblemSolutionDialog({
   function handleSelect(zodFn: (value: string) => void, languageId: string) {
     zodFn(languageId);
     setSelectedLanguage(languageId);
-
-    setSolution((prevState) =>
-      prevState.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              pickedLanguageId: Number(languageId),
-            }
-          : item,
-      ),
+    dispatch(
+      setUsedLanguages({
+        oldLanguageId: Number(selectedLanguage),
+        newLanguageId: Number(languageId),
+      }),
     );
   }
 
@@ -118,30 +122,12 @@ export default function ProblemSolutionDialog({
    * Triggers validation on parent form if needed
    */
   function handleDialogClose() {
-
+    setSolution(`mainMethodBodiesList.${index}`, form.getValues());
     if (!dialogOpenedOnce) {
       //debounce to not show the error the first time we close the dialog
       setTimeout(() => {
         setDialogOpenedOnce(true);
       }, 200);
-    }
-    dispatch(
-      setSolutionDialogData({
-        [id]: {
-          language: form.getValues().language,
-          solutionTemplate: form.getValues().solutionTemplate,
-          mainMethodBodyContent: form.getValues().mainMethodBodyContent,
-        },
-      }),
-    );
-    rhfUpdateFn(updateFnIndex, {
-      languageId: Number(form.getValues().language),
-      solutionTemplate: form.getValues().solutionTemplate,
-      mainMethodBodyContent: form.getValues().mainMethodBodyContent,
-    });
-
-    if (parentFormIsInvalid) {
-      triggerMainFormFn();
     }
   }
 
@@ -149,12 +135,18 @@ export default function ProblemSolutionDialog({
     console.log(formData);
   }
 
-  //we select the other problems that are not the current one so we can know which languages are already used
-  const otherProblems = solutions.filter((item) => item.id !== id)!;
-  //here we get the languages that are already used in the other problems
-  const usedLanguagesIds = otherProblems.map((item) => item.pickedLanguageId!);
+  function handleSolutionDeletion() {
+    deleteSolution();
+    dispatch(removeLanguage(Number(selectedLanguage)));
+  }
+
+  const usedLanguagesIds = usedLanguages.map((item) => item);
+
+  //console.log(usedLanguagesIds);
   // here we check set the state based on the parent form validation and if we have a problem validation error in this current problem, if we do we apply a red border to the dialog trigger button
-  const [dialogOpenedOnce, setDialogOpenedOnce] = useState(parentFormIsInvalid && !problemValidationError);
+  const [dialogOpenedOnce, setDialogOpenedOnce] = useState(
+    parentFormIsInvalid && !problemValidationErrors,
+  );
 
   useEffect(() => {
     // if the dialog is opened once and the parent form is invalid, then trigger the validation
@@ -172,8 +164,11 @@ export default function ProblemSolutionDialog({
         <div className="flex flex-col gap-2">
           <Button
             variant="outline"
+            type="button"
             className={
-              parentFormIsInvalid && problemValidationError ? "border !border-destructive" : undefined
+              parentFormIsInvalid && problemValidationErrors
+                ? "border !border-destructive"
+                : undefined
             }
           >
             Edit solution{" "}
@@ -185,8 +180,8 @@ export default function ProblemSolutionDialog({
                 )?.name
               }`}
           </Button>
-          {problemValidationError &&
-            Object.entries(problemValidationError).map(([key, value]) => (
+          {problemValidationErrors &&
+            Object.entries(problemValidationErrors).map(([key, value]) => (
               <p key={key} className="text-sm text-destructive">
                 {value.message}
               </p>
@@ -209,7 +204,7 @@ export default function ProblemSolutionDialog({
                 {
                   languages.find(
                     (language) =>
-                      language.languageId.toString() === selectedLanguage,
+                      language.languageId === Number(selectedLanguage),
                   )?.name
                 }
               </u>
@@ -236,7 +231,7 @@ export default function ProblemSolutionDialog({
             >
               <FormField
                 control={form.control}
-                name="language"
+                name="languageId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Language</FormLabel>
@@ -256,7 +251,11 @@ export default function ProblemSolutionDialog({
                             {languages
                               .filter(
                                 (item) =>
-                                  !usedLanguagesIds.includes(item.languageId),
+                                  item.languageId.toString() ===
+                                    selectedLanguage ||
+                                  !usedLanguagesIds.includes(
+                                    Number(item.languageId),
+                                  ),
                               )
                               .map((item) => (
                                 //TODO: maybe sort based on the selected item???
@@ -321,7 +320,7 @@ export default function ProblemSolutionDialog({
           <Button
             type="button"
             variant="destructive"
-            onClick={() => handleSolutionDeletion(id, updateFnIndex)}
+            onClick={handleSolutionDeletion}
           >
             Delete Solution
           </Button>

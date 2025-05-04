@@ -8,72 +8,92 @@
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button.tsx";
 import { useSidebar } from "@/components/ui/sidebar.tsx";
-import { useState } from "react";
 import ProblemSolutionDialog from "@/features/problems/components/problem-solution-dialog.tsx";
 import { useGetAllProgrammingLanguagesQuery } from "@/features/problems/api/problems-api.ts";
-import { v4 as uuidv4 } from "uuid";
 import type {
   ProblemSolutions,
   ProblemSolutionsRHFFieldErrors,
-  SolutionComponentProps,
 } from "@/features/problems/types/problems-types.ts";
-import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
-import type { UseFieldArrayRemove } from "react-hook-form";
+import { useFieldArray, useForm, type UseFormSetValue } from "react-hook-form";
+import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form.tsx";
 
 type ProblemCodeEditorDialogProps = {
-  problemSolutions: ProblemSolutions[];
+  parentProblemSolutions: ProblemSolutions[];
+  setMainMethodBodyContent: UseFormSetValue<ProblemFormSchemaType>;
   inputErrors: ProblemSolutionsRHFFieldErrors[] | undefined;
-  inputIsInvalid: boolean;
-  update: (index: number, data: ProblemSolutions) => void;
-  remove: UseFieldArrayRemove;
-  triggerMainFormFn: () => void;
+  parentFormIsInvalid: boolean;
 };
 
+const mainMethodBodyContentSchema = z.object({
+  languageId: z.string().min(1, { message: "Language is required." }),
+  solutionTemplate: z.string().min(1, {
+    message: "Solution template cannot be empty.",
+  }),
+  mainMethodBodyContent: z.string().min(1, {
+    message: "Main method body content cannot be empty.",
+  }),
+});
+
+const formSchema = z.object({
+  mainMethodBodiesList: z
+    .array(mainMethodBodyContentSchema)
+    .min(1, { message: "At least one main method body is required." }),
+});
+
+export type MainMethodBodyList = z.infer<typeof formSchema>;
+
 export default function ProblemInfoDialog({
+  parentProblemSolutions,
+  setMainMethodBodyContent,
   inputErrors,
-  inputIsInvalid,
-  update,
-  remove,
-  triggerMainFormFn,
+  parentFormIsInvalid,
 }: ProblemCodeEditorDialogProps) {
   const { open } = useSidebar();
+  //console.log(parentProblemSolutions);
 
-  const { data } = useGetAllProgrammingLanguagesQuery();
-  const [solutions, setSolutions] = useState<SolutionComponentProps[]>([]);
-  const { solutionDialogData } = useAppSelector(
-    (state) => state.problemSolutions,
-  );
+  const { data: languages } = useGetAllProgrammingLanguagesQuery();
 
-  /**
-   * Handles the addition of a new solution
-   * This function updates the state of the solutions and adds (using RHF's form update fn) a new solution to the form schema "mainMethodBodiesList" array
-   * */
-  function handleClick() {
-    setSolutions((prevState) => [
-      ...prevState,
-      { id: uuidv4(), pickedLanguageId: null },
-    ]);
-    update(solutions.length, {
-      languageId: 0,
-      solutionTemplate: "",
-      mainMethodBodyContent: "",
-    });
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { mainMethodBodiesList: parentProblemSolutions },
+  });
+
+  function onSubmit(formData: z.infer<typeof formSchema>) {
+    console.log(formData);
   }
 
-  /**
-   * Handles the deletion of a solution
-   * This function updates the state of the solutions and removes the solution from the form schema "mainMethodBodiesList" array
-   * */
-  function handleSolutionDeletion(id: string, removeIndex: number) {
-    setSolutions((prevState) => prevState.filter((item) => item.id !== id));
-    remove(removeIndex);
-  }
+  const {
+    fields,
+    append,
+    remove: removeSolution,
+  } = useFieldArray({
+    control: form.control,
+    name: "mainMethodBodiesList",
+  });
 
   return (
-    <Dialog>
+    <Dialog
+      onOpenChange={() =>
+        setMainMethodBodyContent(
+          "mainMethodBodiesList",
+          form.getValues().mainMethodBodiesList,
+        )
+      }
+    >
       <DialogTrigger
         asChild
-        className={inputIsInvalid ? "border !border-destructive" : undefined}
+        className={
+          parentFormIsInvalid ? "border !border-destructive" : undefined
+        }
       >
         <Button variant="outline">Open mainMethodBodiesList Modal</Button>
       </DialogTrigger>
@@ -81,30 +101,47 @@ export default function ProblemInfoDialog({
         <DialogHeader>
           <DialogTitle>Add mainMethodBodies</DialogTitle>
           <DialogDescription>Test</DialogDescription>
-          <Button type="button" onClick={handleClick}>
+          <Button
+            type="button"
+            onClick={() =>
+              append({
+                languageId: "",
+                mainMethodBodyContent: "",
+                solutionTemplate: "",
+              })
+            }
+          >
             Add a solution
           </Button>
-          {solutions.map((solution, index) => (
-            <ProblemSolutionDialog
-              key={solution.id}
-              id={solution.id}
-              languages={data!}
-              solutions={solutions}
-              setSolution={setSolutions}
-              handleSolutionDeletion={handleSolutionDeletion}
-              solutionDialogData={
-                solutionDialogData ? solutionDialogData[solution.id] : undefined
-              }
-              rhfUpdateFn={update}
-              updateFnIndex={index}
-              parentFormIsInvalid={inputIsInvalid}
-              problemValidationError={
-                inputErrors ? inputErrors[index] : undefined
-              }
-              triggerMainFormFn={triggerMainFormFn}
-            />
+          {fields.map((solution, index) => (
+            <Form key={solution.id} {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <FormField
+                  control={form.control}
+                  name="mainMethodBodiesList"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ProblemSolutionDialog
+                          solution={field.value[index]}
+                          index={index}
+                          languages={languages!}
+                          setSolution={form.setValue}
+                          deleteSolution={() => removeSolution(index)}
+                          parentFormIsInvalid={parentFormIsInvalid}
+                          problemValidationErrors={
+                            inputErrors ? inputErrors[index] : undefined
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
           ))}
-          <Button type="button" onClick={() => console.log(solutions)}>
+          <Button type="button" onClick={() => console.log(form.getValues())}>
             Click
           </Button>
           {/*TODO: move or remove*/}
