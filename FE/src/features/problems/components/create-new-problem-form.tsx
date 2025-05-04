@@ -37,6 +37,7 @@ import { Slider } from "@/components/ui/slider.tsx";
 import { useAppDispatch } from "@/hooks/redux/redux-hooks.ts";
 import { clearSolutionDialogData } from "@/features/problems/stores/problem-solutions-slice.ts";
 import { type ProblemSolutionsRHFFieldErrors } from "@/features/problems/types/problems-types.ts";
+import ExpectedOutputsStdinsDialog from "@/features/problems/components/expected-outputs-stdins-dialog.tsx";
 
 const problemSolutionsSchema = z.object({
   languageId: z.number().min(1, { message: "Language ID cannot be empty." }),
@@ -46,6 +47,14 @@ const problemSolutionsSchema = z.object({
   mainMethodBodyContent: z.string().min(1, {
     message: "Main method body content cannot be empty.",
   }),
+});
+
+const expectedOutputAndStdInSchema = z.object({
+  stdInParam: z.string().min(1, { message: "StdIn cannot be empty." }),
+  expectedOutput: z
+    .string()
+    .min(1, { message: "Expected output cannot be empty." }),
+  isSample: z.boolean(),
 });
 
 const formSchema = z.object({
@@ -61,9 +70,11 @@ const formSchema = z.object({
     .min(1, { message: "This problem requires at least one solution." }),
   //TODO: finish expected output and stdIn
   expectedOutputAndStdIn: z
-    .string()
+    .array(expectedOutputAndStdInSchema)
     .min(1, { message: "Expected outputs or StdIns cannot be empty." }),
 });
+
+export type ProblemFormSchemaType = z.infer<typeof formSchema>;
 
 export default function CreateNewProblemForm({
   className,
@@ -78,7 +89,7 @@ export default function CreateNewProblemForm({
       problemDescription: "",
       requiredPercentageToPass: 50,
       mainMethodBodiesList: [],
-      expectedOutputAndStdIn: "", //TODO: finish expected output and stdIn
+      expectedOutputAndStdIn: [],
     },
   });
 
@@ -227,6 +238,8 @@ export default function CreateNewProblemForm({
                     <FormLabel>mainMethodBodiesList</FormLabel>
                     <FormControl>
                       <ProblemInfoDialog
+                        //TODO: maybe look into this on how to use this field value by mapping over the fields generated from the updateFn to make the validation i did simpler
+                        // => https://react-hook-form.com/docs/usefieldarray //scroll down to example and maybe select nested form?
                         problemSolutions={field.value}
                         inputErrors={
                           form.getFieldState("mainMethodBodiesList").error as
@@ -245,6 +258,14 @@ export default function CreateNewProblemForm({
                       />
                     </FormControl>
                     <FormMessage />
+                    {!!form.getFieldState(
+                      "mainMethodBodiesList",
+                      form.formState, //the second parameters indicates that we subscribe to the form state
+                    ).error && (
+                      <p className="text-sm text-destructive">
+                        One or more validation errors occurred
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
@@ -255,18 +276,44 @@ export default function CreateNewProblemForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>expectedOutputAndStdIn</FormLabel>
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        console.log(form.getValues("expectedOutputAndStdIn"))
+                      }
+                    >
+                      Check expectedOutputAndStdIn array
+                    </Button>
                     <FormControl>
-                      <Input placeholder="TODO... dialog" {...field} />
+                      <ExpectedOutputsStdinsDialog
+                        parentField={field}
+                        inputIsInvalid={
+                          !!form.getFieldState(
+                            "expectedOutputAndStdIn",
+                            form.formState,
+                          ).error
+                        }
+                        parentFormValidated={form.formState.isSubmitted}
+                        setExpectedOutputAndStdIn={form.setValue}
+                        formTriggerValidationFn={form.trigger}
+                      />
                     </FormControl>
                     <FormMessage />
+                    {!!form.getFieldState(
+                      "expectedOutputAndStdIn",
+                      form.formState,
+                    ).error && (
+                      <p className="text-sm text-destructive">
+                        One or more validation errors occurred
+                      </p>
+                    )}
                   </FormItem>
                 )}
               />
 
-              {/*<Button className="w-full" disabled={isLoading}>
-                {isLoading ? "Submitting..." : "Create course"}
-              </Button>*/}
-              <Button className="w-full">Submit</Button>
+              <Button className="w-full" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Submitting" : "Create problem"}
+              </Button>
             </form>
           </Form>
         </CardContent>

@@ -65,10 +65,16 @@ export type ProblemSolutions = {
   languageId: number;
   solutionTemplate: string;
   mainMethodBodyContent: string;
-}
+};
 
 export type ProblemSolutionsRHFFieldErrors = {
   languageId: FieldError;
   solutionTemplate: FieldError;
   mainMethodBodyContent: FieldError;
-}
+};
+
+export type ExpectedOutputAndStdin = {
+  stdInParam: string;
+  expectedOutput: string;
+  isSample: boolean;
+};
