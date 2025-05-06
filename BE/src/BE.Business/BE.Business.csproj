@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="DotNetProjects.MonacoRoslynCompletionProvider" Version="0.3.5" />
       <PackageReference Include="Google.Apis.Auth.AspNetCore3" Version="1.69.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
     </ItemGroup>

@@ -59,5 +59,13 @@ namespace BE.Presentation.Controllers
             var result = await _problemService.GeyMyCreatedProblemsAsync();
             return Ok(result);
         }
+
+        [Authorize(Roles = "Teacher")]
+        [HttpPost("create-problem-test")]
+        public async Task<IActionResult> CreateProblemTest(ClientProblemDto problem)
+        {
+            Console.WriteLine(problem);
+            return Ok();
+        }
     }
 }

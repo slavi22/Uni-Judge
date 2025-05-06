@@ -187,6 +187,7 @@ public class Program
         builder.Services.AddScoped<ICourseService, CourseService>();
         builder.Services.AddScoped<IAuthProvidersService, AuthProvidersService>();
         builder.Services.AddScoped<ILanguageService, LanguageService>();
+        builder.Services.AddScoped<ICodeIntellisenseService, CodeIntellisenseService>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         // builder.Services.AddOpenApi();
