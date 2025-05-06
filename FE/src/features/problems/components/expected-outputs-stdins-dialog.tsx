@@ -17,7 +17,7 @@ import {
 import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card.tsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -62,7 +62,6 @@ export default function ExpectedOutputsStdinsDialog({
   formTriggerValidationFn,
 }: ExpectedOutputsStdinsDialogProps) {
   const { open } = useSidebar();
-  //console.log(parentField);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,7 +69,7 @@ export default function ExpectedOutputsStdinsDialog({
     },
   });
 
-  const { fields, append } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: "expectedOutputAndStdIn",
   });
@@ -134,30 +133,22 @@ export default function ExpectedOutputsStdinsDialog({
           >
             Add new input and output
           </Button>
-          <div className="flex flex-col gap-3">
-            {/*<Button onClick={() => console.log(form.getValues())}>Log</Button>
-            <Button
-              onClick={() =>
-                setExpectedOutputAndStdIn(
-                  "expectedOutputAndStdIn",
-                  form.getValues("expectedOutputAndStdIn"),
-                )
-              }
-            >
-              Simulate form close to check form values
-            </Button>*/}
-            <Button>Log</Button>
-            {fields.map((formField, index) => (
-              <Card key={formField.id} className="py-0">
-                {/*<p>{item.stdInParam}</p>
-                <p>{item.expectedOutput}</p>
-                <p>{item.isSample ? "true" : "false"}</p>*/}
-                <CardContent className="flex items-center justify-center gap-5">
-                  <Form {...form}>
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="flex items-center min-h-32 gap-3"
-                    >
+          <div className="flex gap-3">
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="flex flex-col items-center gap-3"
+              >
+                <Button
+                  type="button"
+                  onClick={() => form.handleSubmit(onSubmit)()}
+                >
+                  Submit
+                </Button>
+                {fields.map((formField, index) => (
+                  <Card key={formField.id} className="min-h-32">
+                    <p>{index}</p>
+                    <CardContent className="flex items-center justify-center gap-5">
                       <FormField
                         control={form.control}
                         name={`expectedOutputAndStdIn.${index}.stdInParam`}
@@ -167,12 +158,6 @@ export default function ExpectedOutputsStdinsDialog({
                               <Input placeholder="StdIn parameter" {...field} />
                             </FormControl>
                             <FormMessage className="h-0" />
-                            {/*<Button
-                              type="button"
-                              onClick={() => console.log(field)}
-                            >
-                              Click
-                            </Button>*/}
                           </FormItem>
                         )}
                       />
@@ -206,52 +191,18 @@ export default function ExpectedOutputsStdinsDialog({
                           </FormItem>
                         )}
                       />
-                    </form>
-                  </Form>
-                  {/*<Input
-                    {...field}
-                    value={item.stdInParam}
-                    onChange={(event) => {
-                      const newValue = [...field.value];
-                      newValue[index] = {
-                        ...newValue[index],
-                        stdInParam: event.target.value,
-                      };
-                      field.onChange(newValue);
-                    }}
-                    placeholder="StdIn parameter"
-                  />
-                  <ArrowRight size={128} />
-                  <Input
-                    {...field}
-                    value={item.expectedOutput}
-                    onChange={(event) => {
-                      const newValue = [...field.value];
-                      newValue[index] = {
-                        ...newValue[index],
-                        expectedOutput: event.target.value,
-                      };
-                      field.onChange(newValue);
-                    }}
-                    placeholder="Expected Output"
-                  />
-                  <div className="flex items-center gap-2 whitespace-nowrap">
-                    <Checkbox
-                      checked={item.isSample}
-                      onCheckedChange={(event) => {
-                        const newValue = [...field.value];
-                        newValue[index] = {
-                          ...newValue[index],
-                          isSample: event as boolean,
-                        };
-                        field.onChange(newValue);
-                      }}
-                    />
-                    <p>Is sample?</p>
-                  </div>*/}
-                </CardContent>
-              </Card>
-            ))}
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </form>
+            </Form>
           </div>
         </div>
       </DialogContent>
