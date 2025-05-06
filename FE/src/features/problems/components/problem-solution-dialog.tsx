@@ -22,10 +22,14 @@ import {
 import type {
   LanguageDto,
   ProblemSolutions,
-  ProblemSolutionsRHFFieldErrors,
 } from "@/features/problems/types/problems-types.ts";
 import { Textarea } from "@/components/ui/textarea.tsx";
-import { useForm, UseFormSetValue } from "react-hook-form";
+import {
+  FieldError,
+  useForm,
+  UseFormSetValue,
+  UseFormTrigger,
+} from "react-hook-form";
 import { z } from "zod";
 import {
   Form,
@@ -41,21 +45,8 @@ import {
   removeLanguage,
   setUsedLanguages,
 } from "@/features/problems/stores/problem-solutions-slice.ts";
-import { MainMethodBodyList } from "@/features/problems/components/problem-info-dialog.tsx";
+import type { MainMethodBodyList } from "@/features/problems/components/problem-info-dialog.tsx";
 
-/*type ProblemSolutionDialogProps = {
-  id: string;
-  languages: LanguageDto[];
-  solutions: SolutionComponentProps[];
-  setSolution: React.Dispatch<React.SetStateAction<SolutionComponentProps[]>>;
-  handleSolutionDeletion: (id: string, removeRHFFnIndex: number) => void;
-  solutionDialogData: SolutionDialogData | undefined;
-  rhfUpdateFn: (index: number, data: ProblemSolutions) => void;
-  updateFnIndex: number;
-  parentFormIsInvalid: boolean;
-  problemValidationError: ProblemSolutionsRHFFieldErrors | undefined;
-  triggerMainFormFn: () => void;
-};*/
 type ProblemSolutionDialogProps = {
   solution: ProblemSolutions;
   index: number;
@@ -63,7 +54,8 @@ type ProblemSolutionDialogProps = {
   setSolution: UseFormSetValue<MainMethodBodyList>;
   deleteSolution: () => void;
   parentFormIsInvalid: boolean;
-  problemValidationErrors: ProblemSolutionsRHFFieldErrors | undefined;
+  problemValidationErrors: FieldError | undefined;
+  triggerInfoDialogValidation: UseFormTrigger<MainMethodBodyList>;
 };
 
 const formSchema = z.object({
@@ -84,8 +76,8 @@ export default function ProblemSolutionDialog({
   deleteSolution,
   parentFormIsInvalid,
   problemValidationErrors,
+  triggerInfoDialogValidation,
 }: ProblemSolutionDialogProps) {
-  //console.log(solution);
   const { open } = useSidebar();
   const [selectedLanguage, setSelectedLanguage] = useState<string | undefined>(
     solution.languageId,
@@ -123,11 +115,13 @@ export default function ProblemSolutionDialog({
    */
   function handleDialogClose() {
     setSolution(`mainMethodBodiesList.${index}`, form.getValues());
-    if (!dialogOpenedOnce) {
+    if (!shouldApplyInvalidStyling) {
       //debounce to not show the error the first time we close the dialog
       setTimeout(() => {
-        setDialogOpenedOnce(true);
+        setShouldApplyInvalidStyling(true);
       }, 200);
+    } else {
+      triggerInfoDialogValidation();
     }
   }
 
@@ -142,21 +136,18 @@ export default function ProblemSolutionDialog({
 
   const usedLanguagesIds = usedLanguages.map((item) => item);
 
-  //console.log(usedLanguagesIds);
   // here we check set the state based on the parent form validation and if we have a problem validation error in this current problem, if we do we apply a red border to the dialog trigger button
-  const [dialogOpenedOnce, setDialogOpenedOnce] = useState(
-    parentFormIsInvalid && !problemValidationErrors,
-  );
+  const [shouldApplyInvalidStyling, setShouldApplyInvalidStyling] = useState(parentFormIsInvalid && !!problemValidationErrors);
 
   useEffect(() => {
     // if the dialog is opened once and the parent form is invalid, then trigger the validation
-    if (dialogOpenedOnce) {
+    if (shouldApplyInvalidStyling) {
       // programmatically trigger the form submission so i dont need to manually call trigger() which would break the onChange event in the inputs
       // => https://stackoverflow.com/a/76091816
       // => https://www.react-hook-form.com/api/useform/handlesubmit/
       form.handleSubmit(onSubmit)();
     }
-  }, [dialogOpenedOnce, form]);
+  }, [shouldApplyInvalidStyling, form, problemValidationErrors]);
 
   return (
     <Dialog onOpenChange={(open) => !open && handleDialogClose()}>
@@ -183,10 +174,9 @@ export default function ProblemSolutionDialog({
           {problemValidationErrors &&
             Object.entries(problemValidationErrors).map(([key, value]) => (
               <p key={key} className="text-sm text-destructive">
-                {value.message}
+                {(value as FieldError).message}
               </p>
             ))}
-          {/*<p className="text-sm text-destructive">aa</p>*/}
         </div>
       </DialogTrigger>
       <DialogContent

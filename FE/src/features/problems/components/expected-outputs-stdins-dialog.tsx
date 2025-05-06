@@ -36,7 +36,7 @@ type ExpectedOutputsStdinsDialogProps = {
   expectedOutputsAndStdins: ExpectedOutputAndStdin[];
   inputIsInvalid: boolean;
   parentFormValidated: boolean;
-  setExpectedOutputAndStdIn: UseFormSetValue<ProblemFormSchemaType>;
+  setFormValue: UseFormSetValue<ProblemFormSchemaType>;
   formTriggerValidationFn: UseFormTrigger<ProblemFormSchemaType>;
 };
 
@@ -58,7 +58,7 @@ export default function ExpectedOutputsStdinsDialog({
   expectedOutputsAndStdins,
   inputIsInvalid,
   parentFormValidated,
-  setExpectedOutputAndStdIn,
+  setFormValue,
   formTriggerValidationFn,
 }: ExpectedOutputsStdinsDialogProps) {
   const { open } = useSidebar();
@@ -86,15 +86,21 @@ export default function ExpectedOutputsStdinsDialog({
       form.handleSubmit(onSubmit)();
     }
     setOpenModal(!openModal);
-    setExpectedOutputAndStdIn(
-      "expectedOutputAndStdIn",
-      form.getValues("expectedOutputAndStdIn"),
+    const expectedOutputAndStdin = form.getValues("expectedOutputAndStdIn");
+    const expectedOutputList = expectedOutputAndStdin.map(
+      ({ expectedOutput, isSample }) => ({ expectedOutput, isSample }),
     );
+    const stdInList = expectedOutputAndStdin.map(
+      ({ stdInParam }) => stdInParam,
+    );
+    //TODO: maybe refactor the BE and make it a single object instead of two separate ones
+    setFormValue("expectedOutputList", expectedOutputList);
+    setFormValue("stdInList", stdInList);
   }
 
   useEffect(() => {
     if (!openModal && parentFormValidated) {
-      formTriggerValidationFn("expectedOutputAndStdIn");
+      formTriggerValidationFn("expectedOutputList");
     }
   }, [formTriggerValidationFn, openModal, parentFormValidated]);
 
@@ -129,7 +135,7 @@ export default function ExpectedOutputsStdinsDialog({
             Add new input and output
           </Button>
           <div className="flex flex-col gap-3">
-            <Button onClick={() => console.log(form.getValues())}>Log</Button>
+            {/*<Button onClick={() => console.log(form.getValues())}>Log</Button>
             <Button
               onClick={() =>
                 setExpectedOutputAndStdIn(
@@ -139,7 +145,8 @@ export default function ExpectedOutputsStdinsDialog({
               }
             >
               Simulate form close to check form values
-            </Button>
+            </Button>*/}
+            <Button>Log</Button>
             {fields.map((formField, index) => (
               <Card key={formField.id} className="py-0">
                 {/*<p>{item.stdInParam}</p>

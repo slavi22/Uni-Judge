@@ -19,7 +19,6 @@ export const problemSolutionsSlice = createSlice({
       if (!state.usedLanguages) {
         state.usedLanguages = [];
       }
-      console.log(action.payload);
       // If the old language is not 0 (could be thought as null - not selected) then we swap the old language with the new one
       // essentially if we have c# and the old language is c# and the new language is javascript, we swap c# with javascript
       // our array will initially be [c#], then we will have [javascript]

@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { type ComponentProps, useEffect } from "react";
 import { z } from "zod";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Select,
@@ -34,9 +34,8 @@ import { useGetMyCreatedCoursesQuery } from "@/features/courses/api/course-api.t
 import ProblemInfoDialog from "@/features/problems/components/problem-info-dialog.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Slider } from "@/components/ui/slider.tsx";
-import { useAppDispatch } from "@/hooks/redux/redux-hooks.ts";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 import { clearUsedLanguages } from "@/features/problems/stores/problem-solutions-slice.ts";
-import { type ProblemSolutionsRHFFieldErrors } from "@/features/problems/types/problems-types.ts";
 import ExpectedOutputsStdinsDialog from "@/features/problems/components/expected-outputs-stdins-dialog.tsx";
 
 const problemSolutionsSchema = z.object({
@@ -50,7 +49,6 @@ const problemSolutionsSchema = z.object({
 });
 
 const expectedOutputAndStdInSchema = z.object({
-  stdInParam: z.string().min(1, { message: "StdIn cannot be empty." }),
   expectedOutput: z
     .string()
     .min(1, { message: "Expected output cannot be empty." }),
@@ -61,17 +59,22 @@ const formSchema = z.object({
   courseId: z.string().min(1, { message: "Course ID cannot be empty." }),
   problemId: z.string().min(1, { message: "Problem ID cannot be empty." }),
   name: z.string().min(1, { message: "Name cannot be empty." }),
-  problemDescription: z
-    .string()
-    .min(1, { message: "Description cannot be empty." }),
+  description: z.string().min(1, { message: "Description cannot be empty." }),
   requiredPercentageToPass: z.number().min(1).max(100),
   mainMethodBodiesList: z
     .array(problemSolutionsSchema)
     .min(1, { message: "This problem requires at least one solution." }),
-  //TODO: finish expected output and stdIn
-  expectedOutputAndStdIn: z
+  expectedOutputList: z
     .array(expectedOutputAndStdInSchema)
     .min(1, { message: "Expected outputs or StdIns cannot be empty." }),
+  stdInList: z
+    .string()
+    .array()
+    .min(1, { message: "StdIn list cannot be empty." }),
+  languagesList: z
+    .number()
+    .array()
+    .min(1, { message: "At least one language is required." }),
 });
 
 export type ProblemFormSchemaType = z.infer<typeof formSchema>;
@@ -86,18 +89,28 @@ export default function CreateNewProblemForm({
       courseId: "",
       problemId: "",
       name: "",
-      problemDescription: "",
+      description: "",
       requiredPercentageToPass: 50,
       mainMethodBodiesList: [],
-      expectedOutputAndStdIn: [],
+      expectedOutputList: [],
+      stdInList: [],
+      languagesList: [],
     },
   });
 
   async function onSubmit(formData: z.infer<typeof formSchema>) {
-    console.log(formData);
+    const reformattedFormData = {
+      ...formData,
+      mainMethodBodiesList: formData.mainMethodBodiesList.map((item) => ({
+        ...item,
+        languageId: Number(item.languageId),
+      })),
+    };
+    console.log(reformattedFormData);
   }
 
   const { data, error } = useGetMyCreatedCoursesQuery();
+  const { usedLanguages } = useAppSelector((state) => state.problemSolutions);
 
   const dispatch = useAppDispatch();
   useEffect(() => {
@@ -105,6 +118,10 @@ export default function CreateNewProblemForm({
       dispatch(clearUsedLanguages());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    form.setValue("languagesList", usedLanguages);
+  }, [form, usedLanguages]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -186,7 +203,7 @@ export default function CreateNewProblemForm({
 
               <FormField
                 control={form.control}
-                name="problemDescription"
+                name="description"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>problemDescription</FormLabel>
@@ -242,15 +259,9 @@ export default function CreateNewProblemForm({
                     </Button>
                     <FormControl>
                       <ProblemInfoDialog
-                        //TODO: maybe look into this on how to use this field value by mapping over the fields generated from the updateFn to make the validation i did simpler
                         // => https://react-hook-form.com/docs/usefieldarray //scroll down to example and maybe select nested form?
                         parentProblemSolutions={field.value}
                         setMainMethodBodyContent={form.setValue}
-                        inputErrors={
-                          form.getFieldState("mainMethodBodiesList").error as
-                            | ProblemSolutionsRHFFieldErrors[]
-                            | undefined
-                        }
                         parentFormIsInvalid={
                           !!form.getFieldState(
                             "mainMethodBodiesList",
@@ -274,37 +285,45 @@ export default function CreateNewProblemForm({
 
               <FormField
                 control={form.control}
-                name="expectedOutputAndStdIn"
+                name="expectedOutputList"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>expectedOutputAndStdIn</FormLabel>
                     <Button
                       type="button"
                       onClick={() =>
-                        console.log(form.getValues("expectedOutputAndStdIn"))
+                        console.log(form.getValues("expectedOutputList"))
                       }
                     >
-                      Check expectedOutputAndStdIn array
+                      Check expectedOutputList array
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => console.log(form.getValues("stdInList"))}
+                    >
+                      Check stdInList array
                     </Button>
                     <FormControl>
                       <ExpectedOutputsStdinsDialog
                         expectedOutputsAndStdins={field.value}
                         inputIsInvalid={
                           !!form.getFieldState(
-                            "expectedOutputAndStdIn",
+                            "expectedOutputList",
                             form.formState,
-                          ).error
+                          ).error ||
+                          !!form.getFieldState("stdInList", form.formState)
+                            .error
                         }
                         parentFormValidated={form.formState.isSubmitted}
-                        setExpectedOutputAndStdIn={form.setValue}
+                        setFormValue={form.setValue}
                         formTriggerValidationFn={form.trigger}
                       />
                     </FormControl>
                     <FormMessage />
-                    {!!form.getFieldState(
-                      "expectedOutputAndStdIn",
-                      form.formState,
-                    ).error && (
+                    {(!!form.getFieldState("expectedOutputList", form.formState)
+                      .error ||
+                      !!form.getFieldState("stdInList", form.formState)
+                        .error) && (
                       <p className="text-sm text-destructive">
                         One or more validation errors occurred
                       </p>

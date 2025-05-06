@@ -12,9 +12,12 @@ import ProblemSolutionDialog from "@/features/problems/components/problem-soluti
 import { useGetAllProgrammingLanguagesQuery } from "@/features/problems/api/problems-api.ts";
 import type {
   ProblemSolutions,
-  ProblemSolutionsRHFFieldErrors,
 } from "@/features/problems/types/problems-types.ts";
-import { useFieldArray, useForm, type UseFormSetValue } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  type UseFormSetValue,
+} from "react-hook-form";
 import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,7 +32,6 @@ import {
 type ProblemCodeEditorDialogProps = {
   parentProblemSolutions: ProblemSolutions[];
   setMainMethodBodyContent: UseFormSetValue<ProblemFormSchemaType>;
-  inputErrors: ProblemSolutionsRHFFieldErrors[] | undefined;
   parentFormIsInvalid: boolean;
 };
 
@@ -54,11 +56,9 @@ export type MainMethodBodyList = z.infer<typeof formSchema>;
 export default function ProblemInfoDialog({
   parentProblemSolutions,
   setMainMethodBodyContent,
-  inputErrors,
   parentFormIsInvalid,
 }: ProblemCodeEditorDialogProps) {
   const { open } = useSidebar();
-  //console.log(parentProblemSolutions);
 
   const { data: languages } = useGetAllProgrammingLanguagesQuery();
 
@@ -113,47 +113,45 @@ export default function ProblemInfoDialog({
           >
             Add a solution
           </Button>
-          {fields.map((solution, index) => (
-            <Form key={solution.id} {...form}>
+          {fields.length > 0 && (
+            <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
-                <FormField
-                  control={form.control}
-                  name="mainMethodBodiesList"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <ProblemSolutionDialog
-                          solution={field.value[index]}
-                          index={index}
-                          languages={languages!}
-                          setSolution={form.setValue}
-                          deleteSolution={() => removeSolution(index)}
-                          parentFormIsInvalid={parentFormIsInvalid}
-                          problemValidationErrors={
-                            inputErrors ? inputErrors[index] : undefined
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {fields.map((solution, index) => (
+                  <FormField
+                    key={solution.id}
+                    control={form.control}
+                    name={`mainMethodBodiesList.${index}`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <ProblemSolutionDialog
+                            solution={field.value}
+                            index={index}
+                            languages={languages!}
+                            setSolution={form.setValue}
+                            deleteSolution={() => removeSolution(index)}
+                            parentFormIsInvalid={
+                              !!form.getFieldState(
+                                "mainMethodBodiesList",
+                                form.formState,
+                              ).error
+                            }
+                            problemValidationErrors={
+                              form.getFieldState(
+                                `mainMethodBodiesList.${index}`,
+                              ).error
+                            }
+                            triggerInfoDialogValidation={form.trigger}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
               </form>
             </Form>
-          ))}
-          <Button type="button" onClick={() => console.log(form.getValues())}>
-            Click
-          </Button>
-          {/*TODO: move or remove*/}
-          {/*<Textarea
-            value={value}
-            onChange={onChange}
-            className={
-              inputIsInvalid
-                ? "border border-destructive focus-visible:border-destructive focus-visible:ring-destructive/50"
-                : undefined
-            }
-          />*/}
+          )}
         </DialogHeader>
       </DialogContent>
     </Dialog>

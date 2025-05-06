@@ -1,6 +1,4 @@
-﻿import { type FieldError } from "react-hook-form";
-
-export type ClientProblemDto = {
+﻿export type ClientProblemDto = {
   courseId: string;
   problemId: string;
   name: string;
@@ -41,11 +39,6 @@ export type LanguageDto = {
   name: string;
 };
 
-export type SolutionComponentProps = {
-  id: string;
-  pickedLanguageId: number | null;
-};
-
 export type ProblemSolutionsState = {
   usedLanguages: number[];
 }
@@ -61,14 +54,8 @@ export type ProblemSolutions = {
   mainMethodBodyContent: string;
 };
 
-export type ProblemSolutionsRHFFieldErrors = {
-  languageId: FieldError;
-  solutionTemplate: FieldError;
-  mainMethodBodyContent: FieldError;
-};
 
 export type ExpectedOutputAndStdin = {
-  stdInParam: string;
   expectedOutput: string;
   isSample: boolean;
 };
