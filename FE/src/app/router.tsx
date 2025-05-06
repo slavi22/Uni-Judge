@@ -8,6 +8,7 @@ import RegisterTeacherPage from "@/app/routes/auth/register-teacher-page.tsx";
 import TeacherProtectedRoute from "@/components/protected/teacher-protected-route.tsx";
 import CreateNewCoursePage from "@/app/routes/course/create-new-course-page.tsx";
 import CreateNewProblemPage from "@/app/routes/problems/create-new-problem-page.tsx";
+import CodeEditorTestPage from "@/app/routes/test/code-editor-test-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
+      },
+      {
+        path: "code-editor-test",
+        element: <CodeEditorTestPage />,
       },
       {
         path: "/login",

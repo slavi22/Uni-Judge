@@ -50,7 +50,12 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
         <SidebarMenu>
           {items &&
             items
-              .filter((item) => item.title !== "All Courses" && item.title !== "Teacher" && item.title !== "Admin")
+              .filter(
+                (item) =>
+                  item.title !== "All Courses" &&
+                  item.title !== "Teacher" &&
+                  item.title !== "Admin",
+              )
               .map((item) => (
                 <Collapsible
                   key={item.title}
@@ -59,6 +64,10 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
                   className="group/collapsible"
                 >
                   <SidebarMenuItem>
+                    {/*TODO: REMOVE ONCE DONE TESTING*/}
+                    <div className="mb-10">
+                      <Link to="/code-editor-test">Code editor test page</Link>
+                    </div>
                     <CollapsibleTrigger className="cursor-pointer" asChild>
                       <SidebarMenuButton tooltip={item.title}>
                         {item.icon && <item.icon />}
