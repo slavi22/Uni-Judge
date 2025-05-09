@@ -23,7 +23,6 @@ import type {
   LanguageDto,
   ProblemSolutions,
 } from "@/features/problems/types/problems-types.ts";
-import { Textarea } from "@/components/ui/textarea.tsx";
 import {
   FieldError,
   useForm,
@@ -46,6 +45,7 @@ import {
   setUsedLanguages,
 } from "@/features/problems/stores/problem-solutions-slice.ts";
 import type { MainMethodBodyList } from "@/features/problems/components/problem-info-dialog.tsx";
+import MonacoCodeEditor from "@/components/code-editor/monaco-code-editor.tsx";
 
 type ProblemSolutionDialogProps = {
   solution: ProblemSolutions;
@@ -126,7 +126,7 @@ export default function ProblemSolutionDialog({
   }
 
   function onSubmit(formData: z.infer<typeof formSchema>) {
-    console.log(formData);
+    console.log(formData); //TODO: Remove
   }
 
   function handleSolutionDeletion() {
@@ -137,7 +137,9 @@ export default function ProblemSolutionDialog({
   const usedLanguagesIds = usedLanguages.map((item) => item);
 
   // here we check set the state based on the parent form validation and if we have a problem validation error in this current problem, if we do we apply a red border to the dialog trigger button
-  const [shouldApplyInvalidStyling, setShouldApplyInvalidStyling] = useState(parentFormIsInvalid && !!problemValidationErrors);
+  const [shouldApplyInvalidStyling, setShouldApplyInvalidStyling] = useState(
+    parentFormIsInvalid && !!problemValidationErrors,
+  );
 
   useEffect(() => {
     // if the dialog is opened once and the parent form is invalid, then trigger the validation
@@ -182,8 +184,8 @@ export default function ProblemSolutionDialog({
       <DialogContent
         className={
           open
-            ? "md:ml-[125px] !max-w-full w-[35%] h-[95%]"
-            : "!max-w-full w-[35%] h-[95%]"
+            ? "md:ml-[125px] !max-w-full w-[35%] h-[95%] overflow-auto"
+            : "!max-w-full w-[35%] h-[95%] overflow-auto"
         }
       >
         <DialogHeader>
@@ -207,7 +209,7 @@ export default function ProblemSolutionDialog({
             final solution code
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-3 flex flex-col gap-5 h-screen">
+        <div className="mt-3 flex flex-col gap-5 h-screen mb-16">
           <Form {...form}>
             <form
               onSubmit={(e) => {
@@ -272,30 +274,32 @@ export default function ProblemSolutionDialog({
                   <FormItem>
                     <FormLabel>Solution Template</FormLabel>
                     <FormControl>
-                      <Textarea
+                      <MonacoCodeEditor
+                        selectedLanguage={selectedLanguage}
+                        editorIsForSolutionTemplate
+                        shouldLoadIntellisense={false}
                         value={field.value}
                         onChange={field.onChange}
-                        className="min-h-40"
-                        placeholder="Monaco editor here for solution template..."
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="mainMethodBodyContent"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Main method body content</FormLabel>
+                    <Button type="button" onClick={() => console.log(field.value)}>Asd</Button>
                     <FormControl>
-                      <Textarea
+                      <MonacoCodeEditor
+                        selectedLanguage={selectedLanguage}
+                        editorIsForSolutionTemplate={false}
+                        shouldLoadIntellisense={false}
                         value={field.value}
                         onChange={field.onChange}
-                        className="min-h-40"
-                        placeholder="Monaco editor here for main method body content..."
                       />
                     </FormControl>
                     <FormMessage />

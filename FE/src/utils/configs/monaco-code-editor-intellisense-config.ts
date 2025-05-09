@@ -34,8 +34,7 @@ async function sendRequest(type: Type, request: Request) {
 
 export function registerCsharpProvider(monacoInstance: typeof monaco) {
 
-  //const assemblies = [".\\bin\\Debug\\net9.0\\System.Text.Json.dll"]; //TODO: check if i need that at all
-  const assemblies = ["bin/Debug/net9.0/System.Text.Json.dll"]; //TODO: check if i need that at all
+  const assemblies = ["bin/Debug/net9.0/BE.Presentation.dll"]; //TODO: change to the corresponding dll in prod since currently in the docker container we are still in dev mode
 
   const IDisposable = monacoInstance.languages.registerCompletionItemProvider("csharp", {
     triggerCharacters: [".", " "],

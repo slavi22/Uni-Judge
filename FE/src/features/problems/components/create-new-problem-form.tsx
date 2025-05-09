@@ -37,6 +37,7 @@ import { Slider } from "@/components/ui/slider.tsx";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 import { clearUsedLanguages } from "@/features/problems/stores/problem-solutions-slice.ts";
 import ExpectedOutputsStdinsDialog from "@/features/problems/components/expected-outputs-stdins-dialog.tsx";
+import { useCreateNewProblemMutation } from "@/features/problems/api/problems-api.ts";
 
 const problemSolutionsSchema = z.object({
   languageId: z.string().min(1, { message: "Language ID cannot be empty." }),
@@ -98,6 +99,8 @@ export default function CreateNewProblemForm({
     },
   });
 
+  const [createNewProblem] = useCreateNewProblemMutation();
+
   async function onSubmit(formData: z.infer<typeof formSchema>) {
     const reformattedFormData = {
       ...formData,
@@ -107,6 +110,7 @@ export default function CreateNewProblemForm({
       })),
     };
     console.log(reformattedFormData);
+    createNewProblem(reformattedFormData);
   }
 
   const { data, error } = useGetMyCreatedCoursesQuery();
@@ -206,7 +210,7 @@ export default function CreateNewProblemForm({
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>problemDescription</FormLabel>
+                    <FormLabel>Description</FormLabel>
                     <FormControl>
                       <Textarea
                         {...field}

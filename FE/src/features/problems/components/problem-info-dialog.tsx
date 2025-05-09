@@ -115,7 +115,7 @@ export default function ProblemInfoDialog({
           </Button>
           {fields.length > 0 && (
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
                 {fields.map((solution, index) => (
                   <FormField
                     key={solution.id}

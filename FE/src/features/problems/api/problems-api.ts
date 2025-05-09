@@ -1,6 +1,10 @@
 ﻿import { baseApi } from "@/stores/base-api.ts";
 import { toast } from "sonner";
-import type { ClientProblemDto, CreatedProblemDto, LanguageDto } from "@/features/problems/types/problems-types.ts";
+import type {
+  ClientProblemDto,
+  CreatedProblemDto,
+  LanguageDto,
+} from "@/features/problems/types/problems-types.ts";
 
 const problemsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -20,9 +24,12 @@ const problemsApi = baseApi.injectEndpoints({
       },
     }),
     getAllProgrammingLanguages: build.query<LanguageDto[], void>({
-      query: () => "languages/get-all-languages"
-    })
+      query: () => "languages/get-all-languages",
+    }),
   }),
 });
 
-export const { useCreateNewProblemMutation, useGetAllProgrammingLanguagesQuery } = problemsApi;
+export const {
+  useCreateNewProblemMutation,
+  useGetAllProgrammingLanguagesQuery,
+} = problemsApi;

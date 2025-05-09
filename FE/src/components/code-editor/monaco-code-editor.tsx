@@ -1,0 +1,92 @@
+﻿import { Editor, loader } from "@monaco-editor/react";
+import * as monaco from "monaco-editor";
+import useTheme from "@/features/theme/hooks/use-theme.ts";
+import { registerCsharpProvider } from "@/utils/configs/monaco-code-editor-intellisense-config.ts";
+import { CODE_EDITOR_TEMPLATES } from "@/utils/constants/code-editor-templates.ts";
+import { useEffect, useState } from "react";
+import InfoTooltip from "@/components/tooltips/info-tooltip.tsx";
+import { Info } from "lucide-react";
+
+type MonacoCodeEditorProps = {
+  selectedLanguage?: string;
+  editorIsForSolutionTemplate: boolean;
+  shouldLoadIntellisense: boolean;
+  value: string;
+  onChange: (newValue: string) => void;
+};
+
+export default function MonacoCodeEditor({
+  selectedLanguage = "51",
+  editorIsForSolutionTemplate,
+  shouldLoadIntellisense,
+  value,
+  onChange,
+}: MonacoCodeEditorProps) {
+  const { theme } = useTheme();
+  const [editorDisposeFn, setEditorDisposeFn] =
+    useState<monaco.IDisposable | null>(null);
+  const [editorLanguage, setEditorLanguage] = useState<string | null>(
+    selectedLanguage,
+  );
+
+  const options: monaco.editor.IStandaloneEditorConstructionOptions = {
+    readOnly: false,
+    minimap: { enabled: false },
+    padding: { top: 16, bottom: 16 },
+    scrollBeyondLastLine: false,
+  };
+
+  useEffect(() => {
+    //https://stackoverflow.com/questions/76660010/duplicate-suggestion-in-monaco-editor-react-next-js
+    return () => {
+      if (editorDisposeFn && typeof editorDisposeFn.dispose === "function") {
+        editorDisposeFn?.dispose();
+      }
+    };
+  }, [editorDisposeFn]);
+
+  useEffect(() => {
+    if (editorLanguage !== selectedLanguage) {
+      onChange(
+        editorIsForSolutionTemplate
+          ? CODE_EDITOR_TEMPLATES[selectedLanguage].solutionTemplate
+          : CODE_EDITOR_TEMPLATES[selectedLanguage].mainMethodBodyContent,
+      );
+      setEditorLanguage(selectedLanguage);
+    }
+  }, [editorIsForSolutionTemplate, editorLanguage, onChange, selectedLanguage]);
+
+  return selectedLanguage ? (
+    <div className="p-3 rounded flex flex-col gap-2 overflow-auto">
+      <InfoTooltip
+        icon={Info}
+        tooltipContent="It is recommended to test the code entered below in an IDE first."
+        className="ms-auto"
+      />
+      <Editor
+        className="min-h-96"
+        language={CODE_EDITOR_TEMPLATES[selectedLanguage]?.langName}
+        defaultValue={
+          editorIsForSolutionTemplate
+            ? CODE_EDITOR_TEMPLATES[selectedLanguage]?.solutionTemplate
+            : CODE_EDITOR_TEMPLATES[selectedLanguage]?.mainMethodBodyContent
+        }
+        value={value}
+        onChange={(value) => onChange(value!)}
+        options={options}
+        theme="vs-dark"
+        onMount={() => {
+          if (selectedLanguage === "51" && shouldLoadIntellisense) {
+            loader.init().then((monaco) => {
+              const IDisposable = registerCsharpProvider(monaco);
+              setEditorDisposeFn(IDisposable);
+            });
+          }
+        }}
+        //theme={theme === "dark" ? "light" : "vs-dark"}
+      />
+    </div>
+  ) : (
+    <p className="text-sm text-destructive">Please select a language</p>
+  );
+}
