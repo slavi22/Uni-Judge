@@ -10,14 +10,8 @@ import { Button } from "@/components/ui/button.tsx";
 import { useSidebar } from "@/components/ui/sidebar.tsx";
 import ProblemSolutionDialog from "@/features/problems/components/problem-solution-dialog.tsx";
 import { useGetAllProgrammingLanguagesQuery } from "@/features/problems/api/problems-api.ts";
-import type {
-  ProblemSolutions,
-} from "@/features/problems/types/problems-types.ts";
-import {
-  useFieldArray,
-  useForm,
-  type UseFormSetValue,
-} from "react-hook-form";
+import type { ProblemSolutions } from "@/features/problems/types/problems-types.ts";
+import { useFieldArray, useForm, type UseFormSetValue } from "react-hook-form";
 import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +22,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form.tsx";
+import { useEffect } from "react";
 
 type ProblemCodeEditorDialogProps = {
   parentProblemSolutions: ProblemSolutions[];
@@ -68,7 +63,7 @@ export default function ProblemInfoDialog({
   });
 
   function onSubmit(formData: z.infer<typeof formSchema>) {
-    console.log(formData);
+    console.log(formData); //TODO: Remove
   }
 
   const {
@@ -79,6 +74,12 @@ export default function ProblemInfoDialog({
     control: form.control,
     name: "mainMethodBodiesList",
   });
+
+  useEffect(() => {
+    if (parentFormIsInvalid) {
+      form.handleSubmit(() => {})();
+    }
+  }, [form, parentFormIsInvalid]);
 
   return (
     <Dialog
@@ -113,45 +114,52 @@ export default function ProblemInfoDialog({
           >
             Add a solution
           </Button>
-          {fields.length > 0 && (
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-                {fields.map((solution, index) => (
-                  <FormField
-                    key={solution.id}
-                    control={form.control}
-                    name={`mainMethodBodiesList.${index}`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <ProblemSolutionDialog
-                            solution={field.value}
-                            index={index}
-                            languages={languages!}
-                            setSolution={form.setValue}
-                            deleteSolution={() => removeSolution(index)}
-                            parentFormIsInvalid={
-                              !!form.getFieldState(
-                                "mainMethodBodiesList",
-                                form.formState,
-                              ).error
-                            }
-                            problemValidationErrors={
-                              form.getFieldState(
-                                `mainMethodBodiesList.${index}`,
-                              ).error
-                            }
-                            triggerInfoDialogValidation={form.trigger}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </form>
-            </Form>
-          )}
+          <Button
+          onClick={() =>
+              console.log(
+                form.getFieldState(`mainMethodBodiesList.0`, form.formState),
+              )
+            }
+          >
+            Check
+          </Button>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+              <Button>Submit</Button>
+              {fields.map((solution, index) => (
+                <FormField
+                  key={solution.id}
+                  control={form.control}
+                  name={`mainMethodBodiesList.${index}`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <ProblemSolutionDialog
+                          solution={field.value}
+                          index={index}
+                          languages={languages!}
+                          setSolution={form.setValue}
+                          deleteSolution={() => removeSolution(index)}
+                          parentFormIsInvalid={
+                            !!form.getFieldState(
+                              `mainMethodBodiesList.${index}`,
+                              form.formState,
+                            ).error
+                          }
+                          problemValidationErrors={
+                            form.getFieldState(`mainMethodBodiesList.${index}`)
+                              .error
+                          }
+                          triggerInfoDialogValidation={form.trigger}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </form>
+          </Form>
         </DialogHeader>
       </DialogContent>
     </Dialog>

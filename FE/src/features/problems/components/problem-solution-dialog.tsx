@@ -150,6 +150,7 @@ export default function ProblemSolutionDialog({
       form.handleSubmit(onSubmit)();
     }
   }, [shouldApplyInvalidStyling, form, problemValidationErrors]);
+  console.log(problemValidationErrors);
 
   return (
     <Dialog onOpenChange={(open) => !open && handleDialogClose()}>

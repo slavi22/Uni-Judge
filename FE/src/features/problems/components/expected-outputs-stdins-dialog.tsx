@@ -100,6 +100,7 @@ export default function ExpectedOutputsStdinsDialog({
   useEffect(() => {
     if (!openModal && parentFormValidated) {
       formTriggerValidationFn("expectedOutputList");
+      formTriggerValidationFn("stdInList");
     }
   }, [formTriggerValidationFn, openModal, parentFormValidated]);
 

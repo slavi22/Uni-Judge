@@ -38,6 +38,7 @@ import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 import { clearUsedLanguages } from "@/features/problems/stores/problem-solutions-slice.ts";
 import ExpectedOutputsStdinsDialog from "@/features/problems/components/expected-outputs-stdins-dialog.tsx";
 import { useCreateNewProblemMutation } from "@/features/problems/api/problems-api.ts";
+import { useNavigate } from "react-router";
 
 const problemSolutionsSchema = z.object({
   languageId: z.string().min(1, { message: "Language ID cannot be empty." }),
@@ -99,7 +100,8 @@ export default function CreateNewProblemForm({
     },
   });
 
-  const [createNewProblem] = useCreateNewProblemMutation();
+  const [createNewProblem, { isSuccess }] = useCreateNewProblemMutation();
+  const navigate = useNavigate();
 
   async function onSubmit(formData: z.infer<typeof formSchema>) {
     const reformattedFormData = {
@@ -110,7 +112,10 @@ export default function CreateNewProblemForm({
       })),
     };
     console.log(reformattedFormData);
-    createNewProblem(reformattedFormData);
+    await createNewProblem(reformattedFormData);
+    if (isSuccess) {
+      navigate("/") //TODO: navigate to my created problems page
+    }
   }
 
   const { data, error } = useGetMyCreatedCoursesQuery();
@@ -256,7 +261,8 @@ export default function CreateNewProblemForm({
                     <Button
                       type="button"
                       onClick={() =>
-                        console.log(form.getValues().mainMethodBodiesList)
+                        //console.log(form.getValues().mainMethodBodiesList)
+                        console.log(form.getFieldState(`mainMethodBodiesList`, form.formState).error)
                       }
                     >
                       Check fields
