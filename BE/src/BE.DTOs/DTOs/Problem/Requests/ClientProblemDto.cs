@@ -11,8 +11,12 @@ public class ClientProblemDto
     public string Description { get; set; }
     [Range(0, 100)]
     public int RequiredPercentageToPass { get; set; }
+    [MinLength(1, ErrorMessage = "At least one main method body must be provided.")]
     public List<MainMethodBodyDto> MainMethodBodiesList { get; set; }
+    [MinLength(1, ErrorMessage = "At least one expected output must be provided.")]
     public List<ExpectedOutputListDto> ExpectedOutputList { get; set; }
+    [MinLength(1, ErrorMessage = "At least one test case must be provided.")]
     public List<string> StdInList { get; set; }
+    [MinLength(1, ErrorMessage = "At least one language must be selected.")]
     public List<LanguagesEnum> LanguagesList { get; set; }
 }
