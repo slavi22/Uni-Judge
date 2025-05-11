@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/form.tsx";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";
 import GoogleSigninProviderButton from "@/features/auth/components/google-signin-provider-button.tsx";
-import PasswordInput from "@/features/auth/components/password-input.tsx";
+import PasswordInput from "@/components/inputs/password-input.tsx";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),

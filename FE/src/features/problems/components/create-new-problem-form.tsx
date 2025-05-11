@@ -50,10 +50,15 @@ const problemSolutionsSchema = z.object({
   }),
 });
 
-const expectedOutputAndStdInSchema = z.object({
+const expectedOutputSchema = z.object({
   expectedOutput: z
     .string()
     .min(1, { message: "Expected output cannot be empty." }),
+  isSample: z.boolean(),
+});
+
+const stdInSchema = z.object({
+  stdIn: z.string().min(1, { message: "StdIn cannot be empty." }),
   isSample: z.boolean(),
 });
 
@@ -67,11 +72,10 @@ const formSchema = z.object({
     .array(problemSolutionsSchema)
     .min(1, { message: "This problem requires at least one solution." }),
   expectedOutputList: z
-    .array(expectedOutputAndStdInSchema)
+    .array(expectedOutputSchema)
     .min(1, { message: "Expected outputs or StdIns cannot be empty." }),
   stdInList: z
-    .string()
-    .array()
+    .array(stdInSchema)
     .min(1, { message: "StdIn list cannot be empty." }),
   languagesList: z
     .number()
@@ -114,7 +118,7 @@ export default function CreateNewProblemForm({
     console.log(reformattedFormData);
     await createNewProblem(reformattedFormData);
     if (isSuccess) {
-      navigate("/") //TODO: navigate to my created problems page
+      navigate("/"); //TODO: navigate to my created problems page
     }
   }
 
@@ -262,7 +266,12 @@ export default function CreateNewProblemForm({
                       type="button"
                       onClick={() =>
                         //console.log(form.getValues().mainMethodBodiesList)
-                        console.log(form.getFieldState(`mainMethodBodiesList`, form.formState).error)
+                        console.log(
+                          form.getFieldState(
+                            `mainMethodBodiesList`,
+                            form.formState,
+                          ).error,
+                        )
                       }
                     >
                       Check fields
@@ -278,6 +287,7 @@ export default function CreateNewProblemForm({
                             form.formState,
                           ).error
                         }
+                        triggerMainFromFn={form.trigger}
                       />
                     </FormControl>
                     <FormMessage />

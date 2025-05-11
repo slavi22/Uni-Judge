@@ -10,3 +10,15 @@ export type TeacherCoursesDto = {
   name: string;
   description: string;
 }
+
+export type AllCoursesDto = {
+  courseId: string;
+  name: string;
+  isPasswordProtected: boolean;
+  userIsEnrolled: boolean;
+}
+
+export type SignUpForCourseDto = {
+  courseId: string;
+  password?: string;
+}

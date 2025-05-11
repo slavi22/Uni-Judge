@@ -6,6 +6,7 @@ import { CODE_EDITOR_TEMPLATES } from "@/utils/constants/code-editor-templates.t
 import { useEffect, useState } from "react";
 import InfoTooltip from "@/components/tooltips/info-tooltip.tsx";
 import { Info } from "lucide-react";
+import { cn } from "@/lib/utils.ts";
 
 type MonacoCodeEditorProps = {
   selectedLanguage?: string;
@@ -13,6 +14,8 @@ type MonacoCodeEditorProps = {
   shouldLoadIntellisense: boolean;
   value: string;
   onChange: (newValue: string) => void;
+  className?: string;
+  scrollBeyondLastLine: boolean;
 };
 
 export default function MonacoCodeEditor({
@@ -21,6 +24,8 @@ export default function MonacoCodeEditor({
   shouldLoadIntellisense,
   value,
   onChange,
+  className,
+  scrollBeyondLastLine,
 }: MonacoCodeEditorProps) {
   const { theme } = useTheme();
   const [editorDisposeFn, setEditorDisposeFn] =
@@ -33,7 +38,7 @@ export default function MonacoCodeEditor({
     readOnly: false,
     minimap: { enabled: false },
     padding: { top: 16, bottom: 16 },
-    scrollBeyondLastLine: false,
+    scrollBeyondLastLine: scrollBeyondLastLine,
   };
 
   useEffect(() => {
@@ -57,14 +62,14 @@ export default function MonacoCodeEditor({
   }, [editorIsForSolutionTemplate, editorLanguage, onChange, selectedLanguage]);
 
   return selectedLanguage ? (
-    <div className="p-3 rounded flex flex-col gap-2 overflow-auto">
+    <div className="p-3 rounded flex flex-col gap-2 overflow-auto w-full">
       <InfoTooltip
         icon={Info}
         tooltipContent="It is recommended to test the code entered below in an IDE first."
         className="ms-auto"
       />
       <Editor
-        className="min-h-96"
+        className={cn("min-h-96", className)}
         language={CODE_EDITOR_TEMPLATES[selectedLanguage]?.langName}
         defaultValue={
           editorIsForSolutionTemplate

@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form.tsx";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";
 import { Input } from "@/components/ui/input.tsx";
-import PasswordInput from "@/features/auth/components/password-input.tsx";
+import PasswordInput from "@/components/inputs/password-input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Link, useNavigate } from "react-router";
 import { type ComponentProps, useEffect, useRef } from "react";

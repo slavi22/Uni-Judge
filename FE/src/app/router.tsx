@@ -9,6 +9,8 @@ import TeacherProtectedRoute from "@/components/protected/teacher-protected-rout
 import CreateNewCoursePage from "@/app/routes/course/create-new-course-page.tsx";
 import CreateNewProblemPage from "@/app/routes/problems/create-new-problem-page.tsx";
 import CodeEditorTestPage from "@/app/routes/test/code-editor-test-page.tsx";
+import EnrolledCoursesPage from "@/app/routes/course/enrolled-courses-page.tsx";
+import AllCoursesPage from "@/app/routes/course/all-courses-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -47,7 +49,11 @@ export const router = createBrowserRouter([
             children: [
               {
                 path: "all-courses",
-                element: <div>All Courses</div>,
+                element: <AllCoursesPage />,
+              },
+              {
+                path: "enrolled-courses",
+                element: <EnrolledCoursesPage />,
               },
               {
                 element: <TeacherProtectedRoute />,

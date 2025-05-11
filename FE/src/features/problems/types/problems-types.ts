@@ -6,9 +6,14 @@
   requiredPercentageToPass: number;
   mainMethodBodiesList: MainMethodBodyDto[];
   expectedOutputList: ExpectedOutputListDto[];
-  stdInList: string[];
+  stdInList: StdInListDto[];
   languagesList: LanguagesEnum[];
 };
+
+export type StdInListDto = {
+  isSample: boolean;
+  stdIn: string;
+}
 
 export type MainMethodBodyDto = {
   languageId: LanguagesEnum;

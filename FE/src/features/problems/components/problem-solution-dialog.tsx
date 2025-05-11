@@ -150,7 +150,6 @@ export default function ProblemSolutionDialog({
       form.handleSubmit(onSubmit)();
     }
   }, [shouldApplyInvalidStyling, form, problemValidationErrors]);
-  console.log(problemValidationErrors);
 
   return (
     <Dialog onOpenChange={(open) => !open && handleDialogClose()}>
@@ -281,6 +280,7 @@ export default function ProblemSolutionDialog({
                         shouldLoadIntellisense={false}
                         value={field.value}
                         onChange={field.onChange}
+                        scrollBeyondLastLine={false}
                       />
                     </FormControl>
                     <FormMessage />
@@ -293,14 +293,15 @@ export default function ProblemSolutionDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Main method body content</FormLabel>
-                    <Button type="button" onClick={() => console.log(field.value)}>Asd</Button>
                     <FormControl>
                       <MonacoCodeEditor
+                        key={field}
                         selectedLanguage={selectedLanguage}
                         editorIsForSolutionTemplate={false}
                         shouldLoadIntellisense={false}
                         value={field.value}
                         onChange={field.onChange}
+                        scrollBeyondLastLine={false}
                       />
                     </FormControl>
                     <FormMessage />

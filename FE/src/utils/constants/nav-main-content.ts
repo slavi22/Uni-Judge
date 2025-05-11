@@ -12,8 +12,8 @@ export const studentNav = {
           url: "#",
         },
         {
-          title: "My Courses",
-          url: "#",
+          title: "Enrolled Courses",
+          url: "/courses/enrolled-courses",
         },
       ],
     },
@@ -35,8 +35,8 @@ export const teacherNav = {
           url: "#",
         },
         {
-          title: "My Courses",
-          url: "#",
+          title: "Enrolled Courses",
+          url: "/courses/enrolled-courses",
         },
       ],
     },
@@ -73,8 +73,8 @@ export const adminNav = {
           url: "#",
         },
         {
-          title: "My Courses",
-          url: "#",
+          title: "Enrolled Courses",
+          url: "/courses/enrolled-courses",
         },
       ],
     },

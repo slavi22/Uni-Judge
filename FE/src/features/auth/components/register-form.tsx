@@ -22,7 +22,7 @@ import {
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Link, useNavigate } from "react-router";
-import PasswordInput from "@/features/auth/components/password-input.tsx";
+import PasswordInput from "@/components/inputs/password-input.tsx";
 import GoogleSigninProviderButton from "@/features/auth/components/google-signin-provider-button.tsx";
 import { useRegisterMutation } from "@/features/auth/api/auth-api.ts";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";

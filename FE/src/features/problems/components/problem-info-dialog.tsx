@@ -11,7 +11,12 @@ import { useSidebar } from "@/components/ui/sidebar.tsx";
 import ProblemSolutionDialog from "@/features/problems/components/problem-solution-dialog.tsx";
 import { useGetAllProgrammingLanguagesQuery } from "@/features/problems/api/problems-api.ts";
 import type { ProblemSolutions } from "@/features/problems/types/problems-types.ts";
-import { useFieldArray, useForm, type UseFormSetValue } from "react-hook-form";
+import {
+  useFieldArray,
+  useForm,
+  type UseFormSetValue,
+  UseFormTrigger,
+} from "react-hook-form";
 import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,6 +33,7 @@ type ProblemCodeEditorDialogProps = {
   parentProblemSolutions: ProblemSolutions[];
   setMainMethodBodyContent: UseFormSetValue<ProblemFormSchemaType>;
   parentFormIsInvalid: boolean;
+  triggerMainFromFn: UseFormTrigger<ProblemFormSchemaType>;
 };
 
 const mainMethodBodyContentSchema = z.object({
@@ -52,6 +58,7 @@ export default function ProblemInfoDialog({
   parentProblemSolutions,
   setMainMethodBodyContent,
   parentFormIsInvalid,
+  triggerMainFromFn,
 }: ProblemCodeEditorDialogProps) {
   const { open } = useSidebar();
 
@@ -64,6 +71,16 @@ export default function ProblemInfoDialog({
 
   function onSubmit(formData: z.infer<typeof formSchema>) {
     console.log(formData); //TODO: Remove
+  }
+
+  function handleDialogClose() {
+    setMainMethodBodyContent(
+      "mainMethodBodiesList",
+      form.getValues().mainMethodBodiesList,
+    );
+    if (parentFormIsInvalid) {
+      triggerMainFromFn();
+    }
   }
 
   const {
@@ -82,14 +99,7 @@ export default function ProblemInfoDialog({
   }, [form, parentFormIsInvalid]);
 
   return (
-    <Dialog
-      onOpenChange={() =>
-        setMainMethodBodyContent(
-          "mainMethodBodiesList",
-          form.getValues().mainMethodBodiesList,
-        )
-      }
-    >
+    <Dialog onOpenChange={(open) => !open && handleDialogClose()}>
       <DialogTrigger
         asChild
         className={
@@ -114,18 +124,8 @@ export default function ProblemInfoDialog({
           >
             Add a solution
           </Button>
-          <Button
-          onClick={() =>
-              console.log(
-                form.getFieldState(`mainMethodBodiesList.0`, form.formState),
-              )
-            }
-          >
-            Check
-          </Button>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-              <Button>Submit</Button>
               {fields.map((solution, index) => (
                 <FormField
                   key={solution.id}

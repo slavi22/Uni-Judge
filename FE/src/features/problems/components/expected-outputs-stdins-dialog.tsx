@@ -40,8 +40,15 @@ type ExpectedOutputsStdinsDialogProps = {
   formTriggerValidationFn: UseFormTrigger<ProblemFormSchemaType>;
 };
 
+const stdInSchema = z.object({
+  stdIn: z.string().min(1, { message: "StdIn cannot be empty." }),
+  isSample: z.boolean(),
+});
+
 const expectedOutputAndStdInSchema = z.object({
-  stdInParam: z.string().min(1, { message: "StdIn cannot be empty." }),
+  stdInParam: z
+    .array(stdInSchema)
+    .min(1, { message: "At least one stdIn is required." }),
   expectedOutput: z
     .string()
     .min(1, { message: "Expected output cannot be empty." }),
@@ -89,8 +96,12 @@ export default function ExpectedOutputsStdinsDialog({
     const expectedOutputList = expectedOutputAndStdin.map(
       ({ expectedOutput, isSample }) => ({ expectedOutput, isSample }),
     );
-    const stdInList = expectedOutputAndStdin.map(
-      ({ stdInParam }) => stdInParam,
+    const stdInList = expectedOutputAndStdin.flatMap(
+      ({ stdInParam, isSample }) =>
+        stdInParam.map((item) => ({
+          stdIn: item.stdIn,
+          isSample: isSample,
+        })),
     );
     //TODO: maybe refactor the BE and make it a single object instead of two separate ones
     setFormValue("expectedOutputList", expectedOutputList);
@@ -124,13 +135,16 @@ export default function ExpectedOutputsStdinsDialog({
         </DialogHeader>
         <div className="flex flex-col gap-3">
           <Button
-            onClick={() =>
-              append({
-                stdInParam: "",
-                expectedOutput: "",
-                isSample: false,
-              })
-            }
+            onClick={() => {
+              append(
+                {
+                  stdInParam: [{ stdIn: "", isSample: false }],
+                  expectedOutput: "",
+                  isSample: false,
+                },
+                { focusName: `expectedOutputAndStdIn.${fields.length}.stdInParam.0.stdIn` },
+              );
+            }}
           >
             Add new input and output
           </Button>
@@ -140,19 +154,12 @@ export default function ExpectedOutputsStdinsDialog({
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="flex flex-col items-center gap-3"
               >
-                <Button
-                  type="button"
-                  onClick={() => form.handleSubmit(onSubmit)()}
-                >
-                  Submit
-                </Button>
                 {fields.map((formField, index) => (
                   <Card key={formField.id} className="min-h-32">
-                    <p>{index}</p>
                     <CardContent className="flex items-center justify-center gap-5">
                       <FormField
                         control={form.control}
-                        name={`expectedOutputAndStdIn.${index}.stdInParam`}
+                        name={`expectedOutputAndStdIn.${index}.stdInParam.0.stdIn`}
                         render={({ field }) => (
                           <FormItem className="flex flex-col gap-2">
                             <FormControl>

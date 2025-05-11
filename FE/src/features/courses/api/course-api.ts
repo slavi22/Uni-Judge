@@ -1,5 +1,10 @@
 ﻿import { baseApi } from "@/stores/base-api.ts";
-import { type NewCourseDto, TeacherCoursesDto } from "@/features/courses/types/courses-types.ts";
+import {
+  AllCoursesDto,
+  type NewCourseDto,
+  SignUpForCourseDto,
+  TeacherCoursesDto,
+} from "@/features/courses/types/courses-types.ts";
 import { toast } from "sonner";
 
 const courseApi = baseApi.injectEndpoints({
@@ -21,8 +26,31 @@ const courseApi = baseApi.injectEndpoints({
     }),
     getMyCreatedCourses: build.query<TeacherCoursesDto[], void>({
       query: () => "courses/get-my-created-courses",
-    })
+    }),
+    getAllCourses: build.query<AllCoursesDto[], void>({
+      query: () => "courses/get-all-courses",
+    }),
+    signUpForCourse: build.mutation<void, SignUpForCourseDto>({
+      query: (signUpData) => ({
+        url: "courses/signup-for-course",
+        method: "POST",
+        body: signUpData,
+      }),
+      async onQueryStarted(_args, { queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          toast.success("Successfully signed up for the course.");
+        } catch {
+          toast.error("Error signing up for the course.");
+        }
+      },
+    }),
   }),
 });
 
-export const { useCreateNewCourseMutation, useGetMyCreatedCoursesQuery } = courseApi;
+export const {
+  useCreateNewCourseMutation,
+  useGetMyCreatedCoursesQuery,
+  useGetAllCoursesQuery,
+  useSignUpForCourseMutation,
+} = courseApi;
