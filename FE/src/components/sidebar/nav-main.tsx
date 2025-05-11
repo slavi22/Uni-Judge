@@ -64,10 +64,6 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
                   className="group/collapsible"
                 >
                   <SidebarMenuItem>
-                    {/*TODO: REMOVE ONCE DONE TESTING*/}
-                    <div className="mb-10">
-                      <Link to="/code-editor-test">Code editor test page</Link>
-                    </div>
                     <CollapsibleTrigger className="cursor-pointer" asChild>
                       <SidebarMenuButton tooltip={item.title}>
                         {item.icon && <item.icon />}
@@ -95,7 +91,7 @@ export function NavMain({ items, isAuthenticated }: NavProps) {
             {isAuthenticated ? (
               <>
                 <SidebarMenuButton asChild>
-                  <Link to="/courses/all-courses">
+                  <Link to="/courses">
                     {" "}
                     {/* TODO: Replace with the real link */}
                     {allCourses && allCourses.icon && <allCourses.icon />}

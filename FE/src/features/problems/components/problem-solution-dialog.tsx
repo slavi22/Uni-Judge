@@ -275,6 +275,7 @@ export default function ProblemSolutionDialog({
                     <FormLabel>Solution Template</FormLabel>
                     <FormControl>
                       <MonacoCodeEditor
+                        key={field.name}
                         selectedLanguage={selectedLanguage}
                         editorIsForSolutionTemplate
                         shouldLoadIntellisense={false}
@@ -295,7 +296,7 @@ export default function ProblemSolutionDialog({
                     <FormLabel>Main method body content</FormLabel>
                     <FormControl>
                       <MonacoCodeEditor
-                        key={field}
+                        key={field.name}
                         selectedLanguage={selectedLanguage}
                         editorIsForSolutionTemplate={false}
                         shouldLoadIntellisense={false}

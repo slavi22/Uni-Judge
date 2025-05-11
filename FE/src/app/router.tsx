@@ -8,9 +8,10 @@ import RegisterTeacherPage from "@/app/routes/auth/register-teacher-page.tsx";
 import TeacherProtectedRoute from "@/components/protected/teacher-protected-route.tsx";
 import CreateNewCoursePage from "@/app/routes/course/create-new-course-page.tsx";
 import CreateNewProblemPage from "@/app/routes/problems/create-new-problem-page.tsx";
-import CodeEditorTestPage from "@/app/routes/test/code-editor-test-page.tsx";
 import EnrolledCoursesPage from "@/app/routes/course/enrolled-courses-page.tsx";
 import AllCoursesPage from "@/app/routes/course/all-courses-page.tsx";
+import CourseProblemsPage from "@/app/routes/course/course-problems-page.tsx";
+import ProblemPage from "@/app/routes/problems/problem-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -20,10 +21,6 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />,
-      },
-      {
-        path: "code-editor-test",
-        element: <CodeEditorTestPage />,
       },
       {
         path: "/login",
@@ -48,12 +45,20 @@ export const router = createBrowserRouter([
             path: "courses",
             children: [
               {
-                path: "all-courses",
+                index: true,
                 element: <AllCoursesPage />,
               },
               {
                 path: "enrolled-courses",
                 element: <EnrolledCoursesPage />,
+              },
+              {
+                path: ":courseId",
+                element: <CourseProblemsPage />,
+              },
+              {
+                path: ":courseId/:problemId",
+                element: <ProblemPage />,
               },
               {
                 element: <TeacherProtectedRoute />,
@@ -83,14 +88,12 @@ export const router = createBrowserRouter([
         ],
       },
       {
-        path: "test-breadcrumb",
-        element: <div>BreadCrumb Test Home</div>,
-        children: [
-          {
-            path: "first-level",
-            element: <div>BreadCrumb Test First level</div>,
-          },
-        ],
+        path: "/not-found",
+        element: <div>Not found</div>, //TODO: finish
+      },
+      {
+        path: "/forbidden",
+        element: <div>Forbidden</div>, //TODO: finish
       },
     ],
   },

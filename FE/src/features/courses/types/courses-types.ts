@@ -22,3 +22,15 @@ export type SignUpForCourseDto = {
   courseId: string;
   password?: string;
 }
+
+export type EnrolledCoursesDto = {
+  courseId: string;
+  name: string;
+  description: string;
+}
+
+export type CourseProblemDto = {
+  problemId: string;
+  name: string;
+  description: string;
+}

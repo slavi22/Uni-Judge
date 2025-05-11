@@ -1,6 +1,8 @@
 ﻿import { baseApi } from "@/stores/base-api.ts";
 import {
   AllCoursesDto,
+  CourseProblemDto,
+  EnrolledCoursesDto,
   type NewCourseDto,
   SignUpForCourseDto,
   TeacherCoursesDto,
@@ -45,6 +47,12 @@ const courseApi = baseApi.injectEndpoints({
         }
       },
     }),
+    getEnrolledCourses: build.query<EnrolledCoursesDto[], void>({
+      query: () => "courses/get-enrolled-courses",
+    }),
+    getCourseProblems: build.query<CourseProblemDto[], string>({
+      query: (courseId) => `courses/course/${courseId}`,
+    }),
   }),
 });
 
@@ -53,4 +61,6 @@ export const {
   useGetMyCreatedCoursesQuery,
   useGetAllCoursesQuery,
   useSignUpForCourseMutation,
+  useGetEnrolledCoursesQuery,
+  useGetCourseProblemsQuery,
 } = courseApi;

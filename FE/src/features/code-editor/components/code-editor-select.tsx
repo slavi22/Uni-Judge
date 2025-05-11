@@ -9,10 +9,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState } from "react";
+import {
+  type LanguagesEnum,
+} from "@/features/problems/types/problems-types.ts";
 
-export default function CodeEditorSelect() {
-  const [selectedLanguage, setSelectedLanguage] = useState("51");
+type CodeEditorSelectProps = {
+  availableLanguages: LanguagesEnum[] | undefined;
+};
+
+export default function CodeEditorSelect({
+  availableLanguages,
+}: CodeEditorSelectProps) {
+  const [selectedLanguage, setSelectedLanguage] = useState(
+    availableLanguages?.[0].toString(),
+  );
   const [codeEditorValue, setCodeEditorValue] = useState("");
+  //TODO: fix intellisense when switching to js
   return (
     <>
       <Select
@@ -31,6 +43,7 @@ export default function CodeEditorSelect() {
         </SelectContent>
       </Select>
       <MonacoCodeEditor
+        key={selectedLanguage}
         selectedLanguage={selectedLanguage}
         editorIsForSolutionTemplate={false}
         shouldLoadIntellisense={true}

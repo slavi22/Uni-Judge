@@ -12,9 +12,13 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import CodeEditorSelect from "@/features/code-editor/components/code-editor-select.tsx";
+import { ProblemInfoDto } from "@/features/problems/types/problems-types.ts";
 
-export default function CodeEditorProblem() {
-  //TODO: add the api rtk query which will fetch the problem details
+type CodeEditorProblemProps = {
+  data: ProblemInfoDto | undefined;
+};
+
+export default function CodeEditorProblem({ data }: CodeEditorProblemProps) {
   return (
     <div className="flex h-full">
       <ResizablePanelGroup direction="horizontal">
@@ -27,9 +31,10 @@ export default function CodeEditorProblem() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="description">
-              <TabCardContent title="Problem" description="Description" />
+              <TabCardContent title={data?.name} description={data?.description} />
             </TabsContent>
             <TabsContent value="previousSolutions">
+              {/*TODO: make an rtk query endpoint which will call the user's previous submissions*/}
               <div>Previous solutions list</div>
             </TabsContent>
           </Tabs>
@@ -39,7 +44,7 @@ export default function CodeEditorProblem() {
           <ResizablePanelGroup direction="vertical">
             <ResizablePanel defaultSize={85} className="mb-3">
               <div className="w-full h-full px-3">
-                <CodeEditorSelect />
+                <CodeEditorSelect availableLanguages={data?.availableLanguages}/>
               </div>
             </ResizablePanel>
             <ResizableHandle withHandle />

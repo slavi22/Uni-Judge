@@ -6,8 +6,8 @@
 } from "@/components/ui/card.tsx";
 
 type TabCardContentProps = {
-  title: string;
-  description: string;
+  title: string | undefined;
+  description: string | undefined;
 };
 
 export default function TabCardContent({

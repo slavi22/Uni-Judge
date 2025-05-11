@@ -64,3 +64,14 @@ export type ExpectedOutputAndStdin = {
   expectedOutput: string;
   isSample: boolean;
 };
+
+export type ProblemInfoDto = {
+  courseId: string;
+  problemId: string;
+  name: string;
+  description: string;
+  solutionTemplate: string[];
+  expectedOutputList: string[];
+  stdInList: string[];
+  availableLanguages: LanguagesEnum[];
+}
