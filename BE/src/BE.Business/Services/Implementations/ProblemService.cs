@@ -5,6 +5,7 @@ using BE.DTOs.DTOs.Problem.Requests;
 using BE.DTOs.DTOs.Problem.Responses;
 using BE.Models.Models.Problem;
 using BE.Models.Models.Problem.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace BE.Business.Services.Implementations;
 
@@ -13,13 +14,15 @@ public class ProblemService : IProblemService
     private readonly IProblemRepository _problemRepository;
     private readonly ICourseRepository _courseRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public ProblemService(IProblemRepository problemRepository, ICourseRepository courseRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository, IHttpContextAccessor httpContextAccessor)
     {
         _problemRepository = problemRepository;
         _courseRepository = courseRepository;
         _userRepository = userRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     // Here we are creating a new problem.
@@ -47,7 +50,8 @@ public class ProblemService : IProblemService
         }
 
         var courseEntity = await _courseRepository.GetCourseByCourseIdAsync(dto.CourseId);
-        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
 
         var problemEntity = new ProblemModel
         {
@@ -76,7 +80,8 @@ public class ProblemService : IProblemService
             var stdInList = new StdInListModel
             {
                 ProblemId = problemEntity.Id,
-                StdIn = input
+                IsSample = input.IsSample,
+                StdIn = input.StdIn
             };
             problemEntity.StdInList.Add(stdInList);
         }
@@ -108,7 +113,8 @@ public class ProblemService : IProblemService
     public async Task<List<TeacherProblemsDto>> GeyMyCreatedProblemsAsync()
     {
         var problemsList = new List<TeacherProblemsDto>();
-        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
         var teacherProblems = await _problemRepository.GetTeacherProblems(currentUser.Id);
         foreach (var problem in teacherProblems)
         {
@@ -120,5 +126,22 @@ public class ProblemService : IProblemService
         }
 
         return problemsList;
+    }
+
+    //TODO: add test
+    public async Task<ProblemInfoDto> GetProblemInfoAsync(string courseId, string problemId)
+    {
+        var problem = await _problemRepository.GetProblemWithLanguagesAndMainMethodBodies(courseId, problemId);
+        var problemDto = new ProblemInfoDto
+        {
+            CourseId = problem.Course.CourseId,
+            ProblemId = problem.ProblemId,
+            Name = problem.Name,
+            Description = problem.Description,
+            SolutionTemplate = problem.MainMethodBodiesList.Select(p => p.SolutionTemplate).ToList(),
+            //StdInList = problem.StdInList.Where(s => s.).ToList(),
+            AvalableLanguages = problem.ProblemLanguages.Select(p => (LanguagesEnum)p.LanguageId).ToList()
+        };
+        return problemDto;
     }
 }

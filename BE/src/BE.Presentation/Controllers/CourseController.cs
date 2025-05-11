@@ -94,6 +94,14 @@ namespace BE.Presentation.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Gets all courses created by the authenticated teacher
+        /// </summary>
+        /// <remarks>Only users with the "Teacher" role can access this endpoint. It returns all courses created by the currently authenticated teacher.</remarks>
+        /// <returns>A list of courses created by the teacher with details including course ID, name, description, and creation date</returns>
+        /// <response code="401">Returns 401 if the user is not authenticated</response>
+        /// <response code="403">Returns 403 if the user attempting to access courses does not have the "Teacher" role</response>
+        /// <response code="200">Returns 200 with the list of courses created by the teacher</response>
         //TODO: add test
         [Authorize(Roles = "Teacher")]
         [HttpGet("get-my-created-courses")]
@@ -105,6 +113,25 @@ namespace BE.Presentation.Controllers
         public async Task<IActionResult> GetMyCreatedCourses()
         {
             var result = await _courseService.GetMyCreatedCoursesAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets all available courses in the system
+        /// </summary>
+        /// <remarks>Requires the user to be authenticated. Returns a list of all courses available in the system.</remarks>
+        /// <returns>A list of all courses with their basic information</returns>
+        /// <response code="401">Returns 401 if the user is not authenticated</response>
+        /// <response code="200">Returns 200 with the list of all available courses</response>
+        //TODO: add test
+        [Authorize]
+        [HttpGet("get-all-courses")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<CourseDto>))]
+        public async Task<IActionResult> GetAllCourses()
+        {
+            var result = await _courseService.GetAllCoursesAsync();
             return Ok(result);
         }
     }

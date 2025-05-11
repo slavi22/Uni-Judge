@@ -15,6 +15,7 @@ public class CoursesModel
     public string Name { get; set; }
     public string Description { get; set; }
     public string? Password { get; set; }
+    // navigation property to the creator of the course
     public string UserId { get; set; }
     public AppUser User { get; set; }
     public ICollection<UserCourseModel> UserCourses { get; set; } = new List<UserCourseModel>();

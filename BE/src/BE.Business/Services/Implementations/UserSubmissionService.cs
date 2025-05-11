@@ -1,10 +1,10 @@
-﻿using System.Text;
-using BE.Business.Services.Interfaces;
+﻿using BE.Business.Services.Interfaces;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Judge.Requests;
 using BE.DTOs.DTOs.Judge.Responses;
 using BE.DTOs.DTOs.UserSubmission.Responses;
 using BE.Models.Models.Submissions;
+using Microsoft.AspNetCore.Http;
 
 namespace BE.Business.Services.Implementations;
 
@@ -14,14 +14,16 @@ public class UserSubmissionService : IUserSubmissionService
     private readonly IUserSubmissionRepository _userSubmissionRepository;
     private readonly IProblemRepository _problemRepository;
     private readonly ICourseRepository _courseRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserSubmissionService(IUserRepository userRepository, IUserSubmissionRepository userSubmissionRepository,
-        IProblemRepository problemRepository, ICourseRepository courseRepository)
+        IProblemRepository problemRepository, ICourseRepository courseRepository, IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
         _userSubmissionRepository = userSubmissionRepository;
         _problemRepository = problemRepository;
         _courseRepository = courseRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<UserSubmissionDto> AddUserSubmission(ClientSubmissionDto clientSubmissionDto,
@@ -52,7 +54,8 @@ public class UserSubmissionService : IUserSubmissionService
             testCasesList.Add(testCase);
         }
 
-        var appUser = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var appUser = await _userRepository.GetCurrentUserAsync(userEmail);
         var problem = await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionDto.ProblemId);
         var course = await _courseRepository.GetCourseByCourseIdAsync(clientSubmissionDto.CourseId);
         var entity = new UserSubmissionModel

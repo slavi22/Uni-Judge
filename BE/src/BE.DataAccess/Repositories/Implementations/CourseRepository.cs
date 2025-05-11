@@ -54,4 +54,11 @@ public class CourseRepository : ICourseRepository
         var teacherCourses = await _dbContext.Courses.Include(c => c.User).ToListAsync();
         return teacherCourses;
     }
+
+    public async Task<List<CoursesModel>> GetAllCoursesAsync()
+    {
+        var allCourses = await _dbContext.Courses
+            .Include(c => c.UserCourses).ToListAsync();
+        return allCourses;
+    }
 }

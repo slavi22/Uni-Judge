@@ -16,7 +16,8 @@ public class ProblemRepository : IProblemRepository
 
     public async Task<ProblemModel> GetProblemByProblemIdAsync(string problemId)
     {
-        return await _dbContext.Problems.Include(problemModel => problemModel.StdInList)
+        return await _dbContext.Problems
+            .Include(problemModel => problemModel.StdInList)
             .Include(problemModel => problemModel.ExpectedOutputList)
             .FirstOrDefaultAsync(x => x.ProblemId == problemId);
     }
@@ -30,8 +31,24 @@ public class ProblemRepository : IProblemRepository
     public async Task<List<ProblemModel>> GetTeacherProblems(string teacherId)
     {
         var teacherProblems =
-            await _dbContext.Problems.Include(p => p.User).Include(p => p.Course).Where(p => p.UserId == teacherId)
+            await _dbContext.Problems.Include(p => p.User)
+                .Include(p => p.Course)
+                .Where(p => p.UserId == teacherId)
                 .ToListAsync();
         return teacherProblems;
+    }
+
+    public async Task<ProblemModel> GetProblemWithLanguagesAndMainMethodBodies(string courseId, string problemId)
+    {
+        var problem = await _dbContext.Problems
+            .Include(p => p.Course)
+            .Include(p => p.MainMethodBodiesList)
+            .Include(p => p.ProblemLanguages)
+            .Include(p => p.StdInList)
+            .Include(p => p.ExpectedOutputList)
+            .Where(p => p.Course.CourseId == courseId)
+            .Where(p => p.ProblemId == problemId)
+            .FirstOrDefaultAsync();
+        return problem;
     }
 }

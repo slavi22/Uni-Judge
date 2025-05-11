@@ -1,13 +1,17 @@
-﻿using BE.DataAccess.Repositories.Interfaces;
+﻿using System.Collections;
+using System.Security.Claims;
+using BE.Business.Services.Implementations;
+using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Judge.Requests;
 using BE.DTOs.DTOs.Judge.Responses;
 using BE.Models.Models.Auth;
 using BE.Models.Models.Courses;
 using BE.Models.Models.Problem;
 using BE.Models.Models.Submissions;
+using Microsoft.AspNetCore.Http;
 using Moq;
 
-namespace BE.Tests.Services.UserSubmissionService;
+namespace BE.Tests.Services.UserSubmission;
 
 public class UserSubmissionServiceTests
 {
@@ -15,7 +19,8 @@ public class UserSubmissionServiceTests
     private readonly Mock<IUserSubmissionRepository> _userSubmissionRepositoryMock;
     private readonly Mock<IProblemRepository> _problemRepositoryMock;
     private readonly Mock<ICourseRepository> _courseRepositoryMock;
-    private readonly Business.Services.Implementations.UserSubmissionService _userSubmissionService;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
+    private readonly UserSubmissionService _userSubmissionService;
 
     public UserSubmissionServiceTests()
     {
@@ -23,12 +28,14 @@ public class UserSubmissionServiceTests
         _userSubmissionRepositoryMock = new Mock<IUserSubmissionRepository>();
         _problemRepositoryMock = new Mock<IProblemRepository>();
         _courseRepositoryMock = new Mock<ICourseRepository>();
+        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
 
         _userSubmissionService = new Business.Services.Implementations.UserSubmissionService(
             _userRepositoryMock.Object,
             _userSubmissionRepositoryMock.Object,
             _problemRepositoryMock.Object,
-            _courseRepositoryMock.Object
+            _courseRepositoryMock.Object,
+            _httpContextAccessorMock.Object
         );
     }
 
@@ -58,7 +65,10 @@ public class UserSubmissionServiceTests
             }
         };
 
-        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync()).ReturnsAsync(new AppUser { Id = "user1" });
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "user@email.com") }, "mock"));
+        _httpContextAccessorMock.Setup(context => context.HttpContext).Returns(new DefaultHttpContext { User = userPrincipal });
+        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync(It.IsAny<string>()))
+            .ReturnsAsync(new AppUser { Id = "user1" });
         _problemRepositoryMock.Setup(repo => repo.GetProblemByProblemIdAsync(It.IsAny<string>()))
             .ReturnsAsync(new ProblemModel { Id = "problem1", RequiredPercentageToPass = 80 });
         _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(It.IsAny<string>()))
@@ -74,7 +84,7 @@ public class UserSubmissionServiceTests
         Assert.NotNull(result);
         Assert.NotEmpty(result.SumbissionId);
         Assert.NotEmpty(result.TestCases);
-        Assert.Single(result.TestCases);
+        Assert.Single((IEnumerable)result.TestCases);
     }
 
     [Fact]
@@ -103,7 +113,10 @@ public class UserSubmissionServiceTests
             }
         };
 
-        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync()).ReturnsAsync(new AppUser { Id = "user1" });
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "user@email.com") }, "mock"));
+        _httpContextAccessorMock.Setup(context => context.HttpContext).Returns(new DefaultHttpContext { User = userPrincipal });
+        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync(It.IsAny<string>()))
+            .ReturnsAsync(new AppUser { Id = "user1" });
         _problemRepositoryMock.Setup(repo => repo.GetProblemByProblemIdAsync(It.IsAny<string>()))
             .ReturnsAsync(new ProblemModel { Id = "problem1", RequiredPercentageToPass = 80 });
         _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(It.IsAny<string>()))
@@ -118,6 +131,6 @@ public class UserSubmissionServiceTests
         Assert.NotNull(result);
         Assert.NotEmpty(result.SumbissionId);
         Assert.NotEmpty(result.TestCases);
-        Assert.Single(result.TestCases);
+        Assert.Single((IEnumerable)result.TestCases);
     }
 }

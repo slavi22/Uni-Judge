@@ -39,7 +39,8 @@ public class StudentHasSignedUpForCourseHandler : AuthorizationHandler<StudentHa
         // https://stackoverflow.com/a/72832313
         var userCourse = await _dbContext.Courses.Where(c => c.CourseId == courseId).Include(c => c.UserCourses)
             .FirstOrDefaultAsync();
-        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
         // if the course exists and the user is not signed up for the course, we return and it will point us to the OnForbidden event
         if (userCourse != null && userCourse.UserCourses.Any(x => x.UserId == currentUser.Id) == false)
         {

@@ -6,10 +6,11 @@ namespace BE.DataAccess.Repositories.Interfaces;
 public interface IUserRepository
 {
     /// <summary>
-    /// Retrieves the current user.
+    /// Retrieves a user by their email address.
     /// </summary>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the current user</returns>
-    Task<AppUser> GetCurrentUserAsync();
+    /// <param name="email">The email address of the user to retrieve</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the user if found</returns>
+    Task<AppUser> GetCurrentUserAsync(string email);
 
     /// <summary>
     /// Finds a user by their email. Currently, the user's email is also their username.

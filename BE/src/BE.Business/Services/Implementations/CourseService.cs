@@ -4,6 +4,7 @@ using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Course.Requests;
 using BE.DTOs.DTOs.Course.Responses;
 using BE.Models.Models.Courses;
+using Microsoft.AspNetCore.Http;
 
 namespace BE.Business.Services.Implementations;
 
@@ -11,11 +12,14 @@ public class CourseService : ICourseService
 {
     private readonly ICourseRepository _courseRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CourseService(ICourseRepository courseRepository, IUserRepository userRepository)
+    public CourseService(ICourseRepository courseRepository, IUserRepository userRepository,
+        IHttpContextAccessor httpContextAccessor)
     {
         _courseRepository = courseRepository;
         _userRepository = userRepository;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     public async Task<List<ViewCourseProblemDto>> GetProblemsForCourse(string courseId)
@@ -50,7 +54,8 @@ public class CourseService : ICourseService
             throw new InvalidCoursePasswordException("Invalid course password entered.");
         }
 
-        var user = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var user = await _userRepository.GetCurrentUserAsync(userEmail);
 
         var userCourse = new UserCourseModel
         {
@@ -70,7 +75,8 @@ public class CourseService : ICourseService
             throw new DuplicateCourseIdException($"A course with the given ID - '{course.CourseId}' already exists.");
         }
 
-        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
         var newCourseModel = new CoursesModel
         {
             CourseId = dto.CourseId,
@@ -80,13 +86,21 @@ public class CourseService : ICourseService
             User = currentUser
         };
         await _courseRepository.CreateCourseAsync(newCourseModel);
+        // sign up the creator of the course on creation
+        var userCourse = new UserCourseModel
+        {
+            CourseId = newCourseModel.Id,
+            UserId = currentUser.Id
+        };
+        await _courseRepository.SignUpForCourseAsync(newCourseModel, userCourse);
     }
 
     //TODO: add test
     public async Task<List<TeacherCoursesDto>> GetMyCreatedCoursesAsync()
     {
         var coursesList = new List<TeacherCoursesDto>();
-        var currentUser = await _userRepository.GetCurrentUserAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
         var teacherCourses = await _courseRepository.GetTeacherCoursesAsync(currentUser.Id);
         foreach (var course in teacherCourses)
         {
@@ -97,5 +111,28 @@ public class CourseService : ICourseService
         }
 
         return coursesList;
+    }
+
+    //TODO: add test
+    public async Task<List<CourseDto>> GetAllCoursesAsync()
+    {
+        //TODO: add pagination
+        var allCourses = await _courseRepository.GetAllCoursesAsync();
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
+        var coursesDto = new List<CourseDto>();
+        foreach (var course in allCourses)
+        {
+            var userCourse = course.UserCourses.FirstOrDefault(uc => uc.CourseId == course.Id && uc.UserId == currentUser.Id);
+            coursesDto.Add(new CourseDto
+            {
+                CourseId = course.CourseId,
+                Name = course.Name,
+                IsPasswordProtected = course.Password != null,
+                UserIsEnrolled = course.UserCourses.Contains(userCourse)
+            });
+        }
+
+        return coursesDto;
     }
 }

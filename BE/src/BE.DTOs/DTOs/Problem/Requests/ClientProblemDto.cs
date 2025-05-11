@@ -16,7 +16,7 @@ public class ClientProblemDto
     [MinLength(1, ErrorMessage = "At least one expected output must be provided.")]
     public List<ExpectedOutputListDto> ExpectedOutputList { get; set; }
     [MinLength(1, ErrorMessage = "At least one test case must be provided.")]
-    public List<string> StdInList { get; set; }
+    public List<StdInListDto> StdInList { get; set; }
     [MinLength(1, ErrorMessage = "At least one language must be selected.")]
     public List<LanguagesEnum> LanguagesList { get; set; }
 }

@@ -1,8 +1,10 @@
-﻿using BE.Business.Services.Implementations;
+﻿using System.Security.Claims;
+using BE.Business.Services.Implementations;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Problem.Requests;
 using BE.Models.Models.Courses;
 using BE.Models.Models.Problem.Enums;
+using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace BE.Tests.Services.Problem;
@@ -12,6 +14,7 @@ public class ProblemServiceTests
     private readonly Mock<IProblemRepository> _problemRepositoryMock;
     private readonly Mock<ICourseRepository> _courseRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly ProblemService _problemService;
 
     public ProblemServiceTests()
@@ -19,7 +22,9 @@ public class ProblemServiceTests
         _problemRepositoryMock = new Mock<IProblemRepository>();
         _courseRepositoryMock = new Mock<ICourseRepository>();
         _userRepositoryMock = new Mock<IUserRepository>();
-        _problemService = new ProblemService(_problemRepositoryMock.Object, _courseRepositoryMock.Object, _userRepositoryMock.Object);
+        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        _problemService = new ProblemService(_problemRepositoryMock.Object, _courseRepositoryMock.Object,
+            _userRepositoryMock.Object, _httpContextAccessorMock.Object);
     }
 
     [Fact]
@@ -42,11 +47,13 @@ public class ProblemServiceTests
             {
                 new ExpectedOutputListDto { IsSample = true, ExpectedOutput = "Output" }
             },
-            StdInList = new List<string> { "Input" },
+            StdInList = new List<StdInListDto> { new StdInListDto { IsSample = false, StdIn = "Input" } },
             LanguagesList = new List<LanguagesEnum> { (LanguagesEnum)1 }
         };
 
         var courseEntity = new CoursesModel { CourseId = "course1" };
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "user@email.com") }, "mock"));
+        _httpContextAccessorMock.Setup(context => context.HttpContext).Returns(new DefaultHttpContext { User = userPrincipal });
         _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(It.IsAny<string>()))
             .ReturnsAsync(courseEntity);
 
@@ -75,7 +82,7 @@ public class ProblemServiceTests
             CourseId = "course1",
             MainMethodBodiesList = new List<MainMethodBodyDto>(),
             ExpectedOutputList = new List<ExpectedOutputListDto>(),
-            StdInList = new List<string>(),
+            StdInList = new List<StdInListDto>(),
             LanguagesList = new List<LanguagesEnum>()
         };
 

@@ -24,4 +24,12 @@ public interface IProblemRepository
     /// <param name="teacherId">The unique identifier of the teacher whose problems are to be retrieved</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of problem models created by the teacher</returns>
     Task<List<ProblemModel>> GetTeacherProblems(string teacherId);
+
+    /// <summary>
+    /// Retrieves a problem with its associated languages and main method bodies.
+    /// </summary>
+    /// <param name="courseId">The unique identifier of the course to which the problem belongs</param>
+    /// <param name="problemId">The unique identifier of the problem to retrieve</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the problem model with its related data</returns>
+    Task<ProblemModel> GetProblemWithLanguagesAndMainMethodBodies(string courseId, string problemId);
 }

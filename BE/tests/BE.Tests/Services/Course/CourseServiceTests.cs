@@ -1,10 +1,12 @@
-﻿using BE.Business.Services.Implementations;
+﻿using System.Security.Claims;
+using BE.Business.Services.Implementations;
 using BE.Common.Exceptions;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Course.Requests;
 using BE.Models.Models.Auth;
 using BE.Models.Models.Courses;
 using BE.Models.Models.Problem;
+using Microsoft.AspNetCore.Http;
 using Moq;
 
 namespace BE.Tests.Services.Course;
@@ -13,13 +15,16 @@ public class CourseServiceTests
 {
     private readonly Mock<ICourseRepository> _courseRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
+    private readonly Mock<IHttpContextAccessor> _httpContextAccessorMock;
     private readonly CourseService _courseService;
 
     public CourseServiceTests()
     {
         _courseRepositoryMock = new Mock<ICourseRepository>();
         _userRepositoryMock = new Mock<IUserRepository>();
-        _courseService = new CourseService(_courseRepositoryMock.Object, _userRepositoryMock.Object);
+        _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
+        _courseService = new CourseService(_courseRepositoryMock.Object, _userRepositoryMock.Object,
+            _httpContextAccessorMock.Object);
     }
 
     [Fact]
@@ -27,7 +32,12 @@ public class CourseServiceTests
     {
         // Arrange
         var courseId = "course123";
-        var course = new CoursesModel { Id = courseId, Problems = new List<ProblemModel> { new ProblemModel { Id = "problem1", Name = "Problem 1", Description = "Description 1" } } };
+        var course = new CoursesModel
+        {
+            Id = courseId,
+            Problems = new List<ProblemModel>
+                { new ProblemModel { Id = "problem1", Name = "Problem 1", Description = "Description 1" } }
+        };
         _courseRepositoryMock.Setup(repo => repo.GetCourseAndProblemsByIdAsync(courseId)).ReturnsAsync(course);
 
         // Act
@@ -44,7 +54,8 @@ public class CourseServiceTests
     {
         // Arrange
         var courseId = "course123";
-        _courseRepositoryMock.Setup(repo => repo.GetCourseAndProblemsByIdAsync(courseId)).ReturnsAsync((CoursesModel)null);
+        _courseRepositoryMock.Setup(repo => repo.GetCourseAndProblemsByIdAsync(courseId))
+            .ReturnsAsync((CoursesModel)null);
 
         // Act
         var result = await _courseService.GetProblemsForCourse(courseId);
@@ -72,9 +83,12 @@ public class CourseServiceTests
         var dto = new SignUpForCourseDto { CourseId = "course123", Password = "correctpassword" };
         var course = new CoursesModel { Id = "course123", Password = "correctpassword" };
         var user = new AppUser { Id = Guid.Empty.ToString() };
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "user@email.com") }, "mock"));
         _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(dto.CourseId)).ReturnsAsync(course);
-        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync()).ReturnsAsync(user);
-        _courseRepositoryMock.Setup(repo => repo.SignUpForCourseAsync(course, It.IsAny<UserCourseModel>())).ReturnsAsync(true);
+        _httpContextAccessorMock.Setup(context => context.HttpContext).Returns(new DefaultHttpContext { User = userPrincipal });
+        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _courseRepositoryMock.Setup(repo => repo.SignUpForCourseAsync(course, It.IsAny<UserCourseModel>()))
+            .ReturnsAsync(true);
 
         // Act
         var result = await _courseService.SignUpForCourse(dto);
@@ -87,7 +101,8 @@ public class CourseServiceTests
     public async Task CreateNewCourse_ThrowsDuplicateCourseIdException_WhenCourseAlreadyExists()
     {
         // Arrange
-        var dto = new CreateCourseDto { CourseId = "course123", Name = "Course 123", Description = "Description", Password = "password" };
+        var dto = new CreateCourseDto
+            { CourseId = "course123", Name = "Course 123", Description = "Description", Password = "password" };
         var course = new CoursesModel { Id = Guid.Empty.ToString() };
         _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(dto.CourseId)).ReturnsAsync(course);
 
@@ -98,9 +113,18 @@ public class CourseServiceTests
     [Fact]
     public async Task CreateNewCourse_CreatesCourse_WhenCourseDoesNotExist()
     {
+        //TODO: update rider and test if it will show the exception at the correct line
         // Arrange
-        var dto = new CreateCourseDto { CourseId = "course123", Name = "Course 123", Description = "Description", Password = "password" };
-        _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(dto.CourseId)).ReturnsAsync((CoursesModel)null);
+        var dto = new CreateCourseDto
+            { CourseId = "course123", Name = "Course 123", Description = "Description", Password = "password" };
+        var user = new AppUser { Id = Guid.Empty.ToString() };
+        var userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, "user@email.com") }, "mock"));
+        _courseRepositoryMock.Setup(repo => repo.GetCourseByCourseIdAsync(dto.CourseId))
+            .ReturnsAsync((CoursesModel)null);
+        _httpContextAccessorMock.Setup(context => context.HttpContext).Returns(new DefaultHttpContext { User = userPrincipal });
+        _userRepositoryMock.Setup(repo => repo.GetCurrentUserAsync(It.IsAny<string>())).ReturnsAsync(user);
+        _courseRepositoryMock.Setup(repo => repo.CreateCourseAsync(It.IsAny<CoursesModel>()))
+            .Callback<CoursesModel>(course => course.Id = Guid.Empty.ToString());
 
         // Act
         await _courseService.CreateNewCourse(dto);

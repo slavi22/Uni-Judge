@@ -60,6 +60,26 @@ namespace BE.Presentation.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Gets detailed information about a specific problem by its ID
+        /// </summary>
+        /// <remarks>Authenticated users can retrieve detailed information about a problem using its unique identifier</remarks>
+        /// <param name="courseId">The course identifier the problem belongs to</param>
+        /// <param name="problemId">The unique identifier of the problem to retrieve</param>
+        /// <returns>Returns detailed information about the requested problem</returns>
+        [Authorize(Policy = "HasSignedUpForCourse")]
+        [HttpGet("get-problem-info/{courseId}/{problemId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(ProblemInfoDto))]
+        public async Task<IActionResult> GetProblemInfo(string courseId, string problemId)
+        {
+            var result = await _problemService.GetProblemInfoAsync(courseId, problemId);
+            return Ok(result);
+        }
+
+        //TODO: Remove
         [Authorize(Roles = "Teacher")]
         [HttpPost("create-problem-test")]
         public async Task<IActionResult> CreateProblemTest(ClientProblemDto problem)

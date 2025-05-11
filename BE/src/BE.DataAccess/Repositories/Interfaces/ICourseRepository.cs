@@ -40,4 +40,10 @@ public interface ICourseRepository
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of course models created by the teacher</returns>
     Task<List<CoursesModel>> GetTeacherCoursesAsync(string teacherId);
 
+    /// <summary>
+    /// Retrieves all courses available in the system.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of all course models</returns>
+    Task<List<CoursesModel>> GetAllCoursesAsync();
+
 }
