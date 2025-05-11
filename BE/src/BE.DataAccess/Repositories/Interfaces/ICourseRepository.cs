@@ -46,4 +46,11 @@ public interface ICourseRepository
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of all course models</returns>
     Task<List<CoursesModel>> GetAllCoursesAsync();
 
+    /// <summary>
+    /// Retrieves all courses that a user is enrolled in.
+    /// </summary>
+    /// <param name="userId">The ID of the user whose enrolled courses to retrieve</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of course models the user is enrolled in</returns>
+    Task<List<CoursesModel>> GetAllEnrolledCoursesAsync(string userId);
+
 }

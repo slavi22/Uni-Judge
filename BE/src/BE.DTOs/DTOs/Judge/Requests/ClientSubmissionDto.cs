@@ -5,11 +5,7 @@
 public class ClientSubmissionDto
 {
     public string CourseId { get; set; }
-
     public string ProblemId { get; set; }
-
     public string LanguageId { get; set; }
-
     public string SourceCode { get; set; }
-
 }

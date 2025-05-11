@@ -37,4 +37,10 @@ public interface ICourseService
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of all available courses</returns>
     Task<List<CourseDto>> GetAllCoursesAsync();
+
+    /// <summary>
+    /// Retrieves all courses that the user is enrolled in.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of courses the user is enrolled in</returns>
+    Task<List<EnrolledCourseDto>> GetEnrolledCoursesAsync();
 }

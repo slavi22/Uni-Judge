@@ -11,5 +11,5 @@ public class ProblemInfoDto
     public List<string> SolutionTemplate { get; set; }
     public List<string> ExpectedOutputList { get; set; }
     public List<string> StdInList { get; set; }
-    public List<LanguagesEnum> AvalableLanguages { get; set; }
+    public List<LanguagesEnum> AvailableLanguages { get; set; }
 }

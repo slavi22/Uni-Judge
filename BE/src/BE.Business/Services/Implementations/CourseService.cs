@@ -36,7 +36,7 @@ public class CourseService : ICourseService
         {
             viewCourseProblemsList.Add(new ViewCourseProblemDto
             {
-                ProblemId = problem.Id,
+                ProblemId = problem.ProblemId,
                 Name = problem.Name,
                 Description = problem.Description
             });
@@ -123,7 +123,8 @@ public class CourseService : ICourseService
         var coursesDto = new List<CourseDto>();
         foreach (var course in allCourses)
         {
-            var userCourse = course.UserCourses.FirstOrDefault(uc => uc.CourseId == course.Id && uc.UserId == currentUser.Id);
+            var userCourse =
+                course.UserCourses.FirstOrDefault(uc => uc.CourseId == course.Id && uc.UserId == currentUser.Id);
             coursesDto.Add(new CourseDto
             {
                 CourseId = course.CourseId,
@@ -134,5 +135,24 @@ public class CourseService : ICourseService
         }
 
         return coursesDto;
+    }
+
+    public async Task<List<EnrolledCourseDto>> GetEnrolledCoursesAsync()
+    {
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
+        var enrolledCourses = await _courseRepository.GetAllEnrolledCoursesAsync(currentUser.Id);
+        var enrolledCoursesDto = new List<EnrolledCourseDto>();
+        foreach (var course in enrolledCourses)
+        {
+            enrolledCoursesDto.Add(new EnrolledCourseDto
+            {
+                CourseId = course.CourseId,
+                Name = course.Name,
+                Description = course.Description
+            });
+        }
+
+        return enrolledCoursesDto;
     }
 }

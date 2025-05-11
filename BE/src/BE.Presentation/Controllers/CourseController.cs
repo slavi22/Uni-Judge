@@ -31,7 +31,7 @@ namespace BE.Presentation.Controllers
         [Consumes("application/json")]
         [Produces("application/json")]
         [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ProblemDetails))]
-        [ProducesResponseType(statusCode: StatusCodes.Status403Forbidden, type:typeof(ProblemDetails))]
+        [ProducesResponseType(statusCode: StatusCodes.Status403Forbidden, type: typeof(ProblemDetails))]
         [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<ViewCourseProblemDto>))]
         public async Task<IActionResult> GetCourseProblems(string courseId)
         {
@@ -132,6 +132,25 @@ namespace BE.Presentation.Controllers
         public async Task<IActionResult> GetAllCourses()
         {
             var result = await _courseService.GetAllCoursesAsync();
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets all courses the authenticated user is enrolled in
+        /// </summary>
+        /// <remarks>Requires the user to be authenticated. Returns a list of all courses the current user is enrolled in.</remarks>
+        /// <returns>A list of enrolled courses with their basic information</returns>
+        /// <response code="401">Returns 401 if the user is not authenticated</response>
+        /// <response code="200">Returns 200 with the list of courses the user is enrolled in</response>
+        //TODO: add test
+        [Authorize]
+        [HttpGet("get-enrolled-courses")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<EnrolledCourseDto>))]
+        public async Task<IActionResult> GetEnrolledCourses()
+        {
+            var result = await _courseService.GetEnrolledCoursesAsync();
             return Ok(result);
         }
     }

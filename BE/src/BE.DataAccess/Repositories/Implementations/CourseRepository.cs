@@ -51,7 +51,9 @@ public class CourseRepository : ICourseRepository
 
     public async Task<List<CoursesModel>> GetTeacherCoursesAsync(string teacherId)
     {
-        var teacherCourses = await _dbContext.Courses.Include(c => c.User).ToListAsync();
+        var teacherCourses = await _dbContext.Courses
+                .Include(c => c.User)
+                .Where(c => c.UserId == teacherId).ToListAsync();
         return teacherCourses;
     }
 
@@ -60,5 +62,14 @@ public class CourseRepository : ICourseRepository
         var allCourses = await _dbContext.Courses
             .Include(c => c.UserCourses).ToListAsync();
         return allCourses;
+    }
+
+    public async Task<List<CoursesModel>> GetAllEnrolledCoursesAsync(string userId)
+    {
+        var enrolledCourses = await _dbContext.Courses
+            .Include(c => c.UserCourses)
+            .Where(c => c.UserCourses.Any(uc => uc.UserId == userId))
+            .ToListAsync();
+        return enrolledCourses;
     }
 }

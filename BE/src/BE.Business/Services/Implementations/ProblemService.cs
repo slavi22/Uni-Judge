@@ -132,6 +132,10 @@ public class ProblemService : IProblemService
     public async Task<ProblemInfoDto> GetProblemInfoAsync(string courseId, string problemId)
     {
         var problem = await _problemRepository.GetProblemWithLanguagesAndMainMethodBodies(courseId, problemId);
+        if (problem == null)
+        {
+            throw new ProblemNotFoundException($"The problem with ID '{problemId}' was not found.");
+        }
         var problemDto = new ProblemInfoDto
         {
             CourseId = problem.Course.CourseId,
@@ -139,8 +143,10 @@ public class ProblemService : IProblemService
             Name = problem.Name,
             Description = problem.Description,
             SolutionTemplate = problem.MainMethodBodiesList.Select(p => p.SolutionTemplate).ToList(),
-            //StdInList = problem.StdInList.Where(s => s.).ToList(),
-            AvalableLanguages = problem.ProblemLanguages.Select(p => (LanguagesEnum)p.LanguageId).ToList()
+            ExpectedOutputList =
+                problem.ExpectedOutputList.Where(e => e.IsSample).Select(e => e.ExpectedOutput).ToList(),
+            StdInList = problem.StdInList.Where(s => s.IsSample).Select(s => s.StdIn).ToList(),
+            AvailableLanguages = problem.ProblemLanguages.Select(p => (LanguagesEnum)p.LanguageId).ToList()
         };
         return problemDto;
     }
