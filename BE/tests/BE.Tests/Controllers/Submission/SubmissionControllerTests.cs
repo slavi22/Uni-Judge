@@ -30,7 +30,7 @@ public class SubmissionControllerTests
         // Arrange
         var clientSubmissionDto = new ClientSubmissionDto();
         var judgeResults = new List<SubmissionBatchResultResponseDto>();
-        var userSubmissionDto = new UserSubmissionDto();
+        var userSubmissionDto = new UserSubmissionResultDto();
 
         _mockJudgeService.Setup(service => service.CreateBatchSubmissions(clientSubmissionDto))
             .ReturnsAsync(judgeResults);
@@ -43,7 +43,7 @@ public class SubmissionControllerTests
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.IsType<UserSubmissionDto>(okResult.Value);
+        Assert.IsType<UserSubmissionResultDto>(okResult.Value);
     }
 
     [Fact]

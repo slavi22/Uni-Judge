@@ -17,7 +17,8 @@ public class UserSubmissionService : IUserSubmissionService
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public UserSubmissionService(IUserRepository userRepository, IUserSubmissionRepository userSubmissionRepository,
-        IProblemRepository problemRepository, ICourseRepository courseRepository, IHttpContextAccessor httpContextAccessor)
+        IProblemRepository problemRepository, ICourseRepository courseRepository,
+        IHttpContextAccessor httpContextAccessor)
     {
         _userRepository = userRepository;
         _userSubmissionRepository = userSubmissionRepository;
@@ -26,13 +27,13 @@ public class UserSubmissionService : IUserSubmissionService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public async Task<UserSubmissionDto> AddUserSubmission(ClientSubmissionDto clientSubmissionDto,
+    public async Task<UserSubmissionResultDto> AddUserSubmission(ClientSubmissionDto clientSubmissionDto,
         List<SubmissionBatchResultResponseDto> submissionBatchResultResponseDto)
     {
         // Here we fill the test cases list with the data from the response from the judge service
         // Then we create a new UserSubmissionModel entity and fill it with the data from the clientSubmissionDto and the test cases list
         // We then calculate if the submission is passing or not and add the entity to the database
-        // After that we create a new UserSubmissionDto and fill it with the data from the entity and return it
+        // After that we create a new UserSubmissionResultDto and fill it with the data from the entity and return it
         var testCasesList = new List<TestCaseModel>();
         foreach (var submissionBatchResultResponse in submissionBatchResultResponseDto)
         {
@@ -70,12 +71,17 @@ public class UserSubmissionService : IUserSubmissionService
         };
 
         await _userSubmissionRepository.AddAsync(entity);
-        var userSubmissionDto = new UserSubmissionDto
+        var userSubmissionDto = new UserSubmissionResultDto
         {
-            SumbissionId = entity.Id
+            SumbissionId = entity.Id,
         };
         foreach (var testCaseModel in testCasesList)
         {
+            var testCaseResultId = testCaseModel.TestCaseStatus.ResultId;
+            if (testCaseResultId >= 6)
+            {
+                userSubmissionDto.IsError = true;
+            }
             userSubmissionDto.TestCases.Add(new TestCaseDto
             {
                 IsCorrect = testCaseModel.IsCorrect,
@@ -85,7 +91,7 @@ public class UserSubmissionService : IUserSubmissionService
                 Stderr = testCaseModel.Stderr,
                 Status = new TestCaseStatusDto
                 {
-                    Id = testCaseModel.TestCaseStatus.ResultId,
+                    Id = testCaseResultId,
                     Description = testCaseModel.TestCaseStatus.Description
                 }
             });
@@ -103,7 +109,40 @@ public class UserSubmissionService : IUserSubmissionService
         var percentageInDecimal = (double)percentageToPass / 100;
         var failedTestCases = testCasesList.Count(x => x.IsCorrect == false);
         var totalTestCases = testCasesList.Count;
-        var result = failedTestCases == 0 ? totalTestCases : totalTestCases / failedTestCases;
+        var result = failedTestCases == 0 ? totalTestCases :
+            totalTestCases == failedTestCases ? 0 : totalTestCases / failedTestCases;
         return result >= percentageInDecimal * totalTestCases;
+    }
+
+    //TODO: add test
+    public async Task<List<ProblemUserSubmissionsDto>> GetUserSubmissionsForSpecificProblem(string courseId,
+        string problemId)
+    {
+        var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
+        var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
+        var userSubmissions =
+            await _userSubmissionRepository.GetAllUserSubmissionsForSpecificProblem(courseId, problemId,
+                currentUser.Id);
+        var allUserSubmissions = new List<ProblemUserSubmissionsDto>();
+
+
+        foreach (var submission in userSubmissions)
+        {
+            var anyErrorTestCase = submission.TestCases.Any(tc => tc.TestCaseStatus.ResultId >= 6);
+            var errorDescription = anyErrorTestCase
+                ? submission.TestCases.FirstOrDefault(tc => tc.TestCaseStatus.ResultId >= 6)?.TestCaseStatus.Description
+                : null;
+
+            allUserSubmissions.Add(new ProblemUserSubmissionsDto
+            {
+                SubmissionId = submission.Id,
+                IsPassing = submission.IsPassing,
+                LanguageId = submission.LanguageId.ToString(),
+                IsError = anyErrorTestCase,
+                ErrorResult = errorDescription
+            });
+        }
+
+        return allUserSubmissions;
     }
 }

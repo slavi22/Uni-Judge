@@ -136,13 +136,24 @@ public class ProblemService : IProblemService
         {
             throw new ProblemNotFoundException($"The problem with ID '{problemId}' was not found.");
         }
+
+        var solutionTemplates = new List<SolutionTemplateDto>();
+        foreach (var mainMethodBody in problem.MainMethodBodiesList)
+        {
+            solutionTemplates.Add(new SolutionTemplateDto
+            {
+                LanguageId = ((int)mainMethodBody.LanguageId).ToString(),
+                SolutionTemplateContent = mainMethodBody.SolutionTemplate
+            });
+        }
+
         var problemDto = new ProblemInfoDto
         {
             CourseId = problem.Course.CourseId,
             ProblemId = problem.ProblemId,
             Name = problem.Name,
             Description = problem.Description,
-            SolutionTemplate = problem.MainMethodBodiesList.Select(p => p.SolutionTemplate).ToList(),
+            SolutionTemplates = solutionTemplates,
             ExpectedOutputList =
                 problem.ExpectedOutputList.Where(e => e.IsSample).Select(e => e.ExpectedOutput).ToList(),
             StdInList = problem.StdInList.Where(s => s.IsSample).Select(s => s.StdIn).ToList(),

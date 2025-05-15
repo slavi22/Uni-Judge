@@ -11,4 +11,10 @@ public static class ExtensionMethods
         var serialized = JsonConvert.SerializeObject(self);
         return JsonConvert.DeserializeObject<ClientSubmissionDto>(serialized);
     }
+
+    public static ClientSubmissionTestDto DeepCopyClientSubmissionTestDto(this ClientSubmissionTestDto self)
+    {
+        var serialized = JsonConvert.SerializeObject(self);
+        return JsonConvert.DeserializeObject<ClientSubmissionTestDto>(serialized);
+    }
 }

@@ -11,7 +11,9 @@ public class SubmissionStatusDto
     [JsonConverter(typeof(PlainTextConverter))]
     public string Stdout { get; set; }
 
-    [JsonProperty("compile_output")] public string? CompileOutput { get; set; }
+    [JsonProperty("compile_output")]
+    [JsonConverter(typeof(PlainTextConverter))]
+    public string? CompileOutput { get; set; }
 
     [JsonProperty("stderr")]
     [JsonConverter(typeof(PlainTextConverter))]

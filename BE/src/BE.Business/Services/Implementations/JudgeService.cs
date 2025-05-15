@@ -50,6 +50,143 @@ public class JudgeService : IJudgeService
         return result;
     }
 
+    // TODO: add test
+    public async Task<List<TestSubmissionBatchResultResponseDto>> TestBatchSubmissions(
+        ClientSubmissionTestDto clientSubmissionTestDto)
+    {
+        var preparedSubmissions = await PrepareTestSubmissionBatchDtoWithResult(clientSubmissionTestDto);
+        var preparedSubmissionsWithoutResult =
+            PrepareSubmissionTestBatchDtoWithoutResult(preparedSubmissions);
+        var httpClient = _httpClientFactory.CreateClient("Judge");
+        using var content = new StringContent(JsonConvert.SerializeObject(preparedSubmissionsWithoutResult),
+            Encoding.UTF8,
+            "application/json");
+        var judgeRequest = await httpClient.PostAsync("submissions/batch?base64_encoded=true", content);
+        var judgeResponse =
+            JsonConvert.DeserializeObject<List<SubmissionResponseTokenDto>>(
+                await judgeRequest.Content.ReadAsStringAsync());
+        var submissionStatuses = await PollSubmissionStatuses(judgeResponse);
+        var result = ConstructTestFinalResult(judgeResponse, submissionStatuses, preparedSubmissions);
+        return result;
+    }
+
+    private async Task<BatchSubmissionRequestDto> PrepareTestSubmissionBatchDtoWithResult(
+        ClientSubmissionTestDto clientSubmissionTestDto)
+    {
+        if (await _courseRepository.GetCourseByCourseIdAsync(clientSubmissionTestDto.CourseId) == null)
+        {
+            throw new CourseNotFoundException($"Course with id '{clientSubmissionTestDto.CourseId}' was not found.");
+        }
+
+        if (await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionTestDto.ProblemId) == null)
+        {
+            throw new ProblemNotFoundException($"Problem with id '{clientSubmissionTestDto.ProblemId}' was not found.");
+        }
+
+        // Prepare the submissions by constructing the solution class body and return the prepared submissions
+
+        var problemEntity = await _problemRepository.GetProblemByProblemIdAsync(clientSubmissionTestDto.ProblemId);
+
+        var mainMethodBodyEntity =
+            await _mainMethodBodiesRepository.GetMainMethodBodyByIdAsync(problemEntity.Id,
+                clientSubmissionTestDto.LanguageId);
+        // switch case to construct the solution class body based on the language
+        switch (clientSubmissionTestDto.LanguageId)
+        {
+            case "51":
+            {
+                clientSubmissionTestDto.SourceCode = CSharpTemplate.ConstructCSharpSolutionBase(
+                    mainMethodBodyEntity.MainMethodBodyContent,
+                    clientSubmissionTestDto.SourceCode);
+                break;
+            }
+            case "63":
+            {
+                clientSubmissionTestDto.SourceCode = JsTemplate.ConstructJsSolutionBase(
+                    mainMethodBodyEntity.MainMethodBodyContent,
+                    clientSubmissionTestDto.SourceCode);
+                break;
+            }
+        }
+
+        var preparedSubmissions = new BatchSubmissionRequestDto();
+        for (int i = 0; i < clientSubmissionTestDto.TestCases.Count; i++)
+        {
+            var submissionForRequest = new SubmissionRequestDto
+            {
+                LanguageId = clientSubmissionTestDto.LanguageId,
+                SourceCode = clientSubmissionTestDto.SourceCode,
+                StdIn = clientSubmissionTestDto.TestCases[i].StdIn,
+                ExpectedOutput = clientSubmissionTestDto.TestCases[i].ExpectedOutput
+            };
+            preparedSubmissions.Submissions.Add(submissionForRequest);
+        }
+
+        return preparedSubmissions;
+    }
+
+    private BatchSubmissionRequestDto PrepareSubmissionTestBatchDtoWithoutResult(
+        BatchSubmissionRequestDto batchSubmissions)
+    {
+        var batchSubmissionWithoutExpectedOutput = new BatchSubmissionRequestDto();
+        foreach (var submission in batchSubmissions.Submissions)
+        {
+            var editedSubmission = new SubmissionRequestDto
+            {
+                LanguageId = submission.LanguageId,
+                SourceCode = submission.SourceCode,
+                StdIn = submission.StdIn
+            };
+            batchSubmissionWithoutExpectedOutput.Submissions.Add(editedSubmission);
+        }
+
+        return batchSubmissionWithoutExpectedOutput;
+    }
+
+    private List<TestSubmissionBatchResultResponseDto> ConstructTestFinalResult(
+        List<SubmissionResponseTokenDto> judgeResponse, SubmissionResultDto submissionStatuses,
+        BatchSubmissionRequestDto preparedSubmissionsWithResult)
+    {
+        var result = new List<TestSubmissionBatchResultResponseDto>();
+        // loop through the response and check if the submission is correct or not
+        for (int i = 0; i < judgeResponse.Count; i++)
+        {
+            var answer = submissionStatuses.Submissions[i].Stdout?.Trim().Split("\n").Last();
+            if (submissionStatuses.Submissions[i].Status.Id == 3 &&
+                (answer == preparedSubmissionsWithResult.Submissions[i].ExpectedOutput ||
+                 answer == preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput))
+            {
+                result.Add(new TestSubmissionBatchResultResponseDto
+                {
+                    IsCorrect = true,
+                    Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
+                    Status = submissionStatuses.Submissions[i].Status,
+                    ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
+                    StdIn = preparedSubmissionsWithResult.Submissions[i].StdIn,
+                    CompileOutput = submissionStatuses.Submissions[i].CompileOutput,
+                    Stderr = submissionStatuses.Submissions[i].Stderr
+                });
+            }
+            else
+            {
+                result.Add(new TestSubmissionBatchResultResponseDto
+                {
+                    IsCorrect = false,
+                    Stdout = submissionStatuses.Submissions[i].Stdout != null
+                        ? string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1))
+                        : null,
+                    Status = submissionStatuses.Submissions[i].Status,
+                    ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
+                    StdIn = preparedSubmissionsWithResult.Submissions[i].StdIn,
+                    CompileOutput = submissionStatuses.Submissions[i].CompileOutput,
+                    Stderr = submissionStatuses.Submissions[i].Stderr,
+                });
+            }
+        }
+
+        return result;
+    }
+
     private List<SubmissionBatchResultResponseDto> ConstructFinalResult(
         List<SubmissionResponseTokenDto> judgeResponse, SubmissionResultDto submissionStatuses,
         BatchSubmissionRequestDto preparedSubmissionsWithResult)
@@ -71,6 +208,7 @@ public class JudgeService : IJudgeService
                     Stdout = string.Join("\n", submissionStatuses.Submissions[i].Stdout.Trim().Split("\n").SkipLast(1)),
                     Status = submissionStatuses.Submissions[i].Status,
                     ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
+                    CompileOutput = submissionStatuses.Submissions[i].CompileOutput,
                     HiddenExpectedOutput = preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput,
                     Stderr = submissionStatuses.Submissions[i].Stderr
                 });
@@ -87,6 +225,7 @@ public class JudgeService : IJudgeService
                         : null,
                     Status = submissionStatuses.Submissions[i].Status,
                     ExpectedOutput = preparedSubmissionsWithResult.Submissions[i].ExpectedOutput,
+                    CompileOutput = submissionStatuses.Submissions[i].CompileOutput,
                     HiddenExpectedOutput = preparedSubmissionsWithResult.Submissions[i].HiddenExpectedOutput,
                     Stderr = submissionStatuses.Submissions[i].Stderr
                 });

@@ -36,7 +36,7 @@ public class CourseServiceTests
         {
             Id = courseId,
             Problems = new List<ProblemModel>
-                { new ProblemModel { Id = "problem1", Name = "Problem 1", Description = "Description 1" } }
+                { new ProblemModel { ProblemId = "problem1", Name = "Problem 1", Description = "Description 1" } }
         };
         _courseRepositoryMock.Setup(repo => repo.GetCourseAndProblemsByIdAsync(courseId)).ReturnsAsync(course);
 
