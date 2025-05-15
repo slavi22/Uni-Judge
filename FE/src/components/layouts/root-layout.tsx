@@ -91,6 +91,6 @@ export default function RootLayout() {
       </SidebarInset>
     </SidebarProvider>
   ) : (
-    <LoadingSpinner />
+    <LoadingSpinner text="Loading user profile..." />
   );
 }

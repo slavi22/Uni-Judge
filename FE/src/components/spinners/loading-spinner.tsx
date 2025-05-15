@@ -1,6 +1,10 @@
 ﻿import { LoaderCircle } from "lucide-react";
 
-export default function LoadingSpinner() {
+type LoadingSpinnerProps = {
+  text: string;
+};
+
+export default function LoadingSpinner({ text }: LoadingSpinnerProps) {
   return (
     <div className="flex flex-col justify-center items-center h-screen m-auto">
       <LoaderCircle
@@ -9,7 +13,7 @@ export default function LoadingSpinner() {
         height={undefined}
       />
       <p className="text-xs sm:text-sm md:text-base xl:text-xl 2xl:text-2xl">
-        Loading user profile...
+        {text}
       </p>
     </div>
   );

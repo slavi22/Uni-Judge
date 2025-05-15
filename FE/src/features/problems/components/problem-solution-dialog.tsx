@@ -144,7 +144,7 @@ export default function ProblemSolutionDialog({
   useEffect(() => {
     // if the dialog is opened once and the parent form is invalid, then trigger the validation
     if (shouldApplyInvalidStyling) {
-      // programmatically trigger the form submission so i dont need to manually call trigger() which would break the onChange event in the inputs
+      // programmatically trigger the form submissions so i dont need to manually call trigger() which would break the onChange event in the inputs
       // => https://stackoverflow.com/a/76091816
       // => https://www.react-hook-form.com/api/useform/handlesubmit/
       form.handleSubmit(onSubmit)();
@@ -282,6 +282,7 @@ export default function ProblemSolutionDialog({
                         value={field.value}
                         onChange={field.onChange}
                         scrollBeyondLastLine={false}
+                        editorIsUsedForProblem={false}
                       />
                     </FormControl>
                     <FormMessage />

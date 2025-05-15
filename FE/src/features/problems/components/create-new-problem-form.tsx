@@ -104,7 +104,7 @@ export default function CreateNewProblemForm({
     },
   });
 
-  const [createNewProblem, { isSuccess }] = useCreateNewProblemMutation();
+  const [createNewProblem] = useCreateNewProblemMutation();
   const navigate = useNavigate();
 
   async function onSubmit(formData: z.infer<typeof formSchema>) {
@@ -116,8 +116,8 @@ export default function CreateNewProblemForm({
       })),
     };
     console.log(reformattedFormData);
-    await createNewProblem(reformattedFormData);
-    if (isSuccess) {
+    const result = await createNewProblem(reformattedFormData);
+    if (!result.error) {
       navigate("/"); //TODO: navigate to my created problems page
     }
   }

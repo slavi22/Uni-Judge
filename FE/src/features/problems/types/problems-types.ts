@@ -70,8 +70,13 @@ export type ProblemInfoDto = {
   problemId: string;
   name: string;
   description: string;
-  solutionTemplate: string[];
+  solutionTemplates: SolutionTemplate[];
   expectedOutputList: string[];
   stdInList: string[];
   availableLanguages: LanguagesEnum[];
+}
+
+export type SolutionTemplate = {
+  languageId: string;
+  solutionTemplateContent: string;
 }

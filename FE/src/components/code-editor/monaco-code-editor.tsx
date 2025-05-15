@@ -1,6 +1,5 @@
 ﻿import { Editor, loader } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
-import useTheme from "@/features/theme/hooks/use-theme.ts";
 import { registerCsharpProvider } from "@/utils/configs/monaco-code-editor-intellisense-config.ts";
 import { CODE_EDITOR_TEMPLATES } from "@/utils/constants/code-editor-templates.ts";
 import { useEffect, useState } from "react";
@@ -16,18 +15,19 @@ type MonacoCodeEditorProps = {
   onChange: (newValue: string) => void;
   className?: string;
   scrollBeyondLastLine: boolean;
+  editorIsUsedForProblem: boolean;
 };
 
 export default function MonacoCodeEditor({
-  selectedLanguage = "51",
+  selectedLanguage = "",
   editorIsForSolutionTemplate,
   shouldLoadIntellisense,
   value,
   onChange,
   className,
   scrollBeyondLastLine,
+  editorIsUsedForProblem,
 }: MonacoCodeEditorProps) {
-  const { theme } = useTheme();
   const [editorDisposeFn, setEditorDisposeFn] =
     useState<monaco.IDisposable | null>(null);
   const [editorLanguage, setEditorLanguage] = useState<string | null>(
@@ -45,13 +45,14 @@ export default function MonacoCodeEditor({
     //https://stackoverflow.com/questions/76660010/duplicate-suggestion-in-monaco-editor-react-next-js
     return () => {
       if (editorDisposeFn && typeof editorDisposeFn.dispose === "function") {
+        monaco.editor.getModels().forEach((model) => model.dispose());
         editorDisposeFn?.dispose();
       }
     };
   }, [editorDisposeFn]);
 
   useEffect(() => {
-    if (editorLanguage !== selectedLanguage) {
+    if (editorLanguage !== selectedLanguage && !editorIsUsedForProblem) {
       onChange(
         editorIsForSolutionTemplate
           ? CODE_EDITOR_TEMPLATES[selectedLanguage].solutionTemplate
@@ -59,7 +60,13 @@ export default function MonacoCodeEditor({
       );
       setEditorLanguage(selectedLanguage);
     }
-  }, [editorIsForSolutionTemplate, editorLanguage, onChange, selectedLanguage]);
+  }, [
+    editorIsForSolutionTemplate,
+    editorIsUsedForProblem,
+    editorLanguage,
+    onChange,
+    selectedLanguage,
+  ]);
 
   return selectedLanguage ? (
     <div className="p-3 rounded flex flex-col gap-2 overflow-auto w-full">
@@ -81,12 +88,13 @@ export default function MonacoCodeEditor({
         options={options}
         theme="vs-dark"
         onMount={() => {
-          if (selectedLanguage === "51" && shouldLoadIntellisense) {
-            loader.init().then((monaco) => {
+          // this isnt working atm because of the monaco react library's bug causing language providers to not be removed when the language is changed + the editors themselves dont get disposed
+          loader.init().then((monaco) => {
+            if (selectedLanguage === "51" && shouldLoadIntellisense) {
               const IDisposable = registerCsharpProvider(monaco);
-              setEditorDisposeFn(IDisposable);
-            });
-          }
+              setEditorDisposeFn(IDisposable!);
+            }
+          });
         }}
         //theme={theme === "dark" ? "light" : "vs-dark"}
       />

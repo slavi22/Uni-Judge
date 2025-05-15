@@ -3,17 +3,22 @@ import { Link } from "react-router";
 import { Button } from "@/components/ui/button.tsx";
 import { SquareArrowOutUpRight } from "lucide-react";
 import { type EnrolledCoursesDto } from "@/features/courses/types/courses-types.ts";
+import LoadingSpinner from "@/components/spinners/loading-spinner.tsx";
 
 type EnrolledCoursesPickerProps = {
   data: EnrolledCoursesDto[] | undefined;
+  isLoading: boolean;
 };
 
 export default function EnrolledCoursesPicker({
   data,
+  isLoading,
 }: EnrolledCoursesPickerProps) {
   return (
     <div className="flex flex-col justify-center items-center gap-5 py-4">
-      {data?.length ? (
+      {isLoading ? (
+        <LoadingSpinner text="Loading courses..." />
+      ) : data?.length ? (
         data?.map((course) => (
           <Card
             key={course.courseId}

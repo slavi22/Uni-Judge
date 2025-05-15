@@ -1,4 +1,4 @@
-﻿import CodeEditorProblem from "@/features/code-editor/components/code-editor-problem.tsx";
+﻿import CodeEditorProblem from "@/features/submissions/components/code-editor-problem.tsx";
 import { ProblemInfoDto } from "@/features/problems/types/problems-types.ts";
 
 type ProblemViewerProps = {
@@ -12,5 +12,7 @@ export default function ProblemViewer({
   courseId,
   problemId,
 }: ProblemViewerProps) {
-  return <CodeEditorProblem data={data}/>;
+  return (
+    <CodeEditorProblem data={data} courseId={courseId} problemId={problemId} />
+  );
 }

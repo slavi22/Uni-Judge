@@ -36,42 +36,45 @@ export function registerCsharpProvider(monacoInstance: typeof monaco) {
 
   const assemblies = ["bin/Debug/net9.0/BE.Presentation.dll"]; //TODO: change to the corresponding dll in prod since currently in the docker container we are still in dev mode
 
-  const IDisposable = monacoInstance.languages.registerCompletionItemProvider("csharp", {
-    triggerCharacters: [".", " "],
-    provideCompletionItems: async (
-      model,
-      position,
-    ): Promise<monaco.languages.CompletionList | null | undefined> => {
-      const suggestions = [];
+  const IDisposable = monacoInstance.languages.registerCompletionItemProvider(
+    "csharp",
+    {
+      triggerCharacters: [".", " "],
+      provideCompletionItems: async (
+        model,
+        position,
+      ): Promise<monaco.languages.CompletionList | null | undefined> => {
+        const suggestions = [];
 
-      const request = {
-        Code: model.getValue(),
-        Position: model.getOffsetAt(position),
-        Assemblies: assemblies,
-      };
+        const request = {
+          Code: model.getValue(),
+          Position: model.getOffsetAt(position),
+          Assemblies: assemblies,
+        };
 
-      const resultQ = await sendRequest("complete", request);
+        const resultQ = await sendRequest("complete", request);
 
-      for (const elem of resultQ) {
-        suggestions.push({
-          label: {
-            label: elem.Suggestion,
-            description: elem.Description,
-          },
-          kind: monacoInstance.languages.CompletionItemKind.Function,
-          insertText: elem.Suggestion,
-          range: {
-            startLineNumber: position.lineNumber,
-            endLineNumber: position.lineNumber,
-            startColumn: position.column,
-            endColumn: position.column,
-          },
-        });
-      }
+        for (const elem of resultQ) {
+          suggestions.push({
+            label: {
+              label: elem.Suggestion,
+              description: elem.Description,
+            },
+            kind: monacoInstance.languages.CompletionItemKind.Function,
+            insertText: elem.Suggestion,
+            range: {
+              startLineNumber: position.lineNumber,
+              endLineNumber: position.lineNumber,
+              startColumn: position.column,
+              endColumn: position.column,
+            },
+          });
+        }
 
-      return { suggestions: suggestions };
+        return { suggestions: suggestions };
+      },
     },
-  });
+  );
 
   monacoInstance.languages.registerSignatureHelpProvider("csharp", {
     signatureHelpTriggerCharacters: ["("],
@@ -110,7 +113,7 @@ export function registerCsharpProvider(monacoInstance: typeof monaco) {
       const signatureHelp: monaco.languages.SignatureHelp = {
         signatures: signatures,
         activeParameter: resultQ.activeParameter,
-        activeSignature: resultQ.activeSignature
+        activeSignature: resultQ.activeSignature,
       };
 
       return {

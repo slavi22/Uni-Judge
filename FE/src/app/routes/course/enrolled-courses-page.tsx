@@ -2,8 +2,8 @@
 import { useGetEnrolledCoursesQuery } from "@/features/courses/api/course-api.ts";
 
 export default function EnrolledCoursesPage() {
-  const { data } = useGetEnrolledCoursesQuery(undefined, {
+  const { data, isLoading } = useGetEnrolledCoursesQuery(undefined, {
     refetchOnMountOrArgChange: true,
   });
-  return <EnrolledCoursesPicker data={data}/>;
+  return <EnrolledCoursesPicker data={data} isLoading={isLoading} />;
 }

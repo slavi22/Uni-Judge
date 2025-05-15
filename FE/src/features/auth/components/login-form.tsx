@@ -91,7 +91,6 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                     <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
-                        type="email"
                         placeholder="email@domain.com"
                         {...field}
                       />

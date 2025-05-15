@@ -3,6 +3,7 @@ import { useGetProblemInfoQuery } from "@/features/problems/api/problems-api.ts"
 import { useNavigate, useParams } from "react-router";
 import { useEffect } from "react";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";
+import LoadingSpinner from "@/components/spinners/loading-spinner.tsx";
 
 export default function ProblemPage() {
   const { courseId, problemId } = useParams();
@@ -18,6 +19,9 @@ export default function ProblemPage() {
     }
   }, [error, navigate]);
 
-  //TODO: make the loading state more elegant
-  return isLoading ? <p>Loading</p> : <ProblemViewer data={data} courseId={courseId} problemId={problemId} />
+  return isLoading ? (
+    <LoadingSpinner text="Loading problem data..." />
+  ) : (
+    <ProblemViewer data={data} courseId={courseId} problemId={problemId} />
+  );
 }

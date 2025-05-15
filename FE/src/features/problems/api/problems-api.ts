@@ -35,6 +35,7 @@ const problemsApi = baseApi.injectEndpoints({
       query: ({ courseId, problemId }) =>
         `problems/get-problem-info/${courseId}/${problemId}`,
     }),
+
   }),
 });
 
