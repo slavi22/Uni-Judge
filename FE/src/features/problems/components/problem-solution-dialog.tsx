@@ -125,9 +125,6 @@ export default function ProblemSolutionDialog({
     }
   }
 
-  function onSubmit(formData: z.infer<typeof formSchema>) {
-    console.log(formData); //TODO: Remove
-  }
 
   function handleSolutionDeletion() {
     deleteSolution();
@@ -147,7 +144,7 @@ export default function ProblemSolutionDialog({
       // programmatically trigger the form submissions so i dont need to manually call trigger() which would break the onChange event in the inputs
       // => https://stackoverflow.com/a/76091816
       // => https://www.react-hook-form.com/api/useform/handlesubmit/
-      form.handleSubmit(onSubmit)();
+      form.handleSubmit(() => {})();
     }
   }, [shouldApplyInvalidStyling, form, problemValidationErrors]);
 
@@ -217,7 +214,7 @@ export default function ProblemSolutionDialog({
                 // => https://github.com/react-hook-form/react-hook-form/issues/1005#issuecomment-1012188940
                 // also here => https://stackoverflow.com/a/78552646
                 e.stopPropagation();
-                form.handleSubmit(onSubmit)(e);
+                form.handleSubmit(() => {})(e);
               }}
               className="flex flex-col gap-5"
             >
@@ -304,6 +301,7 @@ export default function ProblemSolutionDialog({
                         value={field.value}
                         onChange={field.onChange}
                         scrollBeyondLastLine={false}
+                        editorIsUsedForProblem={false}
                       />
                     </FormControl>
                     <FormMessage />

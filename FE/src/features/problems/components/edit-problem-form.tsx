@@ -1,4 +1,18 @@
-﻿import { cn } from "@/lib/utils.ts";
+﻿import { z } from "zod";
+import { type ComponentProps, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useEditProblemMutation,
+} from "@/features/problems/api/problems-api.ts";
+import { useNavigate } from "react-router";
+import { useGetMyCreatedCoursesQuery } from "@/features/courses/api/course-api.ts";
+import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
+import {
+  clearUsedLanguages,
+  editProblemSetUsedLanguages,
+} from "@/features/problems/stores/problem-solutions-slice.ts";
+import { cn } from "@/lib/utils.ts";
 import {
   Card,
   CardContent,
@@ -15,12 +29,6 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-error.ts";
-import { Input } from "@/components/ui/input.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { type ComponentProps, useEffect } from "react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Select,
   SelectContent,
@@ -30,15 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.tsx";
-import { useGetMyCreatedCoursesQuery } from "@/features/courses/api/course-api.ts";
-import ProblemInfoDialog from "@/features/problems/components/problem-info-dialog.tsx";
+import { Input } from "@/components/ui/input.tsx";
 import { Textarea } from "@/components/ui/textarea.tsx";
 import { Slider } from "@/components/ui/slider.tsx";
-import { useAppDispatch, useAppSelector } from "@/hooks/redux/redux-hooks.ts";
-import { clearUsedLanguages } from "@/features/problems/stores/problem-solutions-slice.ts";
+import { Button } from "@/components/ui/button.tsx";
+import ProblemInfoDialog from "@/features/problems/components/problem-info-dialog.tsx";
 import ExpectedOutputsStdinsDialog from "@/features/problems/components/expected-outputs-stdins-dialog.tsx";
-import { useCreateNewProblemMutation } from "@/features/problems/api/problems-api.ts";
-import { useNavigate } from "react-router";
+import { type EditProblemInfo } from "@/features/problems/types/problems-types.ts";
 
 const problemSolutionsSchema = z.object({
   languageId: z.string().min(1, { message: "Language ID cannot be empty." }),
@@ -62,6 +68,8 @@ const stdInSchema = z.object({
   isSample: z.boolean(),
 });
 
+export type EditFormStdInSchema = z.infer<typeof stdInSchema>;
+
 const formSchema = z.object({
   courseId: z.string().min(1, { message: "Course ID cannot be empty." }),
   problemId: z.string().min(1, { message: "Problem ID cannot be empty." }),
@@ -83,28 +91,38 @@ const formSchema = z.object({
     .min(1, { message: "At least one language is required." }),
 });
 
-export type ProblemFormSchemaType = z.infer<typeof formSchema>;
+type EditProblemFormProps = {
+  courseId: string | undefined;
+  problemId: string | undefined;
+  data?: EditProblemInfo | undefined;
+} & ComponentProps<"div">;
 
-export default function CreateNewProblemForm({
+export default function EditProblemForm({
+  data,
+  courseId,
+  problemId,
   className,
   ...props
-}: ComponentProps<"div">) {
+}: EditProblemFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      courseId: "",
-      problemId: "",
-      name: "",
-      description: "",
-      requiredPercentageToPass: 50,
-      mainMethodBodiesList: [],
-      expectedOutputList: [],
-      stdInList: [],
-      languagesList: [],
+      courseId: data?.courseId,
+      problemId: data?.problemId,
+      name: data?.name,
+      description: data?.description,
+      requiredPercentageToPass: data?.requiredPercentageToPass,
+      mainMethodBodiesList: data?.mainMethodBodiesList.map((item) => ({
+        ...item,
+        languageId: item.languageId.toString(),
+      })),
+      expectedOutputList: data?.expectedOutputList,
+      stdInList: data?.stdInList,
+      languagesList: data?.languagesList,
     },
   });
 
-  const [createNewProblem] = useCreateNewProblemMutation();
+  const [editProblem] = useEditProblemMutation();
   const navigate = useNavigate();
 
   async function onSubmit(formData: z.infer<typeof formSchema>) {
@@ -115,17 +133,22 @@ export default function CreateNewProblemForm({
         languageId: Number(item.languageId),
       })),
     };
-    //console.log(reformattedFormData);
-    const result = await createNewProblem(reformattedFormData);
+
+    const result = await editProblem({
+      courseId: courseId!,
+      problemId: problemId!,
+      data: reformattedFormData,
+    });
     if (!result.error) {
       navigate("/courses"); //TODO: navigate to my created problems page if i decide to create one
     }
   }
 
-  const { data, error } = useGetMyCreatedCoursesQuery();
+  const { data: myCreatedCoursesData, error } = useGetMyCreatedCoursesQuery();
   const { usedLanguages } = useAppSelector((state) => state.problemSolutions);
 
   const dispatch = useAppDispatch();
+
   useEffect(() => {
     return () => {
       dispatch(clearUsedLanguages());
@@ -133,15 +156,22 @@ export default function CreateNewProblemForm({
   }, [dispatch]);
 
   useEffect(() => {
-    form.setValue("languagesList", usedLanguages);
-  }, [form, usedLanguages]);
+    if (!usedLanguages.length) {
+      dispatch(editProblemSetUsedLanguages(form.getValues("languagesList")));
+    } else {
+      form.setValue("languagesList", usedLanguages);
+    }
+  }, [dispatch, form, usedLanguages]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Button onClick={() => console.log(form.getValues("expectedOutputList"))}>
+        Click
+      </Button>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Create Problem</CardTitle>
-          <CardDescription>Create a new Problem</CardDescription>
+          <CardTitle className="text-2xl">Edit Problem</CardTitle>
+          <CardDescription>Edit the current problem</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -159,6 +189,7 @@ export default function CreateNewProblemForm({
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        disabled={true}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select a course" />
@@ -168,8 +199,8 @@ export default function CreateNewProblemForm({
                             <SelectLabel>
                               Select a course from the ones you've created
                             </SelectLabel>
-                            {data &&
-                              data.map((item) => (
+                            {myCreatedCoursesData &&
+                              myCreatedCoursesData.map((item) => (
                                 <SelectItem
                                   key={item.courseId}
                                   value={item.courseId}
@@ -320,7 +351,7 @@ export default function CreateNewProblemForm({
                     </Button>
                     <FormControl>
                       <ExpectedOutputsStdinsDialog
-                        expectedOutputsAndStdins={field.value}
+                        expectedOutputsAndStdins={field.value} //TODO: here is the discrepancy
                         inputIsInvalid={
                           !!form.getFieldState(
                             "expectedOutputList",
@@ -332,6 +363,7 @@ export default function CreateNewProblemForm({
                         parentFormValidated={form.formState.isSubmitted}
                         setFormValue={form.setValue}
                         formTriggerValidationFn={form.trigger}
+                        stdInListFromParent={form.getValues("stdInList")}
                       />
                     </FormControl>
                     <FormMessage />
@@ -348,7 +380,7 @@ export default function CreateNewProblemForm({
               />
 
               <Button className="w-full" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Submitting" : "Create problem"}
+                {form.formState.isSubmitting ? "Submitting" : "Edit problem"}
               </Button>
             </form>
           </Form>

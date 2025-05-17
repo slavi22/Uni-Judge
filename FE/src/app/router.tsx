@@ -12,6 +12,7 @@ import EnrolledCoursesPage from "@/app/routes/course/enrolled-courses-page.tsx";
 import AllCoursesPage from "@/app/routes/course/all-courses-page.tsx";
 import CourseProblemsPage from "@/app/routes/course/course-problems-page.tsx";
 import ProblemPage from "@/app/routes/problems/problem-page.tsx";
+import EditProblemPage from "@/app/routes/problems/edit-problem-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +81,10 @@ export const router = createBrowserRouter([
                   {
                     path: "create-new-problem",
                     element: <CreateNewProblemPage />,
+                  },
+                  {
+                    path: "edit-problem/:courseId/:problemId",
+                    element: <EditProblemPage />,
                   },
                 ],
               },

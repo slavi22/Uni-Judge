@@ -13,7 +13,7 @@
 export type StdInListDto = {
   isSample: boolean;
   stdIn: string;
-}
+};
 
 export type MainMethodBodyDto = {
   languageId: LanguagesEnum;
@@ -46,19 +46,18 @@ export type LanguageDto = {
 
 export type ProblemSolutionsState = {
   usedLanguages: number[];
-}
+};
 
 export type SetUsedLanguagesPayload = {
   oldLanguageId: number;
   newLanguageId: number;
-}
+};
 
 export type ProblemSolutions = {
   languageId: string;
   solutionTemplate: string;
   mainMethodBodyContent: string;
 };
-
 
 export type ExpectedOutputAndStdin = {
   expectedOutput: string;
@@ -74,9 +73,27 @@ export type ProblemInfoDto = {
   expectedOutputList: string[];
   stdInList: string[];
   availableLanguages: LanguagesEnum[];
-}
+};
 
 export type SolutionTemplate = {
   languageId: string;
   solutionTemplateContent: string;
-}
+};
+
+export type EditProblemInfo = {
+  courseId: string;
+  problemId: string;
+  name: string;
+  description: string;
+  requiredPercentageToPass: number;
+  mainMethodBodiesList: EditProblemMainMethodBody[];
+  expectedOutputList: ExpectedOutputListDto[];
+  stdInList: StdInListDto[];
+  languagesList: LanguagesEnum[];
+};
+
+export type EditProblemMainMethodBody = {
+  languageId: string;
+  solutionTemplate: string;
+  mainMethodBodyContent: string;
+};

@@ -2,7 +2,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card.tsx";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button.tsx";
-import { SquareArrowOutUpRight } from "lucide-react";
+import { SquareArrowOutUpRight, SquarePen } from "lucide-react";
+import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 
 type CourseProblemsViewerProps = {
   data: CourseProblemDto[] | undefined;
@@ -11,8 +12,9 @@ type CourseProblemsViewerProps = {
 
 export default function CourseProblemViewer({
   data,
-  courseId
+  courseId,
 }: CourseProblemsViewerProps) {
+  const { isAuthenticated, roles } = useAppSelector((state) => state.auth);
   return (
     <div className="flex flex-col justify-center items-center gap-5 py-4">
       {data?.map((problem) => (
@@ -21,7 +23,18 @@ export default function CourseProblemViewer({
           className="w-1/4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-primary/50 cursor-pointer"
         >
           <CardHeader className="font-semibold text-lg">
-            {problem.name}
+            <div className="flex gap-3 items-center">
+              {problem.name}
+              {isAuthenticated && roles.includes("Teacher") && (
+                <Link
+                  to={`/problems/edit-problem/${courseId}/${problem.problemId}`}
+                >
+                  <Button variant="outline">
+                    <SquarePen />
+                  </Button>
+                </Link>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-3">

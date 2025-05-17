@@ -69,9 +69,6 @@ export default function ProblemInfoDialog({
     defaultValues: { mainMethodBodiesList: parentProblemSolutions },
   });
 
-  function onSubmit(formData: z.infer<typeof formSchema>) {
-    console.log(formData); //TODO: Remove
-  }
 
   function handleDialogClose() {
     setMainMethodBodyContent(
@@ -125,7 +122,7 @@ export default function ProblemInfoDialog({
             Add a solution
           </Button>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
+            <form onSubmit={form.handleSubmit(() => {})} className="space-y-2">
               {fields.map((solution, index) => (
                 <FormField
                   key={solution.id}

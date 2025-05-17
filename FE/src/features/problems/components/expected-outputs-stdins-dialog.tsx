@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/form.tsx";
 import { useEffect, useState } from "react";
 import { type ExpectedOutputAndStdin } from "@/features/problems/types/problems-types.ts";
+import { EditFormStdInSchema } from "@/features/problems/components/edit-problem-form.tsx";
 
 type ExpectedOutputsStdinsDialogProps = {
   expectedOutputsAndStdins: ExpectedOutputAndStdin[];
@@ -38,6 +39,7 @@ type ExpectedOutputsStdinsDialogProps = {
   parentFormValidated: boolean;
   setFormValue: UseFormSetValue<ProblemFormSchemaType>;
   formTriggerValidationFn: UseFormTrigger<ProblemFormSchemaType>;
+  stdInListFromParent?: EditFormStdInSchema[];
 };
 
 const stdInSchema = z.object({
@@ -67,6 +69,7 @@ export default function ExpectedOutputsStdinsDialog({
   parentFormValidated,
   setFormValue,
   formTriggerValidationFn,
+  stdInListFromParent,
 }: ExpectedOutputsStdinsDialogProps) {
   const { open } = useSidebar();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -115,6 +118,17 @@ export default function ExpectedOutputsStdinsDialog({
     }
   }, [formTriggerValidationFn, openModal, parentFormValidated]);
 
+  useEffect(() => {
+    if (stdInListFromParent) {
+      stdInListFromParent.map((_item, index) =>
+        form.setValue(
+          `expectedOutputAndStdIn.${index}.stdInParam.0`,
+          stdInListFromParent[index],
+        ),
+      );
+    }
+  }, [form, stdInListFromParent]);
+
   return (
     <Dialog open={openModal} onOpenChange={() => handleDialogOpen()}>
       <DialogTrigger asChild>
@@ -142,7 +156,9 @@ export default function ExpectedOutputsStdinsDialog({
                   expectedOutput: "",
                   isSample: false,
                 },
-                { focusName: `expectedOutputAndStdIn.${fields.length}.stdInParam.0.stdIn` },
+                {
+                  focusName: `expectedOutputAndStdIn.${fields.length}.stdInParam.0.stdIn`,
+                },
               );
             }}
           >
