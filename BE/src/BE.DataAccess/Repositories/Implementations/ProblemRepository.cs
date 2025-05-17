@@ -28,6 +28,12 @@ public class ProblemRepository : IProblemRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public async Task EditProblemAsync(ProblemModel problem)
+    {
+        _dbContext.Update(problem);
+        await _dbContext.SaveChangesAsync();
+    }
+
     public async Task<List<ProblemModel>> GetTeacherProblems(string teacherId)
     {
         var teacherProblems =
@@ -40,14 +46,27 @@ public class ProblemRepository : IProblemRepository
 
     public async Task<ProblemModel> GetProblemWithLanguagesAndMainMethodBodies(string courseId, string problemId)
     {
+        //TODO: replace that with the bottom method since its essentially the same
         var problem = await _dbContext.Problems
             .Include(p => p.Course)
             .Include(p => p.MainMethodBodiesList)
             .Include(p => p.ProblemLanguages)
             .Include(p => p.StdInList)
             .Include(p => p.ExpectedOutputList)
-            .Where(p => p.Course.CourseId == courseId)
-            .Where(p => p.ProblemId == problemId)
+            .Where(p => p.Course.CourseId == courseId && p.ProblemId == problemId)
+            .FirstOrDefaultAsync();
+        return problem;
+    }
+
+    public async Task<ProblemModel> GetProblemByProblemIdAndCourseId(string courseId, string problemId)
+    {
+        var problem = await _dbContext.Problems
+            .Include(p => p.Course)
+            .Include(p => p.ProblemLanguages)
+            .Include(p => p.MainMethodBodiesList)
+            .Include(p => p.ExpectedOutputList)
+            .Include(p => p.StdInList)
+            .Where(p => p.Course.CourseId == courseId && p.ProblemId == problemId)
             .FirstOrDefaultAsync();
         return problem;
     }

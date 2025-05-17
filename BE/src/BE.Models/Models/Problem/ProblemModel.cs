@@ -36,5 +36,5 @@ public class ProblemModel
     // "If you reference a new entity from the navigation property of an entity that is already tracked by the context, the entity will be discovered and inserted into the database."
     // https://learn.microsoft.com/en-us/ef/core/saving/related-data#adding-a-related-entity
     public List<MainMethodBodyModel> MainMethodBodiesList { get; set; } = new List<MainMethodBodyModel>();
-    public List<ProblemLanguageModel> ProblemLanguages { get; } = new List<ProblemLanguageModel>();
+    public List<ProblemLanguageModel> ProblemLanguages { get; set; } = new List<ProblemLanguageModel>();
 }

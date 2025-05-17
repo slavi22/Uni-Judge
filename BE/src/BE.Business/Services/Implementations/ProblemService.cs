@@ -110,6 +110,73 @@ public class ProblemService : IProblemService
     }
 
     //TODO: add test
+    public async Task<CreatedProblemDto> EditProblemAsync(string courseId, string problemId, ClientProblemDto dto)
+    {
+        var problem = await _problemRepository.GetProblemByProblemIdAndCourseId(courseId, problemId);
+        problem.ProblemId = dto.ProblemId;
+        problem.Name = dto.Name;
+        problem.Description = dto.Description;
+        problem.RequiredPercentageToPass = dto.RequiredPercentageToPass;
+        problem.MainMethodBodiesList.Clear();
+        foreach (var bodyDto in dto.MainMethodBodiesList)
+        {
+            problem.MainMethodBodiesList.Add(new MainMethodBodyModel
+            {
+                LanguageId = bodyDto.LanguageId,
+                MainMethodBodyContent = bodyDto.MainMethodBodyContent,
+                SolutionTemplate = bodyDto.SolutionTemplate
+            });
+        }
+
+        problem.ExpectedOutputList.Clear();
+        foreach (var testCase in dto.ExpectedOutputList)
+        {
+            var expectedOutputList = new ExpectedOutputListModel
+            {
+                ProblemId = problem.Id,
+                IsSample = testCase.IsSample,
+                ExpectedOutput = testCase.ExpectedOutput
+            };
+            problem.ExpectedOutputList.Add(expectedOutputList);
+        }
+
+        problem.StdInList.Clear();
+        foreach (var input in dto.StdInList)
+        {
+            var stdInList = new StdInListModel
+            {
+                ProblemId = problem.Id,
+                IsSample = input.IsSample,
+                StdIn = input.StdIn
+            };
+            problem.StdInList.Add(stdInList);
+        }
+
+        // saw the clear method here => https://github.com/dotnet/efcore/issues/31033
+        problem.ProblemLanguages.Clear();
+        foreach (var languageId in dto.LanguagesList)
+        {
+            var problemLanguage = new ProblemLanguageModel
+            {
+                ProblemId = problem.Id,
+                LanguageId = (int)languageId
+            };
+            problem.ProblemLanguages.Add(problemLanguage);
+        }
+
+        await _problemRepository.EditProblemAsync(problem);
+        var updatedProblemDto = new CreatedProblemDto
+        {
+            ProblemId = problem.ProblemId,
+            Name = problem.Name,
+            Description = problem.Description,
+            RequiredPercentageToPass = problem.RequiredPercentageToPass,
+            CourseId = problem.CourseId
+        };
+        return updatedProblemDto;
+    }
+
+    //TODO: add test
     public async Task<List<TeacherProblemsDto>> GeyMyCreatedProblemsAsync()
     {
         var problemsList = new List<TeacherProblemsDto>();
@@ -160,5 +227,43 @@ public class ProblemService : IProblemService
             AvailableLanguages = problem.ProblemLanguages.Select(p => (LanguagesEnum)p.LanguageId).ToList()
         };
         return problemDto;
+    }
+
+    //TODO: add test
+    public async Task<EditProblemInfoDto> GetEditProblemInfoAsync(string courseId, string problemId)
+    {
+        var problem = await _problemRepository.GetProblemWithLanguagesAndMainMethodBodies(courseId, problemId);
+        if (problem == null)
+        {
+            throw new ProblemNotFoundException($"The problem with ID '{problemId}' was not found.");
+        }
+
+        var editProblemInfoDto = new EditProblemInfoDto
+        {
+            CourseId = problem.Course.CourseId,
+            ProblemId = problem.ProblemId,
+            Name = problem.Name,
+            Description = problem.Description,
+            RequiredPercentageToPass = problem.RequiredPercentageToPass,
+            MainMethodBodiesList = problem.MainMethodBodiesList.Select(m => new MainMethodBodyDto
+            {
+                LanguageId = m.LanguageId,
+                MainMethodBodyContent = m.MainMethodBodyContent,
+                SolutionTemplate = m.SolutionTemplate
+            }).ToList(),
+            ExpectedOutputList = problem.ExpectedOutputList.OrderBy(e => e.Id).Select(e => new ExpectedOutputListDto
+            {
+                IsSample = e.IsSample,
+                ExpectedOutput = e.ExpectedOutput
+            }).ToList(),
+            StdInList = problem.StdInList.OrderBy(s => s.Id).Select(s => new StdInListDto
+            {
+                IsSample = s.IsSample,
+                StdIn = s.StdIn
+            }).ToList(),
+            LanguagesList = problem.ProblemLanguages.Select(p => (LanguagesEnum)p.LanguageId).ToList()
+        };
+
+        return editProblemInfoDto;
     }
 }

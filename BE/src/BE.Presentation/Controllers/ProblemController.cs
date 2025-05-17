@@ -60,6 +60,7 @@ namespace BE.Presentation.Controllers
             return Ok(result);
         }
 
+        //TODO: add test
         /// <summary>
         /// Gets detailed information about a specific problem by its ID
         /// </summary>
@@ -79,13 +80,53 @@ namespace BE.Presentation.Controllers
             return Ok(result);
         }
 
-        //TODO: Remove
+        //TODO: add test
+        /// <summary>
+        /// Gets detailed information about a problem for editing purposes
+        /// </summary>
+        /// <remarks>Only teachers can access this endpoint to retrieve complete problem details including samples, test cases, and configuration needed for editing</remarks>
+        /// <param name="courseId">The course identifier the problem belongs to</param>
+        /// <param name="problemId">The unique identifier of the problem to retrieve for editing</param>
+        /// <returns>Returns comprehensive problem details including solution templates, test cases, and configuration settings</returns>
+        /// <response code="200">Returns 200 with the detailed problem information for editing</response>
+        /// <response code="401">Returns 401 if the user is not authenticated</response>
+        /// <response code="403">Returns 403 if the user does not have the "Teacher" role</response>
+        /// <response code="404">Returns 404 if the problem with the specified ID is not found</response>
         [Authorize(Roles = "Teacher")]
-        [HttpPost("create-problem-test")]
-        public async Task<IActionResult> CreateProblemTest(ClientProblemDto problem)
+        [HttpGet("get-edit-problem-info/{courseId}/{problemId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(EditProblemInfoDto))]
+        public async Task<IActionResult> GetEditProblemInfo(string courseId, string problemId)
         {
-            Console.WriteLine(problem);
-            return Ok();
+            var result = await _problemService.GetEditProblemInfoAsync(courseId, problemId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Edit an existing problem in a specific course
+        /// </summary>
+        /// <remarks>Only users with the "Teacher" role can edit problems. This endpoint updates all problem details including configuration, test cases, and solution templates.</remarks>
+        /// <param name="courseId">The course identifier the problem belongs to</param>
+        /// <param name="problemId">The unique identifier of the problem to edit</param>
+        /// <param name="dto">Contains the updated problem details to be saved</param>
+        /// <returns>Returns a result with the updated problem details</returns>
+        /// <response code="200">Returns 200 with the updated problem details</response>
+        /// <response code="401">Returns 401 if the user is not authenticated</response>
+        /// <response code="403">Returns 403 if the user does not have the "Teacher" role</response>
+        /// <response code="404">Returns 404 if the problem with the specified ID is not found</response>
+        [Authorize(Roles = "Teacher")]
+        [HttpPut("edit-problem/{courseId}/{problemId}")]
+        [Consumes("application/json")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(CreatedProblemDto))]
+        public async Task<IActionResult> EditProblem(string courseId, string problemId, ClientProblemDto dto)
+        {
+            var result = await _problemService.EditProblemAsync(courseId, problemId, dto);
+            return Ok(result);
         }
     }
 }
