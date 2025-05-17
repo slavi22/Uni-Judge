@@ -53,4 +53,11 @@ public interface ICourseRepository
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of course models the user is enrolled in</returns>
     Task<List<CoursesModel>> GetAllEnrolledCoursesAsync(string userId);
 
+    /// <summary>
+    /// Deletes a course from the system.
+    /// </summary>
+    /// <param name="course">The course model to be deleted</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains the number of affected records</returns>
+    Task<int> DeleteCourseByCourseId(CoursesModel course);
+
 }

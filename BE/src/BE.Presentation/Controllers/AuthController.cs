@@ -196,12 +196,5 @@ namespace BE.Presentation.Controllers
             var userInfo = await _authService.GetUserInfo(User.Identity.Name);
             return Ok(userInfo);
         }
-
-        [Authorize(Roles = "Admin")]
-        [HttpGet("test")]
-        public IActionResult Test()
-        {
-            return Ok();
-        }
     }
 }

@@ -72,4 +72,11 @@ public class CourseRepository : ICourseRepository
             .ToListAsync();
         return enrolledCourses;
     }
+
+    public async Task<int> DeleteCourseByCourseId(CoursesModel course)
+    {
+       _dbContext.Remove(course);
+       var count = await _dbContext.SaveChangesAsync();
+       return count;
+    }
 }
