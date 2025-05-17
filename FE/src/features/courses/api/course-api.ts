@@ -53,6 +53,12 @@ const courseApi = baseApi.injectEndpoints({
     getCourseProblems: build.query<CourseProblemDto[], string>({
       query: (courseId) => `courses/course/${courseId}`,
     }),
+    deleteCourse: build.mutation<void, string>({
+      query: (courseId) => ({
+        url: `courses/delete-course/${courseId}`,
+        method: "DELETE",
+      }),
+    }),
   }),
 });
 
@@ -63,4 +69,5 @@ export const {
   useSignUpForCourseMutation,
   useGetEnrolledCoursesQuery,
   useGetCourseProblemsQuery,
+  useDeleteCourseMutation
 } = courseApi;

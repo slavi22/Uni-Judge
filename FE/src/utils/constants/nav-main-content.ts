@@ -88,7 +88,7 @@ export const adminNav = {
       items: [
         {
           title: "Add a new course",
-          url: "/courses/add-new-course",
+          url: "/courses/create-new-course",
         },
         {
           title: "Create a new problem",
@@ -102,8 +102,8 @@ export const adminNav = {
       isActive: true,
       items: [
         {
-          title: "Admin stuff",
-          url: "#",
+          title: "Delete Courses",
+          url: "/problems/delete-problems",
         },
       ]
     },

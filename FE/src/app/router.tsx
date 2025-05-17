@@ -13,6 +13,8 @@ import AllCoursesPage from "@/app/routes/course/all-courses-page.tsx";
 import CourseProblemsPage from "@/app/routes/course/course-problems-page.tsx";
 import ProblemPage from "@/app/routes/problems/problem-page.tsx";
 import EditProblemPage from "@/app/routes/problems/edit-problem-page.tsx";
+import AdminProtectedRoute from "@/components/protected/admin-protected-route.tsx";
+import DeleteCoursePage from "@/app/routes/course/delete-course-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -85,6 +87,15 @@ export const router = createBrowserRouter([
                   {
                     path: "edit-problem/:courseId/:problemId",
                     element: <EditProblemPage />,
+                  },
+                ],
+              },
+              {
+                element: <AdminProtectedRoute />,
+                children: [
+                  {
+                    path: "delete-problems",
+                    element: <DeleteCoursePage />,
                   },
                 ],
               },
