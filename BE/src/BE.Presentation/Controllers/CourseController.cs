@@ -1,4 +1,5 @@
 using BE.Business.Services.Interfaces;
+using BE.Common.Responses;
 using BE.DTOs.DTOs.Course.Requests;
 using BE.DTOs.DTOs.Course.Responses;
 using Microsoft.AspNetCore.Authorization;
@@ -152,6 +153,32 @@ namespace BE.Presentation.Controllers
         {
             var result = await _courseService.GetEnrolledCoursesAsync();
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Deletes a course from the system
+        /// </summary>
+        /// <remarks>Only users with the "Admin" role can delete courses</remarks>
+        /// <param name="courseId">The unique identifier of the course to delete</param>
+        /// <returns>A response indicating the course deletion status</returns>
+        /// <response code="404">Returns 404 if the course could not be found</response>
+        /// <response code="403">Returns 403 if the user does not have Admin privileges</response>
+        /// <response code="200">Returns 200 if the course was deleted successfully</response>
+        //TODO: add test
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("delete-course/{courseId}")]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> DeleteCourse(string courseId)
+        {
+            var result = await _courseService.DeleteCourseByCourseId(courseId);
+            if (result == 0)
+            {
+                return NotFound();
+            }
+
+            return Ok("Course deleted successfully");
         }
     }
 }

@@ -43,4 +43,11 @@ public interface ICourseService
     /// </summary>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of courses the user is enrolled in</returns>
     Task<List<EnrolledCourseDto>> GetEnrolledCoursesAsync();
+
+    /// <summary>
+    /// Deletes a course from the system by its ID.
+    /// </summary>
+    /// <param name="courseId">The ID of the course to be deleted</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a boolean indicating whether the deletion was successful</returns>
+    Task<int> DeleteCourseByCourseId(string courseId);
 }

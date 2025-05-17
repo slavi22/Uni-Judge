@@ -155,4 +155,15 @@ public class CourseService : ICourseService
 
         return enrolledCoursesDto;
     }
+
+    public async Task<int> DeleteCourseByCourseId(string courseId)
+    {
+        var course = await _courseRepository.GetCourseByCourseIdAsync(courseId);
+        if (course == null)
+        {
+            throw new CourseNotFoundException("Course not found.");
+        }
+        var result = await _courseRepository.DeleteCourseByCourseId(course);
+        return result;
+    }
 }
