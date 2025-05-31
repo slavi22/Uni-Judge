@@ -17,7 +17,6 @@ type PreviousUserSolutionsProps = {
 export default function PreviousUserSolutions({
   data,
 }: PreviousUserSolutionsProps) {
-  console.log(data);
   return (
     <Card className="h-[99%] w-[95%]">
       <CardHeader>

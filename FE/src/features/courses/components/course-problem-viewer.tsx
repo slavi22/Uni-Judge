@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card.tsx";
 import { Link } from "react-router";
 import { Button } from "@/components/ui/button.tsx";
-import { SquareArrowOutUpRight, SquarePen } from "lucide-react";
+import { ClipboardList, SquareArrowOutUpRight, SquarePen } from "lucide-react";
 import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
 
 type CourseProblemsViewerProps = {
@@ -26,13 +26,20 @@ export default function CourseProblemViewer({
             <div className="flex gap-3 items-center">
               {problem.name}
               {isAuthenticated && roles.includes("Teacher") && (
-                <Link
-                  to={`/problems/edit-problem/${courseId}/${problem.problemId}`}
-                >
-                  <Button variant="outline">
-                    <SquarePen />
-                  </Button>
-                </Link>
+                <>
+                  <Link to={`/courses/${courseId}/${problem.problemId}/last-submissions`}>
+                    <Button variant="outline">
+                      <ClipboardList />
+                    </Button>
+                  </Link>
+                  <Link
+                    to={`/problems/edit-problem/${courseId}/${problem.problemId}`}
+                  >
+                    <Button variant="outline">
+                      <SquarePen />
+                    </Button>
+                  </Link>
+                </>
               )}
             </div>
           </CardHeader>

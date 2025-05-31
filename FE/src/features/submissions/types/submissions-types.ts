@@ -60,3 +60,13 @@ export type ProblemUserSubmissionsDto = {
   isPassing: boolean;
   languageId: string;
 };
+
+export type TeacherLastUserSubmissionsDto = {
+  submissionId: string;
+  user: string;
+  isError?: boolean;
+  errorResult?: string;
+  isPassing: boolean;
+  problemId: string;
+  languageId: string;
+};

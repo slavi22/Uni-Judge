@@ -37,7 +37,6 @@ export default function TestCaseResult({
     setLocalTestCases((prevState) =>
       prevState.filter((_, index) => index !== arrIndex),
     );
-    //console.log(`testCase${arrIndex - 1}`);
     setSelectedInnerTab(`test-case-${arrIndex}`);
   }
 
@@ -47,12 +46,15 @@ export default function TestCaseResult({
     }
   }, [testResult]);
 
+  useEffect(() => {
+    setParentTestCases(localTestCases)
+  }, [localTestCases, setParentTestCases]);
+
   return (
     <Tabs
       value={selectedOuterTab}
       onValueChange={(value) => setSelectedOuterTab(value)}
       className="ms-3 min-w-[400px]"
-      onBlur={() => setParentTestCases(localTestCases)}
     >
       <TabsList>
         <TabsTrigger value="testCases">Test Cases</TabsTrigger>
@@ -99,7 +101,6 @@ export default function TestCaseResult({
                   <span className="w-1/2">
                     <p className="ms-1">stdin=</p>
                     <Input
-
                       value={testCase.stdIn || ""}
                       onChange={(e) => {
                         const newStdInValue = e.target.value;

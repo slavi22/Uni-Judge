@@ -32,11 +32,12 @@ const baseQueryWithReauth: BaseQueryFn<
       result = await baseQuery("auth/me", api, extraOptions);
       api.dispatch(login(result.data as LoginDataResponseDto));
       //result = await baseQuery(args, api, extraOptions);
-    } else {
+    }
+    else {
       // set the login state to the initial since we couldn't refresh the token successfully
       // after we call the initialLoad if we are on a protected page we will be redirected to the login page automatically, thus we dont need to implement manual redirection
       api.dispatch(initialLoad());
-      toast.error("Error logging in. Please login again.");
+      toast.error("Error logging in. Please login again."); //TODO: maybe add a conditional for the toast to show, because currently it will show on every 401 error even of first page visit or remove altogether
     }
   }
   //console.log(result);

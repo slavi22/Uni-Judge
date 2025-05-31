@@ -15,6 +15,7 @@ import ProblemPage from "@/app/routes/problems/problem-page.tsx";
 import EditProblemPage from "@/app/routes/problems/edit-problem-page.tsx";
 import AdminProtectedRoute from "@/components/protected/admin-protected-route.tsx";
 import DeleteCoursePage from "@/app/routes/course/delete-course-page.tsx";
+import LastUserSubmissionsPage from "@/app/routes/course/last-user-submissions-page.tsx";
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +70,10 @@ export const router = createBrowserRouter([
                   {
                     path: "create-new-course",
                     element: <CreateNewCoursePage />,
+                  },
+                  {
+                    path: ":courseId/:problemId/last-submissions",
+                    element: <LastUserSubmissionsPage />,
                   },
                 ],
               },

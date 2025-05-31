@@ -31,7 +31,7 @@ export default function TabCardContent({
               <p className="font-bold mb-1">Example {index+1}</p>
               <p>Input: {stdInList?.[index]}</p>
               <p>
-                Output: {expectedOutputList?.[index]?.split(",")[index]}
+                Output: {expectedOutputList?.[index]?.split(",").join(",")}
               </p>
             </div>
           ))}

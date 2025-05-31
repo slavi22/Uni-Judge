@@ -3,6 +3,7 @@ import {
   ClientSubmissionDto,
   ClientSubmissionTestDto,
   ProblemUserSubmissionsDto,
+  TeacherLastUserSubmissionsDto,
   TestSubmissionBatchResultResponseDto,
   UserSubmissionResultDto,
 } from "@/features/submissions/types/submissions-types.ts";
@@ -19,12 +20,12 @@ const submissionsApi = baseApi.injectEndpoints({
         method: "POST",
         body: dto,
       }),
-      async onQueryStarted(_args, {queryFulfilled}) {
+      async onQueryStarted(_args, { queryFulfilled }) {
         const result = await queryFulfilled;
         if (result.data.isError) {
           toast.error("One or more compilation errors occurred.");
         }
-      }
+      },
     }),
     createTestSubmission: build.mutation<
       TestSubmissionBatchResultResponseDto[],
@@ -43,6 +44,17 @@ const submissionsApi = baseApi.injectEndpoints({
       query: ({ courseId, problemId }) =>
         `submissions/get-problem-submissions/${courseId}/${problemId}`,
     }),
+    getLastUserSubmissionsForProblem: build.query<
+      TeacherLastUserSubmissionsDto[],
+      {
+        courseId: string;
+        problemId: string;
+        numOfSubmissions?: number;
+      }
+    >({
+      query: ({ courseId, problemId, numOfSubmissions }) =>
+        `submissions/get-last-problem-submissions/${courseId}/${problemId}${numOfSubmissions ? `?numOfSubmissions=${numOfSubmissions}` : ""}`,
+    }),
   }),
 });
 
@@ -50,4 +62,5 @@ export const {
   useCreateSubmissionMutation,
   useCreateTestSubmissionMutation,
   useGetAllUserSubmissionsForProblemQuery,
+  useGetLastUserSubmissionsForProblemQuery,
 } = submissionsApi;
