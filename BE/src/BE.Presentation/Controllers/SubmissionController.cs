@@ -77,6 +77,7 @@ namespace BE.Presentation.Controllers
         /// <response code="404">Returns 404 if the course or problem is not found</response>
         /// <response code="401">Returns 401 if the user is not authenticated</response>
         /// <response code="403">Returns 403 if the user has not signed up for the course</response>
+        // TODO: add test
         [Authorize(Policy = "HasSignedUpForCourse")]
         [HttpGet("get-problem-submissions/{courseId}/{problemId}")]
         [Produces("application/json")]
@@ -85,6 +86,31 @@ namespace BE.Presentation.Controllers
         public async Task<IActionResult> GetProblemSubmissions(string courseId, string problemId)
         {
             var result = await _userSubmissionService.GetUserSubmissionsForSpecificProblem(courseId, problemId);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Retrieves the most recent submissions for a specific problem in a course
+        /// </summary>
+        /// <remarks>Only accessible by users with the Teacher role</remarks>
+        /// <param name="courseId">The unique identifier of the course</param>
+        /// <param name="problemId">The unique identifier of the problem</param>
+        /// <param name="numOfSubmissions">The number of recent submissions to retrieve (default: 10)</param>
+        /// <returns>A list of the most recent submissions for the specified problem</returns>
+        /// <response code="200">Returns 200 with the list of recent submissions</response>
+        /// <response code="404">Returns 404 if the course or problem is not found</response>
+        /// <response code="403">Returns 403 if the user does not have the Teacher role</response>
+        /// // TODO: add test
+        [Authorize(Roles = "Teacher")]
+        [HttpGet("get-last-problem-submissions/{courseId}/{problemId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(statusCode: StatusCodes.Status404NotFound, type: typeof(ProblemDetails))]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(List<TeacherLastUserSubmissionsDto>))]
+        public async Task<IActionResult> GetLastUserSubmissionsForProblem(string courseId, string problemId,
+            int numOfSubmissions = 10)
+        {
+            var result =
+                await _userSubmissionService.GetLastUserSubmissionsForProblem(courseId, problemId, numOfSubmissions);
             return Ok(result);
         }
     }

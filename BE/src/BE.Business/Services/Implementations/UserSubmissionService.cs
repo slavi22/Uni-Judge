@@ -1,4 +1,5 @@
 ﻿using BE.Business.Services.Interfaces;
+using BE.Common.Exceptions;
 using BE.DataAccess.Repositories.Interfaces;
 using BE.DTOs.DTOs.Judge.Requests;
 using BE.DTOs.DTOs.Judge.Responses;
@@ -82,6 +83,7 @@ public class UserSubmissionService : IUserSubmissionService
             {
                 userSubmissionDto.IsError = true;
             }
+
             userSubmissionDto.TestCases.Add(new TestCaseDto
             {
                 IsCorrect = testCaseModel.IsCorrect,
@@ -121,7 +123,7 @@ public class UserSubmissionService : IUserSubmissionService
         var userEmail = _httpContextAccessor.HttpContext.User.Identity.Name;
         var currentUser = await _userRepository.GetCurrentUserAsync(userEmail);
         var userSubmissions =
-            await _userSubmissionRepository.GetAllUserSubmissionsForSpecificProblem(courseId, problemId,
+            await _userSubmissionRepository.GetAllUserSubmissionsForSpecificProblemAsync(courseId, problemId,
                 currentUser.Id);
         var allUserSubmissions = new List<ProblemUserSubmissionsDto>();
 
@@ -144,5 +146,46 @@ public class UserSubmissionService : IUserSubmissionService
         }
 
         return allUserSubmissions;
+    }
+
+    //TODO: add test
+    public async Task<List<TeacherLastUserSubmissionsDto>> GetLastUserSubmissionsForProblem(string courseId,
+        string problemId, int numOfSubmissions)
+    {
+        // TODO: maybe make sure other teachers cant access info about courses/problems they havent created ?
+        if (await _courseRepository.GetCourseByCourseIdAsync(courseId) == null)
+        {
+            throw new CourseNotFoundException("Course not found.");
+        }
+
+        if (await _problemRepository.GetProblemByProblemIdAsync(problemId) == null)
+        {
+            throw new ProblemNotFoundException("Problem not found.");
+        }
+
+        var lastUserSubmission =
+            await _userSubmissionRepository.GetLastUserSubmissionsForProblemAsync(courseId, problemId,
+                numOfSubmissions);
+        var result = new List<TeacherLastUserSubmissionsDto>();
+        foreach (var submission in lastUserSubmission)
+        {
+            var anyErrorTestCase = submission.TestCases.Any(tc => tc.TestCaseStatus.ResultId >= 6);
+            var errorDescription = anyErrorTestCase
+                ? submission.TestCases.FirstOrDefault(tc => tc.TestCaseStatus.ResultId >= 6)?.TestCaseStatus.Description
+                : null;
+
+            result.Add(new TeacherLastUserSubmissionsDto
+            {
+                SubmissionId = submission.Id,
+                User = submission.User.Email,
+                IsPassing = submission.IsPassing,
+                IsError = anyErrorTestCase,
+                ErrorResult = errorDescription,
+                LanguageId = submission.LanguageId.ToString(),
+                ProblemId = submission.Problem.ProblemId
+            });
+        }
+
+        return result;
     }
 }
