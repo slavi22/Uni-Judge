@@ -69,6 +69,7 @@ export type ProblemInfoDto = {
   problemId: string;
   name: string;
   description: string;
+  requiredPercentageToPass: number;
   solutionTemplates: SolutionTemplate[];
   expectedOutputList: string[];
   stdInList: string[];

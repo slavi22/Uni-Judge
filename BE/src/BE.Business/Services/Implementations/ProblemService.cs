@@ -220,6 +220,7 @@ public class ProblemService : IProblemService
             ProblemId = problem.ProblemId,
             Name = problem.Name,
             Description = problem.Description,
+            RequiredPercentageToPass = problem.RequiredPercentageToPass,
             SolutionTemplates = solutionTemplates,
             ExpectedOutputList =
                 problem.ExpectedOutputList.Where(e => e.IsSample).Select(e => e.ExpectedOutput).ToList(),

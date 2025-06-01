@@ -96,6 +96,7 @@ export default function CodeEditorProblem({
               <TabCardContent
                 title={data?.name}
                 description={data?.description}
+                requiredPercentageToPass={data?.requiredPercentageToPass}
                 stdInList={data?.stdInList}
                 expectedOutputList={data?.expectedOutputList}
               />
