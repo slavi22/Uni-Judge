@@ -17,7 +17,7 @@ import {
 import type { ProblemFormSchemaType } from "@/features/problems/components/create-new-problem-form.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Checkbox } from "@/components/ui/checkbox.tsx";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card.tsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -162,6 +162,7 @@ export default function ExpectedOutputsStdinsDialog({
               );
             }}
           >
+            <Plus />
             Add new input and output
           </Button>
           <div className="flex gap-3">

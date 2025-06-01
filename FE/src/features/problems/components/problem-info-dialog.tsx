@@ -28,6 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form.tsx";
 import { useEffect } from "react";
+import { Plus } from "lucide-react";
 
 type ProblemCodeEditorDialogProps = {
   parentProblemSolutions: ProblemSolutions[];
@@ -119,6 +120,7 @@ export default function ProblemInfoDialog({
               })
             }
           >
+            <Plus />
             Add a solution
           </Button>
           <Form {...form}>
