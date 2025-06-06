@@ -86,12 +86,6 @@ export function NavUser() {
           <LogOut />
           Log out
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/login">
-            <LogIn />
-            Log in
-          </Link>
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   ) : (

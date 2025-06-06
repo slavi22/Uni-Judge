@@ -129,11 +129,6 @@ const authApi = baseApi.injectEndpoints({
         }
       },
     }),
-
-    //TODO: remove
-    test: build.query({
-      query: () => "auth/test",
-    }),
   }),
 });
 
@@ -143,7 +138,4 @@ export const {
   useLogoutMutation,
   useRegisterMutation,
   useRegisterTeacherMutation,
-  //TODO: remove
-  useTestQuery,
-  useLazyTestQuery,
 } = authApi;

@@ -261,16 +261,7 @@ export default function CreateNewProblemForm({
                 name="mainMethodBodiesList"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>mainMethodBodiesList</FormLabel>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        //console.log(form.getValues().mainMethodBodiesList)
-                        console.log(form.getValues(`mainMethodBodiesList`))
-                      }
-                    >
-                      Check fields
-                    </Button>
+                    <FormLabel>Problem Solutions</FormLabel>
                     <FormControl>
                       <ProblemInfoDialog
                         // => https://react-hook-form.com/docs/usefieldarray //scroll down to example and maybe select nested form?
@@ -303,21 +294,7 @@ export default function CreateNewProblemForm({
                 name="expectedOutputList"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>expectedOutputAndStdIn</FormLabel>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        console.log(form.getValues("expectedOutputList"))
-                      }
-                    >
-                      Check expectedOutputList array
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => console.log(form.getValues("stdInList"))}
-                    >
-                      Check stdInList array
-                    </Button>
+                    <FormLabel>Expected Outputs and Standard Inputs</FormLabel>
                     <FormControl>
                       <ExpectedOutputsStdinsDialog
                         expectedOutputsAndStdins={field.value}

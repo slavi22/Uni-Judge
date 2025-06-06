@@ -104,12 +104,12 @@ export default function ProblemInfoDialog({
           parentFormIsInvalid ? "border !border-destructive" : undefined
         }
       >
-        <Button variant="outline">Open mainMethodBodiesList Modal</Button>
+        <Button variant="outline">Edit Solution Templates</Button>
       </DialogTrigger>
       <DialogContent className={open ? "md:ml-[125px]" : undefined}>
         <DialogHeader>
-          <DialogTitle>Add mainMethodBodies</DialogTitle>
-          <DialogDescription>Test</DialogDescription>
+          <DialogTitle>Add Main method bodies and solution templates</DialogTitle>
+          <DialogDescription>Configure solutions for multiple programming languages</DialogDescription>
           <Button
             type="button"
             onClick={() =>

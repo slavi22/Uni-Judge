@@ -10,12 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card.tsx";
-import {
-  useLazyFetchUserProfileQuery,
-  useLazyTestQuery,
-  useLoginMutation,
-} from "@/features/auth/api/auth-api.ts";
-import { useAppSelector } from "@/hooks/redux/redux-hooks.ts";
+import { useLoginMutation } from "@/features/auth/api/auth-api.ts";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -41,11 +36,6 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
   const [loginUser, { error, isLoading }] = useLoginMutation();
   const navigate = useNavigate();
 
-  // TODO: remove once done testing
-  const authStore = useAppSelector((state) => state.auth);
-  const [callMeEndpoint] = useLazyFetchUserProfileQuery();
-  const [test] = useLazyTestQuery();
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -64,12 +54,6 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
   // react-hook-form quick guide => https://www.youtube.com/watch?v=cc_xmawJ8Kg
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Button onClick={() => console.log(authStore)}>Check redux store</Button>
-      <Button onClick={() => callMeEndpoint()}>Request to /me</Button>
-      <Button onClick={() => navigate("/me")}>Navigate /me</Button>
-      <Button onClick={() => test(null)}>
-        Access a page without the required privileges
-      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Login</CardTitle>
@@ -90,10 +74,7 @@ export function LoginForm({ className, ...props }: ComponentProps<"div">) {
                   <FormItem className="mb-8">
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="email@domain.com"
-                        {...field}
-                      />
+                      <Input placeholder="email@domain.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
