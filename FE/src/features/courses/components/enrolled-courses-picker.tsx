@@ -49,7 +49,7 @@ export default function EnrolledCoursesPicker({
             {" "}
             You can do so{" "}
             <Link
-              to="/courses/all-courses"
+              to="/courses"
               className="underline underline-offset-2"
             >
               Here

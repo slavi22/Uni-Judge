@@ -1,4 +1,4 @@
-﻿import { createBrowserRouter } from "react-router";
+﻿import { createBrowserRouter, Navigate } from "react-router";
 import RootLayout from "@/components/layouts/root-layout.tsx";
 import HomePage from "@/app/routes/home-page.tsx";
 import LoginPage from "@/app/routes/auth/login-page.tsx";
@@ -82,6 +82,10 @@ export const router = createBrowserRouter([
           {
             path: "problems",
             children: [
+              {
+                index: true,
+                element: <Navigate to="/courses"/>,
+              },
               {
                 element: <TeacherProtectedRoute />,
                 children: [

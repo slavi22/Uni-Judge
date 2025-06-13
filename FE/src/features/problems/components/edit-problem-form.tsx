@@ -165,9 +165,6 @@ export default function EditProblemForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Button onClick={() => console.log(form.getValues("expectedOutputList"))}>
-        Click
-      </Button>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">Edit Problem</CardTitle>
@@ -292,16 +289,7 @@ export default function EditProblemForm({
                 name="mainMethodBodiesList"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>mainMethodBodiesList</FormLabel>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        //console.log(form.getValues().mainMethodBodiesList)
-                        console.log(form.getValues(`mainMethodBodiesList`))
-                      }
-                    >
-                      Check fields
-                    </Button>
+                    <FormLabel>Edit Solution Templates</FormLabel>
                     <FormControl>
                       <ProblemInfoDialog
                         // => https://react-hook-form.com/docs/usefieldarray //scroll down to example and maybe select nested form?
@@ -334,21 +322,7 @@ export default function EditProblemForm({
                 name="expectedOutputList"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>expectedOutputAndStdIn</FormLabel>
-                    <Button
-                      type="button"
-                      onClick={() =>
-                        console.log(form.getValues("expectedOutputList"))
-                      }
-                    >
-                      Check expectedOutputList array
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => console.log(form.getValues("stdInList"))}
-                    >
-                      Check stdInList array
-                    </Button>
+                    <FormLabel>Edit Expected Outputs & Inputs</FormLabel>
                     <FormControl>
                       <ExpectedOutputsStdinsDialog
                         expectedOutputsAndStdins={field.value} //TODO: here is the discrepancy
