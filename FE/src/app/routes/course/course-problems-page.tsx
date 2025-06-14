@@ -6,7 +6,9 @@ import { isFetchBaseQueryError } from "@/utils/functions/is-fetch-base-query-err
 
 export default function CourseProblemsPage() {
   const { courseId } = useParams();
-  const { data, error } = useGetCourseProblemsQuery(courseId!);
+  const { data, error } = useGetCourseProblemsQuery(courseId!, {
+    refetchOnMountOrArgChange: true,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,7 +16,7 @@ export default function CourseProblemsPage() {
       navigate("/not-found");
     }
     if (isFetchBaseQueryError(error) && error.status === 403) {
-      navigate("/forbidden")
+      navigate("/forbidden");
     }
   }, [error, navigate]);
 

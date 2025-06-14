@@ -10,6 +10,9 @@ import { initialLoad, login } from "@/features/auth/stores/auth-slice.ts";
 import { type LoginDataResponseDto } from "@/features/auth/types/auth-types.ts";
 import { toast } from "sonner";
 
+// GIANT TODO: use invalidateTags to invalidate the cache on certain queries => https://github.com/reduxjs/redux-toolkit/issues/1510
+// instead of manually setting refetchOnMountOrArgChange to true on every query, the invalidateTags will allow us to automatically refetch the data
+
 const baseQuery = fetchBaseQuery({ baseUrl: BE_URL, credentials: "include" });
 
 // the baseQueryWithReauth only works when using query (IT WONT WORK IF WE USE "queryFn")
