@@ -1,5 +1,4 @@
-﻿import { useGetAllCoursesQuery } from "@/features/courses/api/course-api.ts";
-import { Card, CardContent, CardHeader } from "@/components/ui/card.tsx";
+﻿import { Card, CardContent, CardHeader } from "@/components/ui/card.tsx";
 import { Lock, LockOpen, SquareArrowOutUpRight } from "lucide-react";
 import InfoTooltip from "@/components/tooltips/info-tooltip.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -7,11 +6,33 @@ import { cn } from "@/lib/utils.ts";
 import { Link } from "react-router";
 import CourseSignupPasswordDialog from "@/features/courses/components/course-signup-password-dialog.tsx";
 import CourseSignupPasswordlessDialog from "@/features/courses/components/course-signup-passwordless-dialog.tsx";
+import { type AllCoursesDto } from "../types/courses-types";
+import {
+  BaseQueryFn,
+  FetchArgs,
+  QueryActionCreatorResult,
+  QueryDefinition,
+} from "@reduxjs/toolkit/query";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 
-export default function AllCoursesPicker() {
-  const { data, refetch } = useGetAllCoursesQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+type ALlCoursesPickerProps = {
+  data: AllCoursesDto[] | undefined;
+  refetch: () => QueryActionCreatorResult<
+    QueryDefinition<
+      void,
+      BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError>,
+      never,
+      AllCoursesDto[],
+      "baseApi",
+      unknown
+    >
+  >;
+};
+
+export default function AllCoursesPicker({
+  data,
+  refetch,
+}: ALlCoursesPickerProps) {
   return (
     <div className="flex flex-col justify-center items-center gap-5 py-4">
       {data?.map((course) => (
@@ -43,7 +64,10 @@ export default function AllCoursesPicker() {
                 >
                   {course.isPasswordProtected ? (
                     <div className="flex items-center gap-2">
-                      <CourseSignupPasswordDialog course={course} refetchPageFn={refetch} />
+                      <CourseSignupPasswordDialog
+                        course={course}
+                        refetchPageFn={refetch}
+                      />
                       <InfoTooltip
                         icon={Lock}
                         tooltipContent="This course is password protected"
@@ -51,7 +75,10 @@ export default function AllCoursesPicker() {
                     </div>
                   ) : (
                     <div className="flex items-center gap-2">
-                      <CourseSignupPasswordlessDialog course={course} refetchPageFn={refetch} />
+                      <CourseSignupPasswordlessDialog
+                        course={course}
+                        refetchPageFn={refetch}
+                      />
                       <InfoTooltip
                         icon={LockOpen}
                         tooltipContent="This course is open"
